@@ -1,4 +1,5 @@
-#include "../../nova-script/NovaScript.h"
+#include <NovaScript/NovaScript.h>
+#include <NovaScript/Interpretor/Value.h>
 #include <iostream>
 
 struct Script {
@@ -10,13 +11,18 @@ struct Script {
 		ExecuteScript(interpretor);
 	}
 
+	Value* CallFunction(std::string func_name, std::vector<Value*> args) {
+		ValueHandle handle = CallFunc(interpretor, func_name.c_str(), &args);
+		return static_cast<Value*>(handle);
+	}
+
 	~Script() {
 		if (interpretor) {
 			DestroyScript(interpretor);
 		}
 	}
 
-	void* interpretor = nullptr;
+	InterpretorHandle interpretor = nullptr;
 };
 
 static bool stop = false;
@@ -43,13 +49,16 @@ static void ExitCallback(const char* msg) {
 int main() {
 	SetErrorCallback(PushErrorCallback);
 	SetExitCallback(ExitCallback);
+	for (int i = 0; i < 20000; i++) {
+		Script script("test.ns");
+		script.Execute();
 
-	Script script("test.ns");
-	script.Execute();
+		//int x = 10;
 
-	std::cout << "Hello C++!\n";
-
-	while (!stop) {
-
+		//script.CallFunction("AddTen", { new Value(CPPVariable(x)) });
+		//std::cout << x << "\n";
 	}
+
+	std::cout << "Script Finished Execution\n";
+	std::cin.get();
 }

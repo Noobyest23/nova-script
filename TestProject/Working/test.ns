@@ -20,7 +20,7 @@ type Cob {
 	var age = 67
 }
 
-var b = Bob(2)
+var b = Bob()
 io.Print(b.age)
 
 
@@ -28,3 +28,9 @@ var c = Cob()
 
 io.Print(c)
 io.Print(c.age = 11)
+io.Print(io)
+
+func AddTen(x) {
+	x += 10
+}
+

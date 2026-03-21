@@ -226,31 +226,31 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClInclude Include="NovaScript\Library\nova_string.h" />
     <ClInclude Include="NovaScript\Library\nova_vector.h" />
     <ClInclude Include="NovaScript\Library\WinInputDialog\resource.h" />
-    <ClInclude Include="NovaScript.h" />
+    <ClInclude Include="NovaScript\NovaScript.h" />
     <ClInclude Include="NovaScript\Parser\Lexer.h" />
     <ClInclude Include="NovaScript\Parser\Optimizer.h" />
     <ClInclude Include="NovaScript\Parser\Parser.h" />
     <ClInclude Include="NovaScript\Parser\Tokens.h" />
-    <ClInclude Include="NovaScript_API.h" />
+    <ClInclude Include="NovaScript\NovaScript_API.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NovaErrorPush.cpp" />
-    <ClCompile Include="NovaScript\Interpretor\EvaluateExpression.cpp" />
-    <ClCompile Include="NovaScript\Interpretor\EvaluateStatement.cpp" />
-    <ClCompile Include="NovaScript\Interpretor\Interpretor.cpp" />
-    <ClCompile Include="NovaScript\Interpretor\Scope.cpp" />
-    <ClCompile Include="NovaScript\Interpretor\Value.cpp" />
+    <ClCompile Include="Src\EvaluateExpression.cpp" />
+    <ClCompile Include="Src\EvaluateStatement.cpp" />
+    <ClCompile Include="Src\Interpretor.cpp" />
+    <ClCompile Include="Src\Scope.cpp" />
+    <ClCompile Include="Src\Value.cpp" />
     <ClCompile Include="NovaScript.cpp" />
-    <ClCompile Include="NovaScript\Library\NovaModule.cpp" />
-    <ClCompile Include="NovaScript\Parser\Lexer.cpp" />
-    <ClCompile Include="NovaScript\Parser\Optimizer.cpp" />
-    <ClCompile Include="NovaScript\Parser\Parser.cpp" />
+    <ClCompile Include="Src\NovaModule.cpp" />
+    <ClCompile Include="Src\Lexer.cpp" />
+    <ClCompile Include="Src\Optimizer.cpp" />
+    <ClCompile Include="Src\Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="NovaScript\Library\WinInputDialog\dialog.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="NovaErrorPush.h" />
+    <None Include="NovaScript\NovaErrorPush.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

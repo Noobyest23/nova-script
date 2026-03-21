@@ -66,13 +66,13 @@
     <ClInclude Include="NovaScript\Parser\Tokens.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NovaScript.h">
+    <ClInclude Include="NovaScript\NovaScript.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NovaScript\Library\NovaModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NovaScript_API.h">
+    <ClInclude Include="NovaScript\NovaScript_API.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NovaScript\Parser\Optimizer.h">
@@ -86,25 +86,25 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NovaScript\Interpretor\EvaluateExpression.cpp">
+    <ClCompile Include="Src\EvaluateExpression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Interpretor\EvaluateStatement.cpp">
+    <ClCompile Include="Src\EvaluateStatement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Interpretor\Interpretor.cpp">
+    <ClCompile Include="Src\Interpretor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Interpretor\Scope.cpp">
+    <ClCompile Include="Src\Scope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Interpretor\Value.cpp">
+    <ClCompile Include="Src\Value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Parser\Lexer.cpp">
+    <ClCompile Include="Src\Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Parser\Parser.cpp">
+    <ClCompile Include="Src\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NovaScript.cpp">
@@ -113,10 +113,10 @@
     <ClCompile Include="NovaErrorPush.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Library\NovaModule.cpp">
+    <ClCompile Include="Src\NovaModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NovaScript\Parser\Optimizer.cpp">
+    <ClCompile Include="Src\Optimizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -126,6 +126,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="NovaErrorPush.h" />
+    <None Include="NovaScript\NovaErrorPush.h" />
   </ItemGroup>
 </Project>

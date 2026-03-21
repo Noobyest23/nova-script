@@ -1,5 +1,5 @@
-#include "NovaScript.h"
-#include "NovaErrorPush.h"
+#include "NovaScript/NovaScript.h"
+#include "NovaScript/NovaErrorPush.h"
 
 #include "NovaScript/Interpretor/Interpretor.h"
 extern "C" {
