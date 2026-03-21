@@ -2,7 +2,6 @@
 #include "NovaErrorPush.h"
 
 #include "NovaScript/Interpretor/Interpretor.h"
-#include "pch.h"
 extern "C" {
 
 	void SetErrorCallback(void(*function)(const char*, int)) {

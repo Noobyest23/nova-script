@@ -2,7 +2,6 @@
 #include <iostream>
 #include "Scope.h"
 #include "../ASTNodes/StmtNode.h"
-#include "../../pch.h"
 
 namespace {
 	inline int Index(const Value& v) {
@@ -69,7 +68,20 @@ std::string Value::ToString() const {
 		return out + "]";
 	}
 
-	case 6: return "ObjectType";
+	case 6: {
+		NovaType scope = std::get<NovaType>(this->data);
+		std::string output = "NovaType{";
+		int i = 0;
+		for (std::pair<std::string, Value> pair : scope.variables) {
+			output += pair.first + " = " + pair.second.ToString();
+			if (i != scope.variables.size() - 1) {
+				output += ", ";
+			}
+			i++;
+		}
+		output += "}";
+		return output;
+	}
 	case 7: return "Function";
 	case 8: return "C++ Function";
 

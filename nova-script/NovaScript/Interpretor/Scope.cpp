@@ -1,6 +1,5 @@
 #include "Scope.h"
 #include "Value.h"
-#include "../../pch.h"
 
 Scope::~Scope() {
 	variables.clear();

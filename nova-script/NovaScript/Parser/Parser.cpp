@@ -3,8 +3,6 @@
 // TODO:
 // Eric stupid he realise you can use switch on 
 
-#include "../../pch.h"
-
 ProgramNode* Parser::Parse() {
 	std::vector<StmtNode*> statements;
 	while (t_index < tokens.size() - 1 and not force_stop and Current().type != NovaTokenType::Eof) {

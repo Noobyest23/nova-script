@@ -1,0 +1,30 @@
+include "io" as io
+
+io.Print("Hello NovaScript!")
+
+io.Print((0 if true else 1))
+
+var arr = [io.Print, io.Input]
+
+io.Print(arr[0])
+var pfunc = arr[0]
+pfunc("abc")
+
+type Bob {
+
+	var age = 42
+}
+
+type Cob {
+	var b = Bob()
+	var age = 67
+}
+
+var b = Bob(2)
+io.Print(b.age)
+
+
+var c = Cob()
+
+io.Print(c)
+io.Print(c.age = 11)

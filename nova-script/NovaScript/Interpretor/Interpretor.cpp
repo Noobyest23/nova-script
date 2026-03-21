@@ -6,7 +6,6 @@
 #include "../Parser/Parser.h"
 #include "../Library/nova_std.h"
 #include "../../NovaErrorPush.h"
-#include "../../pch.h"
 #include "../Parser/Optimizer.h"
 
 Interpretor::Interpretor(const std::string& filepath) {

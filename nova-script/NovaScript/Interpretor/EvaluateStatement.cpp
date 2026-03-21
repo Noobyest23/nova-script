@@ -84,8 +84,17 @@ es_decl(IfStmtNode* node) {
 }
 
 es_decl(TypeDeclNode* node) {
-	Value val(node);
-	scope->Set(node->type_name, val);
+	FuncDeclNode* valid_constructor = nullptr;
+	
+	for (StmtNode* stmt : node->definition) {
+		if (FuncDeclNode* constructor = dynamic_cast<FuncDeclNode*>(stmt)) {
+			if (constructor->func_id == node->type_name) {
+				valid_constructor = constructor;
+			}
+		}
+	}
+
+	nova_types[node] = valid_constructor;
 }
 
 es_decl(IncludeNode* node) {

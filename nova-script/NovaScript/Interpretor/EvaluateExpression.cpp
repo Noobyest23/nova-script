@@ -328,6 +328,21 @@ ee_decl(FuncCallNode* node) {
 		}
 	}
 	else {
+		for (std::pair<TypeDeclNode*, FuncDeclNode*> types : nova_types) {
+			if (types.first->type_name == node->func_id) {
+				Scope object;
+				Scope* p_scope = scope;
+				scope = &object;
+				for (StmtNode* declNode : types.first->definition) {
+					EvaluateStatement(declNode);
+				}
+				if (types.second) {
+					EvaluateExpression(node);
+				}
+				scope = p_scope;
+				return Value(object);
+			}
+		}
 		PushError("Function (" + node->func_id + ") not found in scope");
 		return nullval;
 	}

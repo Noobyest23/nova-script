@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <fstream>
-#include "../../pch.h"
 #include "../../NovaErrorPush.h"
 
 Lexer::Lexer(const char* filepath) {

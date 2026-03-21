@@ -2,7 +2,6 @@
 #define NOVA_SCRIPT_DLL_API
 
 #include "NovaScript_API.h"
-
 #include <string>
 
 extern "C" {

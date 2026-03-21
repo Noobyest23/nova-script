@@ -71,19 +71,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)nova-engine\working</OutDir>
+    <OutDir>$(SolutionDir)TestProject\working</OutDir>
     <TargetName>$(ProjectName)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)nova-engine\working</OutDir>
+    <OutDir>$(SolutionDir)TestProject\working</OutDir>
     <TargetName>$(ProjectName)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)nova-engine\working</OutDir>
+    <OutDir>$(SolutionDir)TestProject\working</OutDir>
     <TargetName>$(ProjectName)-$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)nova-engine\working</OutDir>
+    <OutDir>$(SolutionDir)TestProject\working</OutDir>
     <TargetName>$(ProjectName)-$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -94,7 +94,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Users\Eric\source\repos\nova-engine\nova-script\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(ProjectDir)Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -104,10 +104,10 @@
     </Link>
     <PostBuildEvent>
       <Command>REM Copy .lib and .dll to Lib folder
-xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)nova-engine\Lib" 
+xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)TestProject\Lib" 
 
 REM Copy .pdb if it exists
-if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)nova-engine\Lib" 
+if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)TestProject\Lib" 
 
 REM Delete intermediate files
 if exist "$(TargetDir)$(TargetName).exp" del /Q "$(TargetDir)$(TargetName).exp"
@@ -136,10 +136,10 @@ if exist "$(TargetDir)$(TargetName).lib" del /Q "$(TargetDir)$(TargetName).lib"<
     </Link>
     <PostBuildEvent>
       <Command>REM Copy .lib and .dll to Lib folder
-xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)nova-engine\Lib" 
+xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)TestProject\Lib" 
 
 REM Copy .pdb if it exists
-if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)nova-engine\Lib" 
+if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)TestProject\Lib" 
 
 REM Delete intermediate files
 if exist "$(TargetDir)$(TargetName).exp" del /Q "$(TargetDir)$(TargetName).exp"
@@ -155,7 +155,7 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Users\Eric\source\repos\nova-engine\nova-script\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(ProjectDir)Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -165,10 +165,10 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     </Link>
     <PostBuildEvent>
       <Command>REM Copy .lib and .dll to Lib folder
-xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)nova-engine\Lib" 
+xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)TestProject\Lib" 
 
 REM Copy .pdb if it exists
-if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)nova-engine\Lib" 
+if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)TestProject\Lib" 
 
 REM Delete intermediate files
 if exist "$(TargetDir)$(TargetName).exp" del /Q "$(TargetDir)$(TargetName).exp"
@@ -197,10 +197,10 @@ if exist "$(TargetDir)$(TargetName).lib" del /Q "$(TargetDir)$(TargetName).lib"<
     </Link>
     <PostBuildEvent>
       <Command>REM Copy .lib and .dll to Lib folder
-xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)nova-engine\Lib" 
+xcopy /Y /D "$(TargetDir)$(TargetName).lib" "$(SolutionDir)TestProject\Lib" 
 
 REM Copy .pdb if it exists
-if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)nova-engine\Lib" 
+if exist "$(TargetDir)$(TargetName).pdb" xcopy /Y /D "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)TestProject\Lib" 
 
 REM Delete intermediate files
 if exist "$(TargetDir)$(TargetName).exp" del /Q "$(TargetDir)$(TargetName).exp"

@@ -1,0 +1,1 @@
+include "io" Print("Hello NovaScript!")

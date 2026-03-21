@@ -97,7 +97,7 @@ private:
 	Value nullval = Value();
 
 	std::unordered_map<std::string, NovaModule*> modules;
-
+	std::unordered_map<TypeDeclNode*, FuncDeclNode*> nova_types;
 };
 
 // Todo

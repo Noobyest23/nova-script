@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36930.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nova-script", "nova-script\nova-script.vcxproj", "{1D6EBA97-9D53-4F68-B4E2-055C8FA4EFCD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProject", "TestProject\TestProject.vcxproj", "{130870F2-B285-4040-B681-5C5D385D9502}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{1D6EBA97-9D53-4F68-B4E2-055C8FA4EFCD}.Release|x64.Build.0 = Release|x64
 		{1D6EBA97-9D53-4F68-B4E2-055C8FA4EFCD}.Release|x86.ActiveCfg = Release|Win32
 		{1D6EBA97-9D53-4F68-B4E2-055C8FA4EFCD}.Release|x86.Build.0 = Release|Win32
+		{130870F2-B285-4040-B681-5C5D385D9502}.Debug|x64.ActiveCfg = Debug|x64
+		{130870F2-B285-4040-B681-5C5D385D9502}.Debug|x64.Build.0 = Debug|x64
+		{130870F2-B285-4040-B681-5C5D385D9502}.Debug|x86.ActiveCfg = Debug|Win32
+		{130870F2-B285-4040-B681-5C5D385D9502}.Debug|x86.Build.0 = Debug|Win32
+		{130870F2-B285-4040-B681-5C5D385D9502}.Release|x64.ActiveCfg = Release|x64
+		{130870F2-B285-4040-B681-5C5D385D9502}.Release|x64.Build.0 = Release|x64
+		{130870F2-B285-4040-B681-5C5D385D9502}.Release|x86.ActiveCfg = Release|Win32
+		{130870F2-B285-4040-B681-5C5D385D9502}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
