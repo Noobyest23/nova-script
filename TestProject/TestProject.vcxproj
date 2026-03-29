@@ -175,6 +175,13 @@
     <ClInclude Include="Include\NovaScript\Parser\Optimizer.h" />
     <ClInclude Include="Include\NovaScript\Parser\Parser.h" />
     <ClInclude Include="Include\NovaScript\Parser\Tokens.h" />
+    <ClInclude Include="Include\NovaScript\Value\ArrayValue.h" />
+    <ClInclude Include="Include\NovaScript\Value\BoolValue.h" />
+    <ClInclude Include="Include\NovaScript\Value\FloatValue.h" />
+    <ClInclude Include="Include\NovaScript\Value\FunctionValue.h" />
+    <ClInclude Include="Include\NovaScript\Value\IntValue.h" />
+    <ClInclude Include="Include\NovaScript\Value\StringValue.h" />
+    <ClInclude Include="Include\NovaScript\Value\Value.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Include\NovaScript\Library\WinInputDialog\dialog.rc" />

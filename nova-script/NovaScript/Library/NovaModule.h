@@ -5,14 +5,15 @@
 #include "../NovaErrorPush.h"
 #include "nova_std_macro.h"
 #include "../NovaScript_API.h"
-struct Scope;
+
+struct NovaObject;
 
 class NOVASCRIPT_API NovaModule {
 public:
 
 	std::string module_name = "";
 
-	virtual Scope GetModule() = 0;
+	virtual NovaObject* GetModule() = 0;
 
 	virtual ~NovaModule() = default;
 

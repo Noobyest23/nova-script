@@ -1,6 +1,7 @@
 #include <NovaScript/NovaScript.h>
-#include <NovaScript/Interpretor/Value.h>
+#include <NovaScript/Value/Value.h>
 #include <iostream>
+#include <vector>
 
 struct Script {
 	Script(std::string filepath) {
@@ -11,9 +12,9 @@ struct Script {
 		ExecuteScript(interpretor);
 	}
 
-	Value* CallFunction(std::string func_name, std::vector<Value*> args) {
+	NovaValue* CallFunction(std::string func_name, std::vector<NovaValue*> args) {
 		ValueHandle handle = CallFunc(interpretor, func_name.c_str(), &args);
-		return static_cast<Value*>(handle);
+		return static_cast<NovaValue*>(handle);
 	}
 
 	~Script() {
@@ -49,15 +50,9 @@ static void ExitCallback(const char* msg) {
 int main() {
 	SetErrorCallback(PushErrorCallback);
 	SetExitCallback(ExitCallback);
-	for (int i = 0; i < 20000; i++) {
-		Script script("test.ns");
-		script.Execute();
-
-		//int x = 10;
-
-		//script.CallFunction("AddTen", { new Value(CPPVariable(x)) });
-		//std::cout << x << "\n";
-	}
+	
+	Script script("test.ns");
+	script.Execute();
 
 	std::cout << "Script Finished Execution\n";
 	std::cin.get();

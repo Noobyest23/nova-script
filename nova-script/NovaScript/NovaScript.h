@@ -42,12 +42,6 @@ extern "C" {
 
 	NOVASCRIPT_API ScopeHandle GetScope(InterpretorHandle interpretor);
 
-	NOVASCRIPT_API ArgsHandle CreateArgs();
-
-	NOVASCRIPT_API void PushArg(ArgsHandle, ValueHandle);
-
-	NOVASCRIPT_API void DestroyArgs(ArgsHandle);
-
 	NOVASCRIPT_API void PushModule(InterpretorHandle interpretor, ModuleHandle mod);
 
 	NOVASCRIPT_API void FlagUseConsole();

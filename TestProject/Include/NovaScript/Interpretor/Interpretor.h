@@ -1,15 +1,15 @@
 #ifndef NOVASCRIPT_INTERPRETOR_H
 #define NOVASCRIPT_INTERPRETOR_H
-
-#include "Value.h"
 #include "../ASTNodes/ProgramNode.h"
 
 class NovaModule;
-struct Value;
+struct NovaValue;
 struct Scope;
 
 #include <string>
 #include <unordered_map>
+
+#define ee(type) NovaValue* EvaluateExpression(type);
 
 class Interpretor {
 public:
@@ -24,11 +24,11 @@ public:
 	void Exec();
 
 	// Calls a Function from nova script
-	Value Call(const std::string& func_name, std::vector<Value*>& args);
+	NovaValue* Call(const std::string& func_name, std::vector<NovaValue*>& args);
 
-	Value* Get(const std::string& var_name);
+	NovaValue* Get(const std::string& var_name);
 
-	void Set(const std::string& var_name, const Value& var);
+	void Set(const std::string& var_name, NovaValue* var);
 
 	Scope* GetScopeAsObj();
 
@@ -36,7 +36,7 @@ public:
 	void PopScope();
 
 	void EvaluateStatement(StmtNode*);
-	Value EvaluateExpression(ExprNode*);
+	NovaValue* EvaluateExpression(ExprNode*);
 
 	void PushModule(NovaModule* mod);
 
@@ -57,32 +57,24 @@ private:
 	void EvaluateStatement(ExprAsStmt*);
 	#pragma endregion
 	#pragma region Evaluate Expression Overloads
-	
-	Value EvaluateExpression(VariableNode*);
-	Value EvaluateExpression(OpNode*);
-	Value EvaluateExpression(FuncCallNode*);
-	Value EvaluateExpression(TernaryNode*);
-	Value EvaluateExpression(IntLiteralNode*);
-	Value EvaluateExpression(FloatLiteralNode*);
-	Value EvaluateExpression(BoolLiteralNode*);
-	Value EvaluateExpression(StringLiteralNode*);
-	Value EvaluateExpression(ArrayLiteralNode*);
-	Value EvaluateExpression(DotAccessNode*);
-	Value EvaluateExpression(Vector2LiteralNode*);
-	Value EvaluateExpression(Vector3LiteralNode*);
-	Value EvaluateExpression(Vector4LiteralNode*);
-	Value EvaluateExpression(ArrayAccessNode*);
-	Value EvaluateExpression(CompoundOp*);
-	Value EvaluateExpression(AssignmentNode*);
-	Value EvaluateExpression(NullLiteralNode*);
-	Value EvaluateExpression(NotNode*);
-
-	Value* EvaluateExpressionPtr(ExprNode*);
-	Value* EvaluateExpressionPtr(VariableNode*);
-	Value* EvaluateExpressionPtr(TernaryNode*);
-	Value* EvaluateExpressionPtr(DotAccessNode*);
-	Value* EvaluateExpressionPtr(ArrayAccessNode*);
-
+	ee(VariableNode*);
+	ee(OpNode*);
+	ee(FuncCallNode*);
+	ee(TernaryNode*);
+	ee(IntLiteralNode*);
+	ee(FloatLiteralNode*);
+	ee(BoolLiteralNode*);
+	ee(StringLiteralNode*);
+	ee(ArrayLiteralNode*);
+	ee(DotAccessNode*);
+	ee(Vector2LiteralNode*);
+	ee(Vector3LiteralNode*);
+	ee(Vector4LiteralNode*);
+	ee(ArrayAccessNode*);
+	ee(AssignmentNode*);
+	ee(CompoundOp*);
+	ee(NullLiteralNode*);
+	ee(NotNode*);
 	#pragma endregion
 
 	ProgramNode* program;
@@ -90,14 +82,9 @@ private:
 
 	void PushError(const std::string& message);
 
-	bool return_flag = false;
-	Value return_val = Value();
-	Value* return_val_ptr = nullptr;
-
-	Value nullval = Value();
-
 	std::unordered_map<std::string, NovaModule*> modules;
 	std::unordered_map<TypeDeclNode*, FuncDeclNode*> nova_types;
+	std::vector<NovaValue*> literal_stack;
 };
 
 // Todo

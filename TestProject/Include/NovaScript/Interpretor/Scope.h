@@ -6,26 +6,26 @@
 #include <memory>
 #include <vector>
 #include "../NovaScript_API.h"
-struct Value;
+#include "../NovaScript/Value/Value.h"
 
 struct NOVASCRIPT_API Scope {
 	Scope* parent = nullptr;
 
-	std::unordered_map<std::string, Value> variables;
+	std::unordered_map<std::string, NovaValue*> variables;
 
 	Scope() = default;
-	explicit Scope(std::unordered_map<std::string, Value>& variables) : variables(variables) {};
+	explicit Scope(std::unordered_map<std::string, NovaValue*>& variables) : variables(variables) {};
 	explicit Scope(Scope* parentScope) : parent(parentScope) {}
 	~Scope();
 
-	Value* Get(const std::string& name);
+	NovaValue* Get(const std::string& name);
 
 	// Insert / overwrite
-	void Set(const std::string& name, Value val);
+	void Set(const std::string& name, NovaValue* val);
 
 	bool Has(const std::string& name);
 
-	std::unordered_map<std::string, Value>& GetAll() { return variables; };
+	std::unordered_map<std::string, NovaValue*>& GetAll() { return variables; };
 
 	std::string Print() const;
 

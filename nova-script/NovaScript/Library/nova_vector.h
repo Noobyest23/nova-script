@@ -4,7 +4,7 @@
 #include "../Interpretor/Scope.h"
 #include "nova_std_macro.h"
 #include "NovaModule.h"
-
+/*
 class NovaVectorModule : public NovaModule {
 public:
 
@@ -89,5 +89,5 @@ public:
 };
 
 
-
+*/
 #endif

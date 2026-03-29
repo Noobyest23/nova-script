@@ -1,6 +1,7 @@
 #include "../NovaScript/Interpretor/Interpretor.h"
 #include "../NovaScript/Interpretor/Scope.h"
-#include "../NovaScript/Interpretor/Value.h"
+#include "../NovaScript/Value/Value.h"
+#include "../NovaScript/Value/FunctionValue.h"
 #include "../NovaScript/ASTNodes/ProgramNode.h"
 #include "../NovaScript/Parser/Lexer.h"
 #include "../NovaScript/Parser/Parser.h"
@@ -43,10 +44,8 @@ void Interpretor::Init() {
 		return;
 	}
 	
-	modules["string"] = new NovaStringModule;
 	modules["io"] = new NovaIOModule;
-	modules["vector"] = new NovaVectorModule;
-	modules["math"] = new NovaMathModule;
+	
 }
 
 void Interpretor::Exec() {
@@ -59,53 +58,35 @@ void Interpretor::Exec() {
 	}
 	for (StmtNode* stmt : program->Statements) {
 		EvaluateStatement(stmt);
+		PurgeStack();
 	}
 }
 
-void Interpretor::PushError(const std::string& message) {
-	Callbacker::PushError(message.c_str(), 2);
+void Interpretor::PushError(const std::string& message, ASTNode* current_node) {
+	std::string msg = message + (current_node ? " : " + current_node->Print() : "");
+	Callbacker::PushError(msg.c_str(), 2);
 };
 
-void Interpretor::Set(const std::string& var_name, const Value& value) {
+void Interpretor::Set(const std::string& var_name, NovaValue* value) {
 	scope->Set(var_name, value);
 }
 
-Value Interpretor::Call(const std::string& func_name, std::vector<Value*>& args) {
-	Value* func = scope->Get(func_name);
-	if (!func) {
-		return Value();
-	}
-	if (func->data.index() == 8) { // cpp function
-		CPPFunction f = std::get<CPPFunction>(func->data);
-		return f(args);
-	}
-	else { // nova function
-		NovaFunction f = std::get<NovaFunction>(func->data);
-		Scope* s = new Scope(scope);
-		scope = s;
-		for (int i = 0; i < f->args.size(); i++) {
-			s->Set(f->args[i], *args[i]);
+NovaValue* Interpretor::Call(const std::string& func_name, std::vector<NovaValue*>& args) {
+	NovaValue* v = scope->Get(func_name);
+	if (v) {
+		if (v->Type() == "NovaFunction") {
+			NovaFunction* fn = static_cast<NovaFunction*>(v);
+			NovaValue* result = fn->Call(args, this);
+			return result;
 		}
-
-		for (StmtNode* stmt : f->body) {
-			EvaluateStatement(stmt);
-			if (return_flag) {
-				for (Value* arg : args) {
-					arg->Release();
-				}
-				return_flag = false;
-				PopScope();
-				return return_val;
-			}
+		else {
+			PushError("Cannot use call a type of " + v->Type());
 		}
-
-		for (Value* arg : args) {
-			arg->Release();
-		}
-
-		PopScope();
-		return nullval;
 	}
+	else {
+		PushError("Cannot call function " + func_name + " the function either doesnt exist in scope or is null");
+	}
+	return nullptr;
 }
 
 void Interpretor::PushScope() {
@@ -125,14 +106,26 @@ void Interpretor::PopScope() {
 	}
 }
 
-Value* Interpretor::Get(const std::string& var_name) {
-	return scope->Get(var_name);
+NovaValue* Interpretor::Get(const std::string& var_name) {
+	NovaValue* v = scope->Get(var_name);
+	v->AddRef();
+	return v;
 }
 
 Scope* Interpretor::GetScopeAsObj() {
 	return scope;
 }
+
 #include "../NovaScript/Library/NovaModule.h"
 void Interpretor::PushModule(NovaModule* mod) {
 	modules[mod->module_name] = mod;
+}
+
+void Interpretor::PurgeStack() {
+	for (NovaValue* lit : literal_stack) {
+		if (lit) {
+			lit->Release();
+		}
+		literal_stack.clear();
+	}
 }

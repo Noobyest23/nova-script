@@ -4,6 +4,9 @@
 #include "../NovaScript/Library/nova_std.h"
 #include "../NovaScript/ASTNodes/StmtNode.h"
 
+#include "../NovaScript/Value/FunctionValue.h"
+#include "../NovaScript/Value/BoolValue.h"
+
 #define es_decl(type) void Interpretor::EvaluateStatement(type)
 #define es(type) if (type n = dynamic_cast<type>(node)) { EvaluateStatement(n); return; }
 
@@ -21,18 +24,17 @@ es_decl(StmtNode* node) {
 	es(IfStmtNode*)
 	es(TypeDeclNode*)
 	es(IncludeNode*)
-	es(ReturnStmtNode*)
 	es(BreakPointNode*)
 	es(ASTPrintNode*)
 	es(ForEachNode*)
 	es(WhileNode*)
 	es(ExprAsStmt*)
-	PushError("Unrecognized Statement " + node->Print());
+	PushError("Unrecognized Statement", node);
 }
 
 es_decl(VarDeclNode* node) {
 	// Add a variable to the scope
-	Value value;
+	NovaValue* value = nullptr;
 	if (node->right) {
 		value = EvaluateExpression(node->right);
 	}
@@ -41,15 +43,17 @@ es_decl(VarDeclNode* node) {
 }
 
 es_decl(FuncDeclNode* node) {
-	Value var(node);
-	scope->Set(node->func_id, var);
+	NovaFunction* func = new NovaFunction(node);
+	scope->Set(node->func_id, func);
 }
 
 es_decl(IfStmtNode* node) {
-	Value value = EvaluateExpression(node->expression);
+	NovaValue* value = EvaluateExpression(node->expression);
 	
-	if (value.IsBool()) {
-		if (value.GetBool()) {
+	if (value->Type() == "Boolean") {
+		NovaBool* nbool = static_cast<NovaBool*>(value);
+		PushScope();
+		if (nbool->b) {
 			for (StmtNode* stmt : node->body) {
 				EvaluateStatement(stmt);
 			}
@@ -59,27 +63,10 @@ es_decl(IfStmtNode* node) {
 				EvaluateStatement(stmt);
 			}
 		}
+		PopScope();
 	}
 	else {
-		// fallback to a boolean op
-		OpNode* op = new OpNode(node->expression, nullptr, "+");
-		Value val = EvaluateExpression(op);
-		if (val.IsBool()) {
-			if (val.GetBool()) {
-				for (StmtNode* stmt : node->body) {
-					EvaluateStatement(stmt);
-				}
-			}
-			else {
-				for (StmtNode* stmt : node->else_body) {
-					EvaluateStatement(stmt);
-				}
-			}
-		}
-		else {
-			PushError("Cannot perform if on an expression that does not evaluate to a boolean");
-		}
-		delete op;
+		PushError("Cannot perform if on an expression that does not evaluate to a boolean", node);
 	}
 }
 
@@ -98,66 +85,53 @@ es_decl(TypeDeclNode* node) {
 }
 
 es_decl(IncludeNode* node) {
-	// Parse through the file
-	Value val = EvaluateExpression(node->file_path);
-	if (!val.IsString()) {
-		PushError("Filepath must evaluate to string " + node->Print());
-		return;
-	}
-	std::string filepath = val.GetString();
-	if (!filepath.ends_with(".ns")) {
-		Value val;
-		auto it = modules.find(filepath);
-		if (it != modules.end()) {
-			NovaType type = modules[filepath]->GetModule();
-			val = Value(type);
-		}
-		if (val.data.index() == 0) {
-			PushError("Cannot include standard lib " + node->file_path->Print() + " because it can't be found");
-			return;
-		}
+	NovaValue* file = EvaluateExpression(node->file_path);
+	NovaValue* as = EvaluateExpression(node->as);
+	if (!file) { PushError("Filepath in include statement evaluated to null", node); return; }
 
-		if (VariableNode* var = dynamic_cast<VariableNode*>(node->as)) {
-			scope->Set(var->identifier, val);
+	if (file->Type() == "String") {
+		if (file->ToString().ends_with(".ns")) {
+			// Include another nova script file
+			Interpretor i(file->ToString());
+			if (as and as->Type() == "String") {
+				NovaObject* object = new NovaObject;
+				for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
+					object->PushBack(pair.first, pair.second);
+				}
+				scope->Set(as->ToString(), object);
+				object->Release();
+			}
+			else {
+				for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
+					scope->Set(pair.first, pair.second);
+				}
+			}
 		}
 		else {
-			for (std::pair<std::string, Value> pair : std::get<Scope>(val.data).variables) {
-				scope->Set(pair.first, pair.second);
+			// include a cpp module
+			if (modules.find(file->ToString()) != modules.end()) {
+				NovaObject* obj = modules[file->ToString()]->GetModule();
+				if (as and as->Type() == "String") {
+					scope->Set(as->ToString(), obj);
+					obj->Release();
+					return;
+				}
+				else {
+					for (std::pair<std::string, NovaValue*> pair : *obj->accessables) {
+						scope->Set(pair.first, pair.second);
+					}
+					obj->Release();
+					return;
+				}
 			}
+
 		}
 	}
 	else {
-		filepath = Callbacker::_proj_path + filepath;
-		Lexer lexer(filepath.c_str());
-		ProgramNode* program = nullptr;
-		{
-			std::vector<Token> tokens = lexer.Parse();
-			Parser parser(tokens);
-			program = parser.Parse();
-		}
-
-		if (!program) {
-			PushError("Error including file " + node->Print());
-		}
-
-		Interpretor interpretor(program);
-		Scope* s = interpretor.GetScopeAsObj();
-
-		
-		if (VariableNode* var = dynamic_cast<VariableNode*>(node->as)) {
-			scope->Set(var->identifier, val);
-		}
-		else {
-			for (std::pair<std::string, Value> pair : s->variables) {
-				scope->Set(pair.first, pair.second);
-			}
-		}
+		PushError("Filepath in include must be a string", node);
+		return;
 	}
-}
 
-es_decl(ReturnStmtNode* node) {
-	return_flag = true;
-	return_val = EvaluateExpression(node->return_value);
 }
 
 es_decl(BreakPointNode* node) {
@@ -178,54 +152,36 @@ es_decl(ASTPrintNode* node) {
 }
 
 es_decl(ForEachNode* node) {
-	PushScope();
-	Value container = EvaluateExpression(node->container);
-	std::string var_name;
-	if (node->variable) {
-		if (VariableNode* var = dynamic_cast<VariableNode*>(node->variable)) {
-			var_name = var->identifier;
-		}
-		else {
-			PushError("For loop variable is not a variable");
-			return;
-		}
-	}
-	else {
-		PushError("For loop variables is null");
-		return;
-	}
-	if (!container.IsArray()) {
-		PushError("For loop cannot iterate through " + container.Type());
-		return;
-	}
 	
-	std::vector<Value>& arr = container.GetArray();
-	for (Value& val : arr) {
-		scope->Set(var_name, val);
-		for (StmtNode* stmt : node->body) {
-			EvaluateStatement(stmt);
-		}
-	}
-	PopScope();
-
 }
 
 es_decl(WhileNode* node) {
-	Value condition = EvaluateExpression(node->expression);
-	if (!condition.IsBool()) {
-		PushError("While loop condition is not a boolean " + node->Print());
+	NovaValue* condition = EvaluateExpression(node->expression);
+	if (condition->Type() == "Boolean") {
+		PushError("While loop condition is not a boolean", node);
 		return;
 	}
 	if (node->expression->constant) {
-		PushError("While loop condition is constant " + node->Print());
+		PushError("While loop condition is constant", node);
 		return;
 	}
 
-	while (condition.GetBool()) {
+	NovaBool* nb = static_cast<NovaBool*>(condition);
+
+	while (nb->b) {
 		for (StmtNode* stmt : node->body) {
 			EvaluateStatement(stmt);
 		}
+
+		condition->Release();
 		condition = EvaluateExpression(node->expression);
+		if (condition->Type() == "Boolean") {
+			nb = static_cast<NovaBool*>(condition);
+		}
+		else {
+			PushError("Condition is no longer a boolean value", node);
+			break;
+		}
 	}
 
 }

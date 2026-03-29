@@ -20,8 +20,8 @@ public:
 
 private:
 
-	StmtNode* OptimizeStatement(StmtNode*);
-	ExprNode* OptimizeExpression(ExprNode*);
+	StmtNode* OptimizeStatement(StmtNode*) { return nullptr; };
+	ExprNode* OptimizeExpression(ExprNode*) { return nullptr; };
 
 	ProgramNode* old_program;
 
@@ -30,7 +30,7 @@ private:
 
 	Interpretor* const_evaluator = nullptr;
 
-	ExprNode* CreateLiteralFromValue(Value* value);
+	ExprNode* CreateLiteralFromValue(Value* value) { return nullptr; };
 };
 
 #endif

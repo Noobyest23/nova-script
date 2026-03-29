@@ -232,14 +232,29 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClInclude Include="NovaScript\Parser\Parser.h" />
     <ClInclude Include="NovaScript\Parser\Tokens.h" />
     <ClInclude Include="NovaScript\NovaScript_API.h" />
+    <ClInclude Include="NovaScript\Value\ArrayValue.h" />
+    <ClInclude Include="NovaScript\Value\BoolValue.h" />
+    <ClInclude Include="NovaScript\Value\FunctionValue.h" />
+    <ClInclude Include="NovaScript\Value\IntValue.h" />
+    <ClInclude Include="NovaScript\Value\FloatValue.h" />
+    <ClInclude Include="NovaScript\Value\NovaObject.h" />
+    <ClInclude Include="NovaScript\Value\StringValue.h" />
+    <ClInclude Include="NovaScript\Value\Value.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NovaErrorPush.cpp" />
+    <ClCompile Include="Src\NovaTypes\ArrayValue.cpp" />
+    <ClCompile Include="Src\NovaTypes\BoolValue.cpp" />
     <ClCompile Include="Src\EvaluateExpression.cpp" />
     <ClCompile Include="Src\EvaluateStatement.cpp" />
+    <ClCompile Include="Src\NovaTypes\FloatValue.cpp" />
     <ClCompile Include="Src\Interpretor.cpp" />
+    <ClCompile Include="Src\NovaTypes\FunctionValue.cpp" />
+    <ClCompile Include="Src\NovaTypes\IntValue.cpp" />
+    <ClCompile Include="Src\NovaTypes\NovaObject.cpp" />
     <ClCompile Include="Src\Scope.cpp" />
-    <ClCompile Include="Src\Value.cpp" />
+    <ClCompile Include="Src\NovaTypes\StringValue.cpp" />
+    <ClCompile Include="Src\NovaTypes\Value.cpp" />
     <ClCompile Include="NovaScript.cpp" />
     <ClCompile Include="Src\NovaModule.cpp" />
     <ClCompile Include="Src\Lexer.cpp" />

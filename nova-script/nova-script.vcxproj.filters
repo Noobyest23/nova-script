@@ -84,6 +84,30 @@
     <ClInclude Include="NovaScript\Library\nova_math.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NovaScript\Value\Value.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\FloatValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\IntValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\BoolValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\StringValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\FunctionValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\ArrayValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\NovaObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\EvaluateExpression.cpp">
@@ -98,7 +122,7 @@
     <ClCompile Include="Src\Scope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Value.cpp">
+    <ClCompile Include="Src\NovaTypes\Value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Lexer.cpp">
@@ -117,6 +141,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Optimizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\IntValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\FloatValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\BoolValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\StringValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\FunctionValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\ArrayValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\NovaObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

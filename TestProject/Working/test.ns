@@ -1,4 +1,4 @@
-include "io" as io
+include "io" as "io"
 
 io.Print("Hello NovaScript!")
 
@@ -11,7 +11,6 @@ var pfunc = arr[0]
 pfunc("abc")
 
 type Bob {
-
 	var age = 42
 }
 
@@ -20,7 +19,7 @@ type Cob {
 	var age = 67
 }
 
-var b = Bob()
+| var b = Bob()
 io.Print(b.age)
 
 
@@ -34,3 +33,4 @@ func AddTen(x) {
 	x += 10
 }
 
+io.Print(AddTen)

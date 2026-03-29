@@ -5,7 +5,7 @@
 #include "nova_std_macro.h"
 #include <string>
 #include "NovaModule.h"
-
+/*
 class NovaStringModule : public NovaModule {
 public:
 
@@ -148,5 +148,5 @@ public:
 
 };
 
-
+*/
 #endif

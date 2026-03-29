@@ -4,7 +4,7 @@
 #include <algorithm>
 #undef min
 #undef max
-
+/*
 class NovaMathModule : public NovaModule {
 
 	nova_std_decl(Sin) {
@@ -131,5 +131,5 @@ class NovaMathModule : public NovaModule {
 	}
 
 };
-
+*/
 #endif

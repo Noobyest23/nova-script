@@ -1,6 +1,6 @@
 #include "NovaScript/NovaScript.h"
 #include "NovaScript/NovaErrorPush.h"
-
+#include "NovaScript/Value/Value.h"
 #include "NovaScript/Interpretor/Interpretor.h"
 extern "C" {
 
@@ -37,28 +37,17 @@ extern "C" {
 
 	void PushVariable(InterpretorHandle i, const char* val_name, ValueHandle val) {
 		Interpretor* interpretor = static_cast<Interpretor*>(i);
-		Value* value = static_cast<Value*>(val);
-		interpretor->Set(val_name, *value);
+		NovaValue* value = static_cast<NovaValue*>(val);
+		interpretor->Set(val_name, value);
 	}
 
 	ValueHandle CallFunc(InterpretorHandle i, const char* function_name, void* a) {
 		Interpretor* interpretor = static_cast<Interpretor*>(i);
-		std::vector<Value*>* args = static_cast<std::vector<Value*>*>(a);
-		return new Value(interpretor->Call(function_name, *args));
-	}
-
-	ArgsHandle CreateArgs() {
-		return new std::vector<Value*>;
-	}
-
-	void PushArg(ArgsHandle args, ValueHandle arg) {
-		Value* value = static_cast<Value*>(arg);
-		std::vector<Value*>* vec = static_cast<std::vector<Value*>*>(args);
-		vec->push_back(value);
-	}
-
-	void DeleteArgs(ArgsHandle args) {
-		delete args;
+		std::vector<NovaValue*>* args = static_cast<std::vector<NovaValue*>*>(a);
+		NovaValue* result = interpretor->Call(function_name, *args);
+		interpretor->PurgeStack();
+		result->AddRef();
+		return result;
 	}
 
 	void PushModule(InterpretorHandle i, ModuleHandle m) {
