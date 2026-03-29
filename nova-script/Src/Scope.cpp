@@ -23,7 +23,9 @@ void Scope::Set(const std::string& name, NovaValue* val) {
 	auto it = variables.find(name);
 	if (it != variables.end()) {
 		val->AddRef();
-		variables[name]->Release();
+		if (variables[name]) {
+			variables[name]->Release();
+		}
 		variables[name] = val;
 	}
 	else if (parent) {
@@ -31,7 +33,9 @@ void Scope::Set(const std::string& name, NovaValue* val) {
 			parent->Set(name, val);
 		}
 		else {
-			val->AddRef();
+			if (val) {
+				val->AddRef();
+			}
 			variables.insert_or_assign(name, val);
 		}
 	}

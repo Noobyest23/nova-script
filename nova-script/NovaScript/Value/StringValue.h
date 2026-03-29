@@ -2,14 +2,17 @@
 #define NOVASCRIPT_STRING_VALUE_H
 #include "Value.h"
 
+struct NovaInt;
+struct NovaBool;
+
 struct NovaString : public NovaValue {
-	NovaString(const std::string& str) : str(str) {};
+	NovaString(const std::string& str);
 	std::string str;
 
 	NovaValue* Copy() const override;
 	std::string ToString() const override;
 	std::string Type() const override;
-
+	
 	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
 };
 

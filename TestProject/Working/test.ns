@@ -2,6 +2,8 @@ include "io" as "io"
 
 io.Print("Hello NovaScript!")
 
+io.Print("Hello NovaScript!".Length())
+
 io.Print((0 if true else 1))
 
 var arr = [io.Print, io.Input]

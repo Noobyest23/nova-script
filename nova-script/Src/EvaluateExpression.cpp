@@ -246,7 +246,9 @@ ee_decl(DotAccessNode* node) {
 	for (const std::pair<std::string, NovaValue*>& pair : *val->accessables) {
 		n_scope.Set(pair.first, pair.second);
 	}
-	
+	if (n_scope.Has("this")) { // if the object has the "this" field we pass it up the chain
+		n_scope.Set("this", val);
+	}
 	NovaValue* result = EvaluateExpression(node->right);
 	scope = p_scope;
 	return result;
