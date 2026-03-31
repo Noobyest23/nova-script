@@ -3,14 +3,15 @@
 #include "Value.h"
 #include <vector>
 
-struct NovaArray : public NovaValue {
+struct NOVASCRIPT_API NovaArray : public NovaValue {
 	NovaArray(std::vector<NovaValue*>& arr) : arr(arr) {};
 	std::vector<NovaValue*> arr;
 
 	NovaValue* Copy() const override;
 	std::string ToString() const override;
 	std::string Type() const override;
-	
+	NovaValue* Assign(NovaValue* rhs) override;
+
 protected:
 
 	void OnDestroy() override;

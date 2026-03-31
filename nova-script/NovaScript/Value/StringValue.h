@@ -5,7 +5,7 @@
 struct NovaInt;
 struct NovaBool;
 
-struct NovaString : public NovaValue {
+struct NOVASCRIPT_API NovaString : public NovaValue {
 	NovaString(const std::string& str);
 	std::string str;
 
@@ -14,6 +14,8 @@ struct NovaString : public NovaValue {
 	std::string Type() const override;
 	
 	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
+	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) override;
+	NovaValue* Assign(NovaValue* rhs) override;
 };
 
 

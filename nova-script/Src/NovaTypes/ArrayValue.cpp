@@ -31,3 +31,12 @@ void NovaArray::OnDestroy() {
 		}
 	}
 }
+
+NovaValue* NovaArray::Assign(NovaValue* rhs) {
+	if (rhs->Type() == "Array") {
+		NovaArray* arr = static_cast<NovaArray*>(rhs);
+		this->arr = arr->arr;
+		return this;
+	}
+	return nullptr;
+}

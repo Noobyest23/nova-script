@@ -58,17 +58,22 @@ ee_decl(AssignmentNode* node) {
 	NovaValue* rhs = EvaluateExpression(node->right);
 	if (!rhs) { PushError("Right side in assignment is null", node); return nullptr; }
 
-	
 	if (VariableNode* var = dynamic_cast<VariableNode*>(node->left)) {
-		scope->Set(var->identifier, rhs);
+		if (!lhs->Assign(rhs)) {
+			scope->Set(var->identifier, rhs);
+		}
+		return lhs;
 	}
 	else if (DotAccessNode* dot = dynamic_cast<DotAccessNode*>(node->left)) {
-		lhs = EvaluateExpression(dot->left);
 		if (VariableNode* var = dynamic_cast<VariableNode*>(dot->right)) {
-			rhs->AddRef();
-			lhs->accessables->at(var->identifier)->Release();
-			lhs->accessables->insert_or_assign(var->identifier, rhs);
-			return rhs;
+			if (!lhs->Assign(rhs)) {
+				lhs = EvaluateExpression(dot->left); // gives us the var in var.property
+				rhs->AddRef();
+				lhs->accessables->at(var->identifier)->Release();
+				lhs->accessables->insert_or_assign(var->identifier, rhs);
+				return rhs;
+			}
+			return lhs;
 		}
 		else {
 			PushError("Unrecognized node in dot access assignment", node);
@@ -76,24 +81,47 @@ ee_decl(AssignmentNode* node) {
 		}
 	}
 	else if (ArrayAccessNode* arr = dynamic_cast<ArrayAccessNode*>(node->left)) {
-		lhs = EvaluateExpression(arr->arr); // gives us the array itself, where lhs was just what we got from array at the index
 		if (lhs->Type() == "Array") {
-			NovaArray* narr = static_cast<NovaArray*>(lhs);
-			NovaValue* index = EvaluateExpression(arr->index);
-			if (!index or index->Type() != "Int") { PushError("Index in array assignment is not an int", node); return nullptr; }
-			NovaInt* int_index = static_cast<NovaInt*>(index);
-			if (int_index->num > narr->arr.size()) { PushError("Out of bounds array assignment", node); return nullptr; }
-			rhs->AddRef();
-			narr->arr[int_index->num]->Release();
-			narr->arr[int_index->num] = rhs;
-			return narr->arr[int_index->num];
+			if (!lhs->Assign(rhs)) {
+				lhs = EvaluateExpression(arr->arr); // gives us the array itself, where lhs was just what we got from array at the index
+				NovaArray* narr = static_cast<NovaArray*>(lhs);
+				NovaValue* index = EvaluateExpression(arr->index);
+				if (!index or index->Type() != "Int") { PushError("Index in array assignment is not an int", node); return nullptr; }
+				NovaInt* int_index = static_cast<NovaInt*>(index);
+				if (int_index->CNum() > narr->arr.size()) { PushError("Out of bounds array assignment", node); return nullptr; }
+				rhs->AddRef();
+				narr->arr[int_index->CNum()]->Release();
+				narr->arr[int_index->CNum()] = rhs;
+				return narr->arr[int_index->CNum()];
+			}
+			return lhs;
 		}
 	}
 	
 }
 
 ee_decl(CompoundOp* node) {
-	return nullptr;
+	NovaValue* lhs = EvaluateExpression(node->lhs);
+	NovaValue* rhs = EvaluateExpression(node->rhs);
+
+	if (!lhs) {PushError("Left hand side cannot be null in operation", node); return nullptr;}
+	if (!rhs) {PushError("Right hand side cannot be null in operation", node); return nullptr;}
+
+	NovaValue::NovaOperator op = NovaValue::CompoundPlus;
+
+	if (node->op == "-=") {
+		op = NovaValue::CompoundMinus;
+	}
+	else if (node->op == "*=") {
+		op = NovaValue::CompoundMultiply;
+	}
+	else if (node->op == "/=") {
+		op = NovaValue::CompoundDivide;
+	}
+
+	NovaValue* result = lhs->PerformCompoundOp(rhs, op);
+	literal_stack.push_back(result);
+	return result;
 }
 
 ee_decl(OpNode* node) {
@@ -146,7 +174,8 @@ ee_decl(FuncCallNode* node) {
 				NovaValue* a_value = EvaluateExpression(arg);
 				args.push_back(a_value);
 			}
-			return fn->Call(args, this);
+			NovaValue* result = fn->Call(args, this);
+			return result;
 		}
 		else {
 			PushError(node->func_id + " is not a function", node);
@@ -278,7 +307,7 @@ ee_decl(ArrayAccessNode* node) {
 		std::vector<NovaValue*>& list = narr->arr;
 		if (index->Type() == "Int") {
 			NovaInt* nint = static_cast<NovaInt*>(index);
-			return list[nint->num];
+			return list[nint->CNum()];
 		}
 		else {
 			PushError("Index is not an int", node);
@@ -306,13 +335,13 @@ ee_decl(NotNode* node) {
 		}
 		if (val->Type() == "Float") {
 			NovaFloat* nf = static_cast<NovaFloat*>(val);
-			NovaFloat* notnf = new NovaFloat(!nf->num);
+			NovaFloat* notnf = new NovaFloat(!nf->CNum());
 			literal_stack.push_back(notnf);
 			return notnf;
 		}
 		if (val->Type() == "Int") {
 			NovaInt* nf = static_cast<NovaInt*>(val);
-			NovaInt* notnf = new NovaInt(!nf->num);
+			NovaInt* notnf = new NovaInt(!nf->CNum());
 			literal_stack.push_back(notnf);
 			return notnf;
 		}

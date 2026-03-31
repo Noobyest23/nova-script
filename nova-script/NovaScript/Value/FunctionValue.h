@@ -6,7 +6,7 @@
 
 class Interpretor;
 
-struct NovaFunction : public NovaValue {
+struct NOVASCRIPT_API NovaFunction : public NovaValue {
 	NovaFunction(FuncDeclNode* node) : fn(node) {};
 	NovaFunction(NovaValue* (*cppfn)(std::vector<NovaValue*>&)) : cppfn(cppfn) {};
 	FuncDeclNode* fn = nullptr;
@@ -17,7 +17,7 @@ struct NovaFunction : public NovaValue {
 	std::string Type() const override;
 	std::string ToString() const override;
 	NovaValue* Copy() const override;
-
+	NovaValue* Assign(NovaValue* rhs) override;
 };
 
 

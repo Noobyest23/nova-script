@@ -23,3 +23,7 @@ std::string NovaObject::Type() const {
 void NovaObject::PushBack(const std::string& str, NovaValue* value) {
 	accessables->emplace(str, value);
 }
+
+NovaValue* NovaObject::Assign(NovaValue* rhs) {
+	return nullptr;
+}

@@ -48,6 +48,38 @@ NovaValue* NovaString::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 	return nullptr;
 }
 
+
+NovaValue* NovaString::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
+	if (Type() == "String") {
+		NovaString* r = static_cast<NovaString*>(rhs);
+		std::string result;
+		switch (op) {
+		case NovaOperator::CompoundPlus:
+			result += r->str;
+			return this;
+		break;
+		default:
+			OpFailed(rhs, op);
+			return nullptr;
+			break;
+		}
+
+		return new NovaString(result);
+	}
+
+	OpFailed(rhs, op);
+	return nullptr;
+}
+
+NovaValue* NovaString::Assign(NovaValue* rhs) {
+	if (rhs->Type() == "String") {
+		NovaString* str = static_cast<NovaString*>(rhs);
+		this->str = str->str;
+		return this;
+	}
+	return nullptr;
+}
+
 static void PushError(std::string msg) {
 	Callbacker::PushError(msg, 2);
 }
@@ -91,12 +123,12 @@ nova_std_decl(Substr) {
 	intget(start, 1);
 	intget(len, 2);
 
-	if (start->num < 0 || len->num < 0 || start->num >= string->str.size()) {
+	if (start->CNum() < 0 || len->CNum() < 0 || start->CNum() >= string->str.size()) {
 		PushError("Invalid substring range");
 		return new NovaString("");
 	}
 
-	return new NovaString(string->str.substr(start->num, len->num));
+	return new NovaString(string->str.substr(start->CNum(), len->CNum()));
 }
 
 nova_std_decl(Find) {

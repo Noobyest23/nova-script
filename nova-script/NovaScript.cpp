@@ -45,8 +45,10 @@ extern "C" {
 		Interpretor* interpretor = static_cast<Interpretor*>(i);
 		std::vector<NovaValue*>* args = static_cast<std::vector<NovaValue*>*>(a);
 		NovaValue* result = interpretor->Call(function_name, *args);
+		if (result) {
+			result->AddRef();
+		}
 		interpretor->PurgeStack();
-		result->AddRef();
 		return result;
 	}
 
@@ -64,5 +66,22 @@ extern "C" {
 		Interpretor* interpretor = static_cast<Interpretor*>(i);
 		return interpretor->GetScopeAsObj();
 	}
+
+#include "NovaScript/Parser/Parser.h"
+#include "NovaScript/Parser/Lexer.h"
+#include "NovaScript/ASTNodes/ASTNode.h"
+
+	void PrintAST(const char* filepath) {
+		Lexer lexer(filepath);
+		auto tokens = lexer.Parse();
+		Parser parser(tokens);
+		ProgramNode* node = parser.Parse();
+		Callbacker::PushError(node->Print(), 0);
+		node->Delete();
+	}
+
+	const char* Version() { return "v0.1b"; };
+
+	const char* Changelog() { return ""; };
 
 }

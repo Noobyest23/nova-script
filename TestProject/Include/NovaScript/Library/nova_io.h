@@ -4,7 +4,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #include <string>
-#include "../NovaScript/Value/StringValue.h"
+#include "../Value/StringValue.h"
 #include "../NovaErrorPush.h"
 #include "../NovaScript.h"
 

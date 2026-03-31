@@ -46,6 +46,12 @@ extern "C" {
 
 	NOVASCRIPT_API void FlagUseConsole();
 
+	NOVASCRIPT_API void PrintAST(const char* filepath);
+
+	NOVASCRIPT_API const char* Version();
+
+	NOVASCRIPT_API const char* Changelog();
+
 }
 
 #endif

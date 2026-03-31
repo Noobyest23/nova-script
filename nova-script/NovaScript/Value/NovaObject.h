@@ -2,7 +2,7 @@
 #define NOVASCRIPT_OBJECT_H
 #include "Value.h"
 // this class LIES, it is 104 bytes
-struct NovaObject : public NovaValue {
+struct NOVASCRIPT_API NovaObject : public NovaValue {
 	NovaObject() { accessables = new std::unordered_map<std::string, NovaValue*>; }
 
 	NovaValue* Copy() const;
@@ -10,7 +10,7 @@ struct NovaObject : public NovaValue {
 	std::string Type() const;
 
 	void PushBack(const std::string& str, NovaValue* value);
-
+	NovaValue* Assign(NovaValue*) override;
 };
 
 #endif

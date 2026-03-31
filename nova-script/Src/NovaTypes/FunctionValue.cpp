@@ -1,5 +1,6 @@
 #include "../NovaScript/Value/FunctionValue.h"
 #include "../NovaScript/Interpretor/Interpretor.h"
+#include "../NovaScript/Interpretor/Scope.h"
 
 NovaValue* NovaFunction::Call(std::vector<NovaValue*> args, Interpretor* interpretor) const {
 	if (fn) {
@@ -8,6 +9,9 @@ NovaValue* NovaFunction::Call(std::vector<NovaValue*> args, Interpretor* interpr
 			return nullptr;
 		}
 		interpretor->PushScope();
+		for (int i = 0; i < args.size(); i++) {
+			interpretor->GetScopeAsObj()->Set(fn->args[i], args[i]);
+		}
 		for (StmtNode* node : fn->body) {
 			if (ReturnStmtNode* ret = dynamic_cast<ReturnStmtNode*>(node)) {
 				NovaValue* return_val = interpretor->EvaluateExpression(ret->return_value);
@@ -54,4 +58,9 @@ NovaValue* NovaFunction::Copy() const {
 		PushError("This function is null");
 		return nullptr;
 	}
+}
+
+NovaValue* NovaFunction::Assign(NovaValue* rhs) {
+	// You cannot assign to a function
+	return this;
 }

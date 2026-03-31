@@ -1,0 +1,11 @@
+include "io" as "io"
+
+io.Print("Hello NovaScript!")
+
+func AddTen(x) {
+	x += 10
+}
+
+func SetTen(x) {
+	x = 10
+}

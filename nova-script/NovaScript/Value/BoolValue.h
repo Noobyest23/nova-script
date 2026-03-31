@@ -3,7 +3,7 @@
 
 #include "Value.h"
 
-struct NovaBool : public NovaValue {
+struct NOVASCRIPT_API NovaBool : public NovaValue {
 	NovaBool(bool b) : b(b) {};
 	bool b;
 
@@ -12,6 +12,7 @@ struct NovaBool : public NovaValue {
 	std::string Type() const override;
 
 	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
+	NovaValue* Assign(NovaValue* rhs) override;
 };
 
 #endif

@@ -31,3 +31,12 @@ NovaValue* NovaBool::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 	OpFailed(rhs, op);
 	return nullptr;
 }
+
+NovaValue* NovaBool::Assign(NovaValue* rhs) {
+	if (rhs->Type() == "Boolean") {
+		NovaBool* b = static_cast<NovaBool*>(rhs);
+		this->b = b->b;
+		return this;
+	}
+	return nullptr;
+}

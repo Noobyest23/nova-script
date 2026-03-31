@@ -2,7 +2,9 @@
 #define NOVASCRIPT_VALUE_H
 #include <string>
 #include <unordered_map>
-struct NovaValue {
+#include "../NovaScript_API.h"
+
+struct NOVASCRIPT_API NovaValue {
 	
 	enum NovaOperator {
 		Plus,
@@ -14,7 +16,11 @@ struct NovaValue {
 		LesserThen,
 		GreaterEqual,
 		LesserEqual,
-		NotEqual
+		NotEqual,
+		CompoundPlus,
+		CompoundMinus,
+		CompoundMultiply,
+		CompoundDivide
 	};
 
 	void AddRef();
@@ -22,7 +28,9 @@ struct NovaValue {
 	virtual NovaValue* Copy() const = 0;
 	virtual std::string ToString() const = 0;
 	virtual std::string Type() const = 0;
-	virtual NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { return nullptr; };
+	virtual NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { OpFailed(rhs, op);  return nullptr; };
+	virtual NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { OpFailed(rhs, op); return nullptr; };
+	virtual NovaValue* Assign(NovaValue* rhs) = 0;
 	NovaValue* Access(const std::string& chain);
 	std::unordered_map<std::string, NovaValue*>* accessables = nullptr;
 	
@@ -36,6 +44,7 @@ protected:
 	void PushWarning(const std::string& msg) const;
 
 	unsigned int ref_count = 1;
+	
 };
 
 #endif
