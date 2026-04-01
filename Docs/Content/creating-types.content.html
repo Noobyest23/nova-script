@@ -1,0 +1,86 @@
+<section>
+	<h1>Creating Types</h1>
+    <p>NovaScript allows you to create your own types that can be used in scripts. This is done by creating a class that inherits from <code>NovaValue</code>.</p>
+    <p>The following functions are <strong>required</strong> to implement for a NovaValue</p>
+    <li><code>Type()</code>: Returns the type of the value as a string.</li>
+    <li><code>ToString()</code>: Returns a string representation of the value.</li>
+    <li><code>Copy()</code>: Returns a copy of the value.</li>
+    <li><code>Assign(NovaValue* rhs)</code>: Assigns the value of rhs to this value, if the types are compatible. Returns this value if the assignment was successful, or nullptr if it was not.</li>
+    <p>These functions are optional to implement</p>
+    <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
+    <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
+    <li><code>OnDestroy()</code>: Called when the value is destroyed.</li>
+    <p>For this example I will create an Image class for NovaScript</p>
+    <pre><code class="cpp">class MyImageType : public NovaValue {
+public:
+    MyImageType(int width, int height) : width(width), height(height) {}
+    MyImageType(char* data) {}
+
+    void MyImageInitFunction() {
+        // Initialize accessables if needed
+        if (!accessables) {
+            accessables = new std::unordered_map<std::string, NovaValue*>();
+        }
+        // Use reference_wrapper to allow scripts to modify C++ variables directly
+        (*accessables)["width"] = new NovaInt(std::reference_wrapper<int>(width));
+        (*accessables)["height"] = new NovaInt(std::reference_wrapper<int>(height));
+    }
+
+    // Required NovaValue functions
+    std::string Type() const override { return "MyImageType"; }
+    std::string ToString() const override { return "MyImageType(" + std::to_string(width) + ", " + std::to_string(height) + ")"; }
+    NovaValue* Copy() const override { return new MyImageType(data); }
+    NovaValue* Assign(NovaValue* rhs) override {
+        if (rhs->Type() != Type()) {
+            PushError("TypeError: Cannot assign value of type " + rhs->Type() + " to type " + Type());
+            // Note that this variable will still be overriten.
+            // If you want a value that CANNOT be overwritten, you can simply return this instead of nullptr, but this is not recommended as it can lead to unexpected behavior.
+            return nullptr;
+        }
+        MyImageType* image_rhs = static_cast<MyImageType*>(rhs);
+        width = image_rhs->width;
+        height = image_rhs->height;
+        data = image_rhs->data;
+        return this;
+    }
+
+    // Optional NovaValue functions
+    NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const {
+        OpFailed(rhs, op);
+        return nullptr;
+    }
+    NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
+        OpFailed(rhs, op);
+        return nullptr;
+    }
+
+protected:
+    void OnDestroy() override { delete[] data; }
+
+private:
+    int width;
+    int height;
+    char* data;
+};
+</code></pre>
+    <p><strong>Note:</strong> Currently theres no way to instantiate MyImageType. What you could do is make an Image module and expose a function <code>Image()</code> that returns a new image</p>
+    <p><strong>Note:</strong> This code comes straight from my noodle and probably wouldnt work first try as an actual image class, but it should give you a good starting point.</p>
+    <h2>List of NovaOperators</h2>
+    <pre><code class="cpp">enum NovaOperator {
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
+    Equality,
+    GreaterThen,
+    LesserThen,
+    GreaterEqual,
+    LesserEqual,
+    NotEqual,
+    CompoundPlus,
+    CompoundMinus,
+    CompoundMultiply,
+    CompoundDivide
+};
+</code></pre>
+</section>

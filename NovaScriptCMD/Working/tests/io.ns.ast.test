@@ -1,0 +1,7 @@
+include "io"
+Print("Hello NovaScript!") as Stmt
+PrintWarning("Hello NovaScript!") as Stmt
+PrintError("Hello NovaScript!") as Stmt
+var str = Input("Type INPUT otherwise the test for this file will fail")
+Print("INPUT") as Stmt
+

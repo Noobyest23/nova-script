@@ -1,0 +1,216 @@
+/* Nova Engine Docs Shared Styles */
+@import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,500&display=swap');
+
+#toggle-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #444; /* Dark grey */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+#toggle-btn:hover {
+    background-color: #555;
+}
+
+.bg-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('../Images/cosmos-1853491_960_720.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -1;
+    
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.bg-image.hidden {
+    opacity: 0;
+}
+body {
+	background-color: #1e1e1e;
+	color: #e0e0e0;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 18px;
+}
+.layout {
+	display: flex;
+	height: 95vh;
+	max-width: 1500px;
+	margin: 0 auto;
+	padding: 1rem;
+	gap: 1.5rem;
+}
+nav {
+    background-color: #1a1a1a;
+    padding: 2rem 1rem;
+    width: 256px;
+    border-right: 1px solid #333;
+    overflow-y: auto;
+    border-radius: 10px;
+
+    /* Add these lines */
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100% - 4rem); /* Accounts for padding */
+}
+nav h2 {
+    text-align: left;
+    font-size: 1.5rem;
+}
+nav ul { list-style: none; padding-left: 0; text-align: left; font-size: 1.2rem; }
+nav li { margin-bottom: 1rem; width: 100%;}
+nav a {
+	color: #e0e0e0;
+	text-decoration: none;
+	font-weight: 500;
+	display: block;
+	transition: color 0.2s ease;
+}
+nav a:hover { color: #00adb5; }
+.logo {
+	text-align: center;
+}
+.logo img {
+	width: 100%;
+	object-fit: fill;
+	border-radius: 1px;
+}
+a {
+	color: #6cc4ff;
+}
+main {
+	flex: 1;
+	overflow-y: auto;
+	background-color: #242424;
+	padding: 2rem;
+	border-radius: 12px;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+h1, h2 {
+	color: #00adb5;
+	margin-bottom: 0.5rem;
+}
+h2 {
+	border-bottom: 1px solid #333;
+	padding-bottom: 0.3rem;
+	margin-bottom: 1rem;
+	margin-top: 2rem;
+}
+p { margin-bottom: 1rem; }
+pre {
+	background: #181c24;
+	color: #e6e6e6;
+	border-radius: 8px;
+	font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+	font-size: 1rem;
+	padding: 1rem;
+	box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+	border: 1px solid #222;
+	line-height: 1.5;
+	overflow-x: auto;
+	margin-bottom: 1.5rem;
+}
+code {
+	padding: 0.2em 0.4em;
+	font-size: 0.95em;
+	background: #181c24;
+	color: #f8ff9d;
+	border-radius: 4px;
+	box-shadow: none;
+	border: none;
+}
+h1 code, h2 code, h3 code {
+    background: #242424 !important; /* match <main> background */
+    color: #00adb5; /* match heading color */
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 1em;
+}
+.hljs, code[class^="language-"] {
+    background: inherit;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1.5rem 0;
+	background-color: #1a1a1a;
+	border-radius: 8px;
+	overflow: hidden;
+}
+th, td {
+	padding: 12px 15px;
+	text-align: left;
+	border-bottom: 1px solid #333;
+}
+th {
+	background-color: #895c9e;
+	color: #eeeeee;
+	font-weight: 600;
+}
+tr:hover {
+	background-color: #2a2a2a;
+}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: #444; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Additive padding for nested lists */
+.nav-dropdown ul {
+    padding-left: 1.2rem; /* Adjust this value to increase/decrease the "step" */
+    margin-top: 0.2rem;
+    margin-bottom: 0.2rem;
+}
+
+/* Optional: Make the nested links slightly smaller or a different color to show hierarchy */
+.nav-dropdown ul a {
+    opacity: 0.9;
+}
+
+/* Ensure the summary (the clickable toggle) also aligns with the parent level */
+details summary {
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+    cursor: pointer;
+}
+
+.sidebar-footer {
+    margin-top: auto; /* Pushes the footer to the bottom */
+    padding-top: 2rem;
+}
+
+.report-btn {
+    display: block;
+    padding: 10px;
+    background-color: #7289da; /* Discord Blurple */
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.report-btn:hover {
+    background-color: #5b70be;
+    color: white;
+}

@@ -1,0 +1,113 @@
+<section>
+	<h1>Getting Started with Nova Script</h1>
+    <p>To get started with Nova Script, you'll need to set up your development environment. Follow these steps:</p>
+
+    <h2>Downloading the NovaScript Library</h2>
+    <p>You can download the latest version of the NovaScript library from my GitHub repository: <a href="https://github.com/Noobyest23/nova-script">Download NovaScript</a></p>
+    <li>You will need:</li>
+    <ul>
+        <li><code>novascript.dll</code> - The main NovaScript library.</li>
+        <li><code>novascript.lib</code> - The import library for linking.</li>
+        <li><code>nova-script/NovaScript/</code> - The directory containing all the necessary header files.</li>
+    </ul>
+    <h2>Setting up your environment</h2>
+    <p>Once you have downloaded the necessary files, follow these steps to set up your development environment:</p>
+    <ol>
+        <li>Place the <code>novascript.dll</code> file in your project's output directory (with the .exe)</li>
+        <li>Create a folder named <code>include</code> in your project's root directory and copy the contents of the <code>NovaScript/</code> directory into it.</li>
+        <li>Create a folder named <code>lib</code> in your project's root directory and copy the <code>novascript.lib</code> file into it.</li>
+        <li>Configure your IDE or text editor to include the <code>include</code> directory in its search paths</li>
+        <li>Configure your IDE or text editor to link against the <code>lib</code> directory</li>
+    </ol>
+    <h1>C++ setup</h1>
+    <h2>Initializing Callbacks</h2>
+    <p>NovaScript uses 2 callbacks for error handling and script termination.</p>
+    <pre><code class="cpp">#include &lt;NovaScript/NovaScript.h&gt;
+// Error callback for logging errors from Nova Script
+// The function must be declared with this signature to be used as an error callback
+static void PushErrorCallback(const char* msg, int severity) {
+    // Severity levels: 0 = Info, 1 = Warning, 2 = Error
+	switch (severity) {
+	case 0:
+		std::cout << msg << "\\n";
+		break;
+	case 1:
+        // prints yellow text for warnings
+		std::cout << "\\033[33m" << msg << "\\033[0m\\n";
+		break;
+	case 2:
+        // prints red text for errors
+		std::cout << "\\033[31m" << msg << "\\033[0m\\n";
+		break;
+	}
+}
+// Exit with an optional message (used when a Script calls exit())
+// The function must be declared with this signature to be used as an exit callback
+static void ExitCallback(const char* msg) {
+	std::cout << msg;
+	exit(0);
+}
+
+int main() {
+    // Initialize Nova Script with the error and exit callbacks
+    SetErrorCallback(PushErrorCallback);
+    SetExitCallback(ExitCallback);
+
+    ...
+</code></pre>
+    <p> The error callback is responsible for any messages that are sent from NovaScript to your program, it is very important for debugging and logging purposes.</p>
+    <h2>Wrapping NovaScript Calls</h2>
+    <p>This section provides a simple wrapper around the NovaScript API, making it easier to work with scripts.</p>
+    <pre><code class="cpp">struct Script {
+    Script(std::string filepath) {
+        interpretor = BuildScript(filepath.c_str());
+    }
+
+    void Execute() {
+        ExecuteScript(interpretor);
+    }
+
+    NovaValue* GetVar(std::string var_name) {
+        ValueHandle handle = GetVariable(interpretor, var_name.c_str());
+        return static_cast<NovaValue*>(handle);
+    }
+
+    void SetVar(std::string var_name, NovaValue* value) {
+        SetVariable(interpretor, var_name.c_str(), value);
+    }
+
+    NovaValue* CallFunction(std::string func_name, std::vector<NovaValue*> args) {
+        ValueHandle handle = CallFunc(interpretor, func_name.c_str(), &args);
+        return static_cast<NovaValue*>(handle);
+    }
+
+    ~Script() {
+        if (interpretor) {
+            DestroyScript(interpretor);
+        }
+    }
+
+    // represents the script itself under the hood
+    InterpretorHandle interpretor = nullptr;
+};</code></pre>
+    <p> This is a simple wrapper around the NovaScript API, it allows you to easily create and execute scripts, get and set variables within a Script, and call functions within those scripts.</p>
+    <p><b>Note:</b> you MUST manually release a return value from a script function via <code>NovaValue::Release()</code></p>
+    <h1>Your First Script</h1>
+    <p>Now that you have set up your environment and have a simple wrapper for the NovaScript API, you can create and execute your first script. Here's an example of how to do that:</p>
+    <pre><code class="py"># This is a simple NovaScript file that prints "Hello, World!" to the console
+include "io" as "io"
+# io is a built-in module that provides basic input/output functionality
+# include "io" would include the module into global scope, and as "io" allows us to reference it with the name "io"
+# example
+# include "io", Print("Hello World!")
+io.Print("Hello World!")
+</code></pre>
+<p>And on the c++ side</p>
+<pre><code class="cpp">int main() {
+    // After you have set up your callbacks and wrapper, you can create and execute a script like this:
+    Script script("path/to/your/script.ns");
+    script.Execute();
+    return 0;
+}</code></pre>
+    <p>That's it! You've just created and executed your first NovaScript script.</p>
+</section>

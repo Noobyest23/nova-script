@@ -1,0 +1,45 @@
+<section>
+	<h1>Modules</h1>
+    <p>NovaScript code will often be slightly slower then the native code of the host program. To help mitigate this, NovaScript supports modules, which are native code libraries that can be loaded into NovaScript and called from scripts.</p>
+    <h2>Creating a Module</h2>
+    <p>To create a module, you will need to include the following headers</p>
+    <pre><code class="cpp">#include &lt;NovaScript/NovaScript.h&gt;
+#include &lt;NovaScript/Interpretor/Library/NovaModule.h&gt;
+#include &lt;NovaScript/Interpretor/Library/nova_std_macro.h&gt; // technically optional but will make things easier</code></pre>
+    <p>Then, you can define your module by creating a class that inherits from <code>NovaModule</code>. You will need to implement the following functions:</p>
+    <pre><code class="cpp">class MyModule : public NovaModule {
+    public:
+    // Your constructor must set the module_name string to the name of your module, this is how it will be accessed from NovaScript
+    MyModule() {  
+        module_name = "MyModule";
+    }
+
+    // This is a macro that defines a function that can be called from NovaScript. The first argument is the name of the function.
+    nova_std_decl(AddTen) {
+        // This is a macro that retrieves a NovaInt* from an argument
+        intget(my_int, 0);
+        // my_int is the name of the variables and 0 is the index of the argument (the first argument is index 0, the second is index 1, etc.)
+        int result = my_int->num + 10;
+        return new NovaInt(result); // You must return a NovaValue* (or a subclass of NovaValue) from your function, this is how the result will be passed back to NovaScript
+    }
+
+    NovaObject* GetModule() {
+        NovaObject* module = new NovaObject();
+        module->PushBack("AddTen", AddTen); // This is how you add functions to your module, the first argument is the name of the function as it will be accessed from NovaScript, and the second argument is a pointer to the function itself
+        return module;
+    }
+
+};</code></pre>
+<p>Once you have created your module you must push it to your interpreter</p>
+<pre><code class="cpp">PushModule(interpretor, new MyModule()); // you should add this function to your Script wrapper if you made one!</code></pre>
+<h2>Macros</h2>
+<p>NovaScript provides some macros to help with common tasks when creating modules. These are not required, but they can make your life easier.</p>
+<li><code>nova_std_decl(func_name)</code>: This macro defines a function that can be called from NovaScript. The first argument is the name of the function.</li>
+<p><code>typeget(var_name, arg_i)</code>: Macros will retrieve a specific type of variable from an argument, where var_name is the name of the variable to be created and arg_i is its index in the argument list. Below is a list of all of these kinds of macros</p>
+<li><code>intget(var_name, arg_i)</code>
+<li><code>floatget(var_name, arg_i)</code>
+<li><code>boolget(var_name, arg_i)</code>
+<li><code>objget(var_name, arg_i)</code>
+<li><code>funcget(var_name, arg_i)</code>
+<li><code>arrget(var_name, arg_i)</code>
+</section>

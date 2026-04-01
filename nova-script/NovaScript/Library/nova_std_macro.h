@@ -14,11 +14,27 @@ PushError("Expected string as argument " + std::to_string(arg_i)); return nullpt
 NovaString* str = static_cast<NovaString*>(args[arg_i]);
 
 #define intget(i, arg_i) if (args[arg_i]->Type() != "Int") {\
-PushError("Expected string as argument " + std::to_string(arg_i)); return nullptr;}\
+PushError("Expected int as argument " + std::to_string(arg_i)); return nullptr;}\
 NovaInt* i = static_cast<NovaInt*>(args[arg_i]);
 
 #define floatget(f, arg_i) if (args[arg_i]->Type() != "Float") {\
-PushError("Expected string as argument " + std::to_string(arg_i)); return nullptr;}\
+PushError("Expected float as argument " + std::to_string(arg_i)); return nullptr;}\
 NovaFloat* f = static_cast<NovaFloat*>(args[arg_i]);
+
+#define boolget(b, arg_i) if (args[arg_i]->Type() != "Boolean") {\
+PushError("Expected boolean as argument " + std::to_string(arg_i)); return nullptr;}\
+NovaBool* b = static_cast<NovaBool*>(args[arg_i]);
+
+#define objget(o, arg_i) if (args[arg_i]->Type() != "Object") {\
+PushError("Expected object as argument " + std::to_string(arg_i)); return nullptr;}\
+NovaObject* o = static_cast<NovaObject*>(args[arg_i]);
+
+#define arrget(a, arg_i) if (args[arg_i]->Type() != "Array") {\
+PushError("Expected array as argument " + std::to_string(arg_i)); return nullptr;}\
+NovaArray* a = static_cast<NovaArray*>(args[arg_i]);
+
+#define funcget(f, arg_i) if (args[arg_i]->Type() != "NovaFunction") {\
+PushError("Expected function as argument " + std::to_string(arg_i)); return nullptr;}\
+NovaFunction* f = static_cast<NovaFunction*>(args[arg_i]);
 
 #endif
