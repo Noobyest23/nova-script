@@ -4,8 +4,13 @@
 #include "Value.h"
 
 struct NOVASCRIPT_API NovaBool : public NovaValue {
-	NovaBool(bool b) : b(b) {};
-	bool b;
+	NovaBool(bool b) : novab(b) {};
+	NovaBool(std::reference_wrapper<bool> cppb) : cppb(cppb) {};
+	bool novab;
+	std::reference_wrapper<bool> cppb = novab;
+
+	bool& B();
+	const bool& CB() const;
 
 	NovaValue* Copy() const override;
 	std::string ToString() const override;

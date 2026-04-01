@@ -7,7 +7,12 @@ struct NovaBool;
 
 struct NOVASCRIPT_API NovaString : public NovaValue {
 	NovaString(const std::string& str);
-	std::string str;
+	NovaString(std::reference_wrapper<std::string> cppstr);
+	std::string novastr;
+	std::reference_wrapper<std::string> cppstr = novastr;
+
+	std::string& Str();
+	const std::string& CStr() const;
 
 	NovaValue* Copy() const override;
 	std::string ToString() const override;

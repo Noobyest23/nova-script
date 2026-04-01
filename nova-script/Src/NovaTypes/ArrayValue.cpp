@@ -1,8 +1,16 @@
 #include "../NovaScript/Value/ArrayValue.h"
 
+std::vector<NovaValue*>& NovaArray::Arr() {
+	return cpparr.get();
+}
+
+const std::vector<NovaValue*>& NovaArray::CArr() const {
+	return cpparr.get();
+}
+
 NovaValue* NovaArray::Copy() const {
 	std::vector<NovaValue*> new_arr;
-	for (NovaValue* v : arr) {
+	for (NovaValue* v : CArr()) {
 		new_arr.push_back(v->Copy());
 	}
 	return new NovaArray(new_arr);
@@ -10,9 +18,9 @@ NovaValue* NovaArray::Copy() const {
 
 std::string NovaArray::ToString() const {
 	std::string output = "[";
-	for (NovaValue* v : arr) {
+	for (NovaValue* v : CArr()) {
 		output += v ? v->ToString() : "null";
-		if (v != arr.back()) {
+		if (v != CArr().back()) {
 			output += ", ";
 		}
 	}
@@ -25,7 +33,7 @@ std::string NovaArray::Type() const {
 }
 
 void NovaArray::OnDestroy() {
-	for (NovaValue* v : arr) {
+	for (NovaValue* v : CArr()) {
 		if (v) {
 			v->Release();
 		}
@@ -35,7 +43,7 @@ void NovaArray::OnDestroy() {
 NovaValue* NovaArray::Assign(NovaValue* rhs) {
 	if (rhs->Type() == "Array") {
 		NovaArray* arr = static_cast<NovaArray*>(rhs);
-		this->arr = arr->arr;
+		this->Arr() = arr->CArr();
 		return this;
 	}
 	return nullptr;

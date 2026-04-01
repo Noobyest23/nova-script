@@ -53,7 +53,7 @@ es_decl(IfStmtNode* node) {
 	if (value->Type() == "Boolean") {
 		NovaBool* nbool = static_cast<NovaBool*>(value);
 		PushScope();
-		if (nbool->b) {
+		if (nbool->CB()) {
 			for (StmtNode* stmt : node->body) {
 				EvaluateStatement(stmt);
 			}
@@ -86,20 +86,22 @@ es_decl(TypeDeclNode* node) {
 
 es_decl(IncludeNode* node) {
 	NovaValue* file = EvaluateExpression(node->file_path);
-	NovaValue* as = EvaluateExpression(node->as);
 	if (!file) { PushError("Filepath in include statement evaluated to null", node); return; }
 
 	if (file->Type() == "String") {
 		if (file->ToString().ends_with(".ns")) {
 			// Include another nova script file
 			Interpretor i(file->ToString());
-			if (as and as->Type() == "String") {
-				NovaObject* object = new NovaObject;
-				for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
-					object->PushBack(pair.first, pair.second);
+			if (node->as) {
+				if (VariableNode* as = dynamic_cast<VariableNode*>(node->as)) {
+					NovaObject* object = new NovaObject;
+					for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
+						object->PushBack(pair.first, pair.second);
+					}
+					scope->Set(as->identifier, object);
+					object->Release();
 				}
-				scope->Set(as->ToString(), object);
-				object->Release();
+				PushError("as in include statement is not a variable");
 			}
 			else {
 				for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
@@ -111,10 +113,13 @@ es_decl(IncludeNode* node) {
 			// include a cpp module
 			if (modules.find(file->ToString()) != modules.end()) {
 				NovaObject* obj = modules[file->ToString()]->GetModule();
-				if (as and as->Type() == "String") {
-					scope->Set(as->ToString(), obj);
-					obj->Release();
-					return;
+				if (node->as) {
+					if (VariableNode* as = dynamic_cast<VariableNode*>(node->as)) {
+						scope->Set(as->identifier, obj);
+						obj->Release();
+						return;
+					}
+					PushError("as in include statement is not a variable");
 				}
 				else {
 					for (std::pair<std::string, NovaValue*> pair : *obj->accessables) {
@@ -168,7 +173,7 @@ es_decl(WhileNode* node) {
 
 	NovaBool* nb = static_cast<NovaBool*>(condition);
 
-	while (nb->b) {
+	while (nb->CB()) {
 		for (StmtNode* stmt : node->body) {
 			EvaluateStatement(stmt);
 		}

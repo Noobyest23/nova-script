@@ -96,7 +96,7 @@ public:
 		strget(string, 0);
 		std::string in;
 		if (_use_console) {
-			std::cout << string->str << " >: ";
+			std::cout << string->CStr() << " >: ";
 			std::getline(std::cin, in);
 			return new NovaString(in);
 		}
@@ -105,7 +105,7 @@ public:
 
 			InputDlgData dlgData;
 			dlgData.userInput = &in;
-			dlgData.prompt = string->str;
+			dlgData.prompt = string->CStr();
 
 			DialogBoxParamA(
 				GetModuleHandle(nullptr),

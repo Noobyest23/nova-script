@@ -1,11 +1,19 @@
 #include "../NovaScript/Value/BoolValue.h"
 
+bool& NovaBool::B() {
+	return cppb.get();
+}
+
+const bool& NovaBool::CB() const {
+	return cppb.get();
+}
+
 NovaValue* NovaBool::Copy() const {
-	return new NovaBool(b);
+	return new NovaBool(CB());
 }
 
 std::string NovaBool::ToString() const {
-	return b ? "true" : "false";
+	return CB() ? "true" : "false";
 }
 
 std::string NovaBool::Type() const {
@@ -18,10 +26,10 @@ NovaValue* NovaBool::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 		bool result;
 		switch (op) {
 		case NovaOperator::Equality:
-			result = b == r->b;
+			result = CB() == r->CB();
 			break;
 		case NovaOperator::NotEqual:
-			result = b != r->b;
+			result = CB() != r->CB();
 			break;
 		default:
 			OpFailed(rhs, op);
@@ -35,7 +43,7 @@ NovaValue* NovaBool::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 NovaValue* NovaBool::Assign(NovaValue* rhs) {
 	if (rhs->Type() == "Boolean") {
 		NovaBool* b = static_cast<NovaBool*>(rhs);
-		this->b = b->b;
+		this->B() = b->CB();
 		return this;
 	}
 	return nullptr;

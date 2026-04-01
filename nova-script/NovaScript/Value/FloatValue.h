@@ -6,7 +6,6 @@ struct NOVASCRIPT_API NovaFloat : public NovaValue {
 	NovaFloat(float num) : novanum(num) {};
 	NovaFloat(std::reference_wrapper<float> cppnum) : cppnum(cppnum) {};
 	float novanum = 0;
-	bool is_cpp = false;
 	std::reference_wrapper<float> cppnum = novanum;
 	float& Num();
 	const float& CNum() const;

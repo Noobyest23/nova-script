@@ -88,11 +88,11 @@ ee_decl(AssignmentNode* node) {
 				NovaValue* index = EvaluateExpression(arr->index);
 				if (!index or index->Type() != "Int") { PushError("Index in array assignment is not an int", node); return nullptr; }
 				NovaInt* int_index = static_cast<NovaInt*>(index);
-				if (int_index->CNum() > narr->arr.size()) { PushError("Out of bounds array assignment", node); return nullptr; }
+				if (int_index->CNum() > narr->CArr().size()) { PushError("Out of bounds array assignment", node); return nullptr; }
 				rhs->AddRef();
-				narr->arr[int_index->CNum()]->Release();
-				narr->arr[int_index->CNum()] = rhs;
-				return narr->arr[int_index->CNum()];
+				narr->Arr()[int_index->CNum()]->Release();
+				narr->Arr()[int_index->CNum()] = rhs;
+				return narr->CArr()[int_index->CNum()];
 			}
 			return lhs;
 		}
@@ -214,7 +214,7 @@ ee_decl(TernaryNode* node) {
 
 	if (val and val->Type() == "Boolean") {
 		NovaBool* nb = static_cast<NovaBool*>(val);
-		if (nb->b) {
+		if (nb->CB()) {
 			return EvaluateExpression(node->truthy_value);
 		}
 		else {
@@ -304,7 +304,7 @@ ee_decl(ArrayAccessNode* node) {
 
 	if (arr->Type() == "Array") {
 		NovaArray* narr = static_cast<NovaArray*>(arr);
-		std::vector<NovaValue*>& list = narr->arr;
+		std::vector<NovaValue*>& list = narr->Arr();
 		if (index->Type() == "Int") {
 			NovaInt* nint = static_cast<NovaInt*>(index);
 			return list[nint->CNum()];
@@ -329,7 +329,7 @@ ee_decl(NotNode* node) {
 		NovaValue* val = EvaluateExpression(node->expression);
 		if (val->Type() == "Boolean") {
 			NovaBool* nb = static_cast<NovaBool*>(val);
-			NovaBool* notnb = new NovaBool(!nb->b);
+			NovaBool* notnb = new NovaBool(!nb->CB());
 			literal_stack.push_back(notnb);
 			return notnb;
 		}

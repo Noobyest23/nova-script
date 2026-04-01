@@ -4,8 +4,13 @@
 #include <vector>
 
 struct NOVASCRIPT_API NovaArray : public NovaValue {
-	NovaArray(std::vector<NovaValue*>& arr) : arr(arr) {};
-	std::vector<NovaValue*> arr;
+	NovaArray(std::vector<NovaValue*>& arr) : novaarr(arr) {};
+	NovaArray(std::reference_wrapper<std::vector<NovaValue*>> cpparr) : cpparr(cpparr) {};
+	std::vector<NovaValue*> novaarr;
+	std::reference_wrapper<std::vector<NovaValue*>> cpparr = novaarr;
+
+	std::vector<NovaValue*>& Arr();
+	const std::vector<NovaValue*>& CArr() const;
 
 	NovaValue* Copy() const override;
 	std::string ToString() const override;

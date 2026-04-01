@@ -4,9 +4,8 @@
 
 struct NOVASCRIPT_API NovaInt : public NovaValue {
 	NovaInt(int num) : novanum(num) {};
-	NovaInt(std::reference_wrapper<int> cppnum) : cppnum(cppnum) { is_cpp_num = true; };
+	NovaInt(std::reference_wrapper<int> cppnum) : cppnum(cppnum) {};
 	int novanum = 0;
-	bool is_cpp_num = false;
 	std::reference_wrapper<int> cppnum = novanum;
 	int& Num();
 	const int& CNum() const;

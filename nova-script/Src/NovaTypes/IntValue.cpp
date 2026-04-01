@@ -3,17 +3,11 @@
 #include "../NovaScript/Value/BoolValue.h"
 
 int& NovaInt::Num() {
-	if (is_cpp_num) {
-		return cppnum.get();
-	}
-	return novanum;
+	return cppnum.get();
 }
 
 const int& NovaInt::CNum() const {
-	if (is_cpp_num) {
-		return cppnum.get();
-	}
-	return novanum;
+	return cppnum.get();
 }
 
 NovaValue* NovaInt::Copy() const {

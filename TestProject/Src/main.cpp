@@ -108,7 +108,7 @@ void Test(const std::string& filepath) {
 		std::cout << "[PASSED] " << filepath << "\n";
 	}
 	else {
-		std::cout << "FAILED " << filepath << "\n";
+		std::cout << "[FAILED] " << filepath << "\n";
 	}
 
 }
@@ -142,24 +142,22 @@ int main(int argc, char* argv[]) {
 				std::string filepath = argv[2];
 
 				{
-					// 1. Capture Script Output
 					std::ofstream outFile(filepath + ".test");
 					std::streambuf* oldCout = std::cout.rdbuf(outFile.rdbuf()); // Redirect cout
 
 					Script script(filepath);
 					script.Execute();
 
-					std::cout.rdbuf(oldCout); // Restore cout
+					std::cout.rdbuf(oldCout);
 					std::cout << "Test output saved to " << filepath << ".test\n";
 				}
 				{
-					// 1. Capture Script Output
 					std::ofstream outFile(filepath + ".ast.test");
 					std::streambuf* oldCout = std::cout.rdbuf(outFile.rdbuf()); // Redirect cout
 
 					PrintAST(filepath.c_str());
 
-					std::cout.rdbuf(oldCout); // Restore cout
+					std::cout.rdbuf(oldCout);
 					std::cout << "Test output saved to " << filepath << ".test\n";
 				}
 			}
