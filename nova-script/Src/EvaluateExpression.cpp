@@ -28,9 +28,6 @@ ee_decl(ExprNode* node) {
 	ee(StringLiteralNode*)
 	ee(ArrayLiteralNode*)
 	ee(DotAccessNode*)
-	ee(Vector2LiteralNode*)
-	ee(Vector3LiteralNode*)
-	ee(Vector4LiteralNode*)
 	ee(ArrayAccessNode*)
 	ee(AssignmentNode*)
 	ee(CompoundOp*)
@@ -174,7 +171,7 @@ ee_decl(FuncCallNode* node) {
 				NovaValue* a_value = EvaluateExpression(arg);
 				args.push_back(a_value);
 			}
-			NovaValue* result = fn->Call(args, this);
+			NovaValue* result = fn->Call(args);
 			return result;
 		}
 		else {
@@ -281,18 +278,6 @@ ee_decl(DotAccessNode* node) {
 	NovaValue* result = EvaluateExpression(node->right);
 	scope = p_scope;
 	return result;
-}
-
-ee_decl(Vector2LiteralNode* node) {
-	return nullptr;
-}
-
-ee_decl(Vector3LiteralNode* node) {
-	return nullptr;
-}
-
-ee_decl(Vector4LiteralNode* node) {
-	return nullptr;
 }
 
 ee_decl(ArrayAccessNode* node) {

@@ -1,4 +1,0 @@
-[31m[Parser] Expected variable name at 4, 8, NovaTokenType is 0[0m
-include "io" as "io"
-123 = x as Stmt
-

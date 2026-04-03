@@ -2,6 +2,8 @@
 #include "NovaScript/NovaErrorPush.h"
 #include "NovaScript/Value/Value.h"
 #include "NovaScript/Interpretor/Interpretor.h"
+#include "NovaScript/NovaErrorPush.h"
+
 extern "C" {
 
 	void SetErrorCallback(void(*function)(const char*, int)) {
@@ -21,8 +23,14 @@ extern "C" {
 	}
 
 	void ExecuteScript(InterpretorHandle i) {
-		Interpretor* interpretor = static_cast<Interpretor*>(i);
-		interpretor->Exec();
+		try {
+			Interpretor* interpretor = static_cast<Interpretor*>(i);
+			interpretor->Exec();
+		}
+		catch (std::exception e) {
+			Callbacker::PushError("[NovaScript] Fatal Error while executing script!", 2);
+			Callbacker::PushError(e.what(), 0);
+		}
 	}
 
 	void DestroyScript(InterpretorHandle interpretor) {
@@ -42,14 +50,20 @@ extern "C" {
 	}
 
 	ValueHandle CallFunc(InterpretorHandle i, const char* function_name, void* a) {
-		Interpretor* interpretor = static_cast<Interpretor*>(i);
-		std::vector<NovaValue*>* args = static_cast<std::vector<NovaValue*>*>(a);
-		NovaValue* result = interpretor->Call(function_name, *args);
-		if (result) {
-			result->AddRef();
+		try {
+			Interpretor* interpretor = static_cast<Interpretor*>(i);
+			std::vector<NovaValue*>* args = static_cast<std::vector<NovaValue*>*>(a);
+			NovaValue* result = interpretor->Call(function_name, *args);
+			if (result) {
+				result->AddRef();
+			}
+			interpretor->PurgeStack();
+			return result;
 		}
-		interpretor->PurgeStack();
-		return result;
+		catch (std::exception e) {
+			Callbacker::PushError("[NovaScript] Fatal Error while calling function!", 2);
+			Callbacker::PushError(e.what(), 0);
+		}
 	}
 
 	void PushModule(InterpretorHandle i, ModuleHandle m) {

@@ -1,0 +1,18 @@
+include "io" as io
+include "vector"
+
+var my_vec = Vector2(10.0, 10.0)
+
+io.Print(my_vec)
+
+var cpp_vec
+
+func AddCPPVec(other_vec) {
+	cpp_vec = other_vec
+}
+
+cpp_vec.x = 10
+cpp_vec.y = 20
+
+my_vec *= 20
+io.Print(my_vec)

@@ -467,54 +467,6 @@ ExprNode* Parser::ParsePrimary() {
 		Advance();
 		return new ArrayLiteralNode(values);
 	}
-	else if (Accept(NovaTokenType::VectorLit2)) {
-		std::vector<ExprNode*> values;
-		Advance();
-		if (Accept(NovaTokenType::OpenParen)) {
-			Advance();
-			while (!Accept(NovaTokenType::CloseParen)) {
-				values.push_back(ParseExpression());
-				if (values.size() > 4) {
-					PushError("Vector size cannot go past 4");
-					break;
-				}
-			}
-			Advance();
-			return new Vector2LiteralNode(values);
-		}
-	}
-	else if (Accept(NovaTokenType::VectorLit3)) {
-		std::vector<ExprNode*> values;
-		Advance();
-		if (Accept(NovaTokenType::OpenParen)) {
-			Advance();
-			while (!Accept(NovaTokenType::CloseParen)) {
-				values.push_back(ParseExpression());
-				if (values.size() > 4) {
-					PushError("Vector size cannot go past 4");
-					break;
-				}
-			}
-			Advance();
-			return new Vector3LiteralNode(values);
-		}
-	}
-	else if (Accept(NovaTokenType::VectorLit4)) {
-		std::vector<ExprNode*> values;
-		Advance();
-		if (Accept(NovaTokenType::OpenParen)) {
-			Advance();
-			while (!Accept(NovaTokenType::CloseParen)) {
-				values.push_back(ParseExpression());
-				if (values.size() > 4) {
-					PushError("Vector size cannot go past 4");
-					break;
-				}
-			}
-			Advance();
-			return new Vector4LiteralNode(values);
-		}
-	}
 	else if (Accept(NovaTokenType::Null)) {
 		Advance();
 		return new NullLiteralNode();

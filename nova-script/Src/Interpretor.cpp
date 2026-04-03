@@ -45,7 +45,8 @@ void Interpretor::Init() {
 	}
 	
 	modules["io"] = new NovaIOModule;
-	
+	modules["vector"] = new NovaVectorModule;
+	modules["functional"] = new NovaFunctionalModule;
 }
 
 void Interpretor::Exec() {
@@ -76,7 +77,7 @@ NovaValue* Interpretor::Call(const std::string& func_name, std::vector<NovaValue
 	if (v) {
 		if (v->Type() == "NovaFunction") {
 			NovaFunction* fn = static_cast<NovaFunction*>(v);
-			NovaValue* result = fn->Call(args, this);
+			NovaValue* result = fn->Call(args);
 			return result;
 		}
 		else {

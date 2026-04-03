@@ -197,7 +197,8 @@ nova_std_decl(ToLower) {
 	return new NovaString(out);
 }
 
-static auto nova_string_lib = new std::unordered_map<std::string, NovaValue*>{
+NovaString::NovaString(const std::string& str) : novastr(str) {
+	accessables = new std::unordered_map<std::string, NovaValue*>{
 	{"Length", new NovaFunction(Length)},
 	{"IsEmpty", new NovaFunction(IsEmpty)},
 	{"StartsWith", new NovaFunction(StartsWith)},
@@ -210,12 +211,22 @@ static auto nova_string_lib = new std::unordered_map<std::string, NovaValue*>{
 	{"ToUpper", new NovaFunction(ToUpper)},
 	{"ToLower", new NovaFunction(ToLower)},
 	{"this", nullptr}
-};
-
-NovaString::NovaString(const std::string& str) : novastr(str) {
-	accessables = nova_string_lib;
+	};
 }
 
 NovaString::NovaString(std::reference_wrapper<std::string> cppstr) : cppstr(cppstr) {
-	accessables = nova_string_lib;
+	accessables = new std::unordered_map<std::string, NovaValue*>{
+	{"Length", new NovaFunction(Length)},
+	{"IsEmpty", new NovaFunction(IsEmpty)},
+	{"StartsWith", new NovaFunction(StartsWith)},
+	{"EndsWith", new NovaFunction(EndsWith)},
+	{"Contains", new NovaFunction(Contains)},
+	{"Substr", new NovaFunction(Substr)},
+	{"Find", new NovaFunction(Find)},
+	{"Trim", new NovaFunction(Trim)},
+	{"Replace", new NovaFunction(Replace)},
+	{"ToUpper", new NovaFunction(ToUpper)},
+	{"ToLower", new NovaFunction(ToLower)},
+	{"this", nullptr}
+	};
 }

@@ -67,9 +67,6 @@ private:
 	ee(StringLiteralNode*);
 	ee(ArrayLiteralNode*);
 	ee(DotAccessNode*);
-	ee(Vector2LiteralNode*);
-	ee(Vector3LiteralNode*);
-	ee(Vector4LiteralNode*);
 	ee(ArrayAccessNode*);
 	ee(AssignmentNode*);
 	ee(CompoundOp*);

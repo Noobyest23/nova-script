@@ -17,6 +17,30 @@ NovaString* str = static_cast<NovaString*>(args[arg_i]);
 PushError("Expected int as argument " + std::to_string(arg_i)); return nullptr;}\
 NovaInt* i = static_cast<NovaInt*>(args[arg_i]);
 
+#define numfget(f, arg_i) if (args[arg_i]->Type() != "Int" and args[arg_i]->Type() != "Float") {\
+PushError("Expected number as argument " + std::to_string(arg_i)); return nullptr;}\
+float f = 0.0f;\
+if (args[arg_i]->Type() != "Int") {\
+NovaInt* nova_int = static_cast<NovaInt*>(args[arg_i]);\
+f = nova_int->CNum();\
+}\
+else {\
+NovaFloat* nova_float = static_cast<NovaFloat*>(args[arg_i]); \
+f = nova_float->CNum();\
+}
+
+#define numiget(f, arg_i) if (args[arg_i]->Type() != "Int" and args[arg_i]->Type() != "Float") {\
+PushError("Expected number as argument " + std::to_string(arg_i)); return nullptr;}\
+int f = 0;\
+if (args[arg_i]->Type() != "Int") {\
+NovaInt* nova_int = static_cast<NovaInt*>(args[arg_i]);\
+f = nova_int->CNum();\
+}\
+else {\
+NovaFloat* nova_float = static_cast<NovaFloat*>(args[arg_i]); \
+f = nova_float->CNum();\
+}
+
 #define floatget(f, arg_i) if (args[arg_i]->Type() != "Float") {\
 PushError("Expected float as argument " + std::to_string(arg_i)); return nullptr;}\
 NovaFloat* f = static_cast<NovaFloat*>(args[arg_i]);

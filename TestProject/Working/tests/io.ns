@@ -1,8 +1,0 @@
-# test io library
-include "io"
-
-Print("Hello NovaScript!")
-PrintWarning("Hello NovaScript!")
-PrintError("Hello NovaScript!")
-var str = Input("Type INPUT otherwise the test for this file will fail")
-Print("INPUT")

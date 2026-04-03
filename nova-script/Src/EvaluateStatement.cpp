@@ -43,7 +43,7 @@ es_decl(VarDeclNode* node) {
 }
 
 es_decl(FuncDeclNode* node) {
-	NovaFunction* func = new NovaFunction(node);
+	NovaFunction* func = new NovaFunction(node, this);
 	scope->Set(node->func_id, func);
 }
 

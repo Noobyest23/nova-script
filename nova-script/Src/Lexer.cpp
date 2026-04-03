@@ -29,19 +29,17 @@ std::vector<Token> Lexer::Parse() {
 		//	result.push_back({ NovaTokenType::NewLine, "\n", line, column});
 		//}
 
-		// Skip whitespace
 		if (isspace(c)) {
 			Advance();
 			continue;
 		}
 
-		// Number literal
 		if (isdigit(c)) {
 			result.push_back(Number());
 			continue;
 		}
 
-		// Identifier (variables, keywords later)
+	
 		if (isalpha(c) || c == '_') {
 			result.push_back(Identifier());
 			continue;
@@ -276,15 +274,6 @@ Token Lexer::Identifier() {
 	}
 	else if (value == "continue") {
 		return { NovaTokenType::Continue, value, line, column };
-	}
-	else if (value == "Vector2") {
-		return { NovaTokenType::VectorLit2, value, line, column };
-	}
-	else if (value == "Vector3") {
-		return { NovaTokenType::VectorLit3, value, line, column };
-	}
-	else if (value == "Vector4") {
-		return { NovaTokenType::VectorLit4, value, line, column };
 	}
 	else if (value == "true") {
 		return { NovaTokenType::BoolLit, value, line, column };

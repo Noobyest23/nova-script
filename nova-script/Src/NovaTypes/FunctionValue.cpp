@@ -2,7 +2,7 @@
 #include "../NovaScript/Interpretor/Interpretor.h"
 #include "../NovaScript/Interpretor/Scope.h"
 
-NovaValue* NovaFunction::Call(std::vector<NovaValue*> args, Interpretor* interpretor) const {
+NovaValue* NovaFunction::Call(std::vector<NovaValue*> args) const {
 	if (fn) {
 		if (args.size() != fn->args.size()) {
 			PushError("Argument size mismatch, function expected " + std::to_string(fn->args.size()) + " but got " + std::to_string(args.size()));
@@ -49,7 +49,7 @@ std::string NovaFunction::Type() const {
 
 NovaValue* NovaFunction::Copy() const {
 	if (fn) {
-		return new NovaFunction(fn);
+		return new NovaFunction(fn, interpretor);
 	}
 	else if (cppfn) {
 		return new NovaFunction(cppfn);

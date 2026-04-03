@@ -108,6 +108,15 @@
     <ClInclude Include="NovaScript\Value\NovaObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NovaScript\Value\Vector2Value.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Value\SignalValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NovaScript\Library\nova_functional.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\EvaluateExpression.cpp">
@@ -162,6 +171,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\NovaTypes\NovaObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\Vector2Value.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\NovaTypes\SignalValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -262,5 +262,33 @@ io.Print("Hello World!")
 	<p>If (when) you encounter any bugs, I would greatly appreciate it if you report them at this <a href="https://discord.gg/s7Axx58VDv" target="_blank">Discord server</a>. There's a channel dedicated to bug reports.</p>
 	<p>Also check out my <a href="https://noobyest.itch.io" target="_blank">Itch Page</a></p>
 </section>
-`
+`,
+  "keywords": `<section>
+	<h1>Keywords</h1>
+
+    <p><strong>Keywords</strong> are reserved words in Nova Script that have special meaning and cannot be used as identifiers (like variable names, function names, etc.). They are fundamental to the syntax and structure of the language.</p>
+
+    <p>Here is a list of all keywords in Nova Script:</p>
+
+    <ul>
+        <li><code>var</code> Used to declare a new variable that can optionaly be initialized <code>var my_variable = 10</code></li>
+        <li><code>const</code> Used to declare a constant variable that cannot be reassigned. <code>const myConstant = 10;</code></li>
+        <li><code>if</code> Used to create a conditional statement. <code>if (condition) { ... }</code>, <code>condition</code> must evaluate to a <code>NovaBool</code></li>
+        <li><code>else</code> Used to create an alternative branch for a conditional statement. <code>else { ... }</code></li>
+        <li><code>while</code> Used to create a loop that continues while a condition is true. <code>while (condition) { ... }</code></li>
+        <li><code>for</code> Used to create a loop that iterates through a container. <code>for (element in my_array) { ... }</code>, <code>in</code> is another keyword and can be replaced with <code>:</code></li>
+        <li><code>func</code> Used to declare a new function. <code>func myFunction() { ... }</code></li>
+        <li><code>return</code> Used to return a value from a function. <code>return value;</code></li>
+        <li><code>not</code> Used to negate a boolean expression. <code>not (condition)</code> must evaluate to a <code>NovaBool</code></li>
+        <li><code>and</code> Used to perform a logical AND operation. <code>condition1 and condition2</code> must evaluate to a <code>NovaBool</code></li>
+        <li><code>or</code> Used to perform a logical OR operation. <code>condition1 or condition2</code> must evaluate to a <code>NovaBool</code></li>
+        <li><code>type</code> Used to declare a new type <code>type MyType { ... }</code></li>
+        <li><code>include</code> Used to include external files or modules</li>
+        <li><code>true</code> Represents the boolean value true</li>
+        <li><code>false</code> Represents the boolean value false</li>
+        <li><code>null</code> Represents the absence of a value</li>
+    </ul>
+</section>
+`,
+  "types": ``
 };

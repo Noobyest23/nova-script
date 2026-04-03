@@ -44,7 +44,6 @@ protected:
 	void PushWarning(const std::string& msg) const;
 
 	unsigned int ref_count = 1;
-	
 };
 
 #endif
