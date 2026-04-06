@@ -1,0 +1,28 @@
+include "io" as io
+include "functional"
+
+io.Print("Hello NovaScript!")
+
+func AddTen(x) {
+	x += 10
+}
+
+func SetTen(x) {
+	x = 10
+}
+
+var x = 50
+var y = x
+x = 1
+x += 2
+io.Print("x", x)
+io.Print("y", y)
+
+var sig = Signal()
+sig.Connect(SetTen)
+sig.Connect(AddTen)
+sig.Emit(*x)
+AddTen(*y)
+io.Print("y", y)
+io.Print("x", x)
+io.Print(sig)

@@ -1,10 +1,8 @@
 #include "../NovaScript/Value/NovaObject.h"
 
-NovaValue* NovaObject::Copy() const {
-	NovaObject* obj = new NovaObject();
-	std::unordered_map<std::string, NovaValue*>* accs = new std::unordered_map<std::string, NovaValue*>(*accessables);
-	obj->accessables = accs;
-	return obj;
+NovaValue* NovaObject::Copy() {
+	// all objects are ptrs
+	return this;
 }
 
 std::string NovaObject::ToString() const {
@@ -26,4 +24,8 @@ void NovaObject::PushBack(const std::string& str, NovaValue* value) {
 
 NovaValue* NovaObject::Assign(NovaValue* rhs) {
 	return nullptr;
+}
+
+void NovaObject::OnDestroy() {
+	delete this;
 }

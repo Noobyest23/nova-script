@@ -59,6 +59,7 @@ void Help() {
 	std::cout << "- make-test - Makes a test for this specific nova script file\n\n";
 	std::cout << "- test - Tests a nova script file against its .ns.test files\n\n";
 	std::cout << "- test-dir - Tests a directory of nova script files\n\n";
+	std::cout << "- batch - Runs a file <x> times\n\n";
 	std::cout << "\n";
 }
 
@@ -179,6 +180,21 @@ int main(int argc, char* argv[]) {
 						Test(entry.path().string());
 					}
 				}
+			}
+		}
+		else if (arg1 == "batch") {
+			if (argc >= 3) {
+				int runs = std::stoi(argv[3]);
+				for (int i = 0; i < runs; i++) {
+					Script script(argv[2]);
+					script.Execute();
+				}
+				std::cout << "---------------------------------\nBatch Finished\n";
+				//std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+				std::cin.get();
+			}
+			else {
+				std::cout << "Usage: batch <filepath> <runs>";
 			}
 		}
 		else {

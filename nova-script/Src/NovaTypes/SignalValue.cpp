@@ -16,6 +16,7 @@ nova_std_decl(Emit) {
 		auto* func = static_cast<NovaFunction*>(val);
 		func->Call(new_args);
 	}
+	return nullptr;
 }
 
 nova_std_decl(Connect) {
@@ -23,6 +24,17 @@ nova_std_decl(Connect) {
 	funcget(func, 1);
 	NovaSignal* signal = static_cast<NovaSignal*>(args[0]);
 	signal->connections.push_back(func);
+	func->AddRef();
+	return nullptr;
+}
+
+nova_std_decl(Disconnect) {
+	req_args(2);
+	funcget(func, 1);
+	NovaSignal* signal = static_cast<NovaSignal*>(args[0]);
+	signal->connections.erase(std::remove(signal->connections.begin(), signal->connections.end(), func));
+	func->Release();
+	return nullptr;
 }
 
 nova_std_decl(GetConnections) {
@@ -32,10 +44,18 @@ nova_std_decl(GetConnections) {
 }
 
 NovaSignal::NovaSignal() {
-	accessables = new std::unordered_map<std::string, NovaValue*>{
+	accessables = new std::unordered_map<std::string, NovaValue*> {
 		{"Emit", new NovaFunction(Emit)},
 		{"Connect", new NovaFunction(Connect)},
 		{"GetConnections", new NovaFunction(GetConnections)},
+		{"Disconnect", new NovaFunction(Disconnect)},
 		{"this", nullptr}
 	};
+}
+
+void NovaSignal::OnDestroy() {
+	for (NovaValue* f : connections) {
+		f->Release();
+	}
+	delete this;
 }

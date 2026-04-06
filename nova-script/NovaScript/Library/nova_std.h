@@ -2,9 +2,8 @@
 #define NOVASCRIPT_STD_H
 
 #include "nova_io.h"
-#include "nova_string.h"
-#include "nova_vector.h"
 #include "nova_math.h"
 #include "nova_functional.h"
+#include "nova_types.h"
 
 #endif

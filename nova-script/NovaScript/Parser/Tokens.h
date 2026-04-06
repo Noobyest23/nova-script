@@ -42,7 +42,7 @@ enum class NovaTokenType {
 	Break, // 35
 	Continue,
 	Dot,
-	VectorLit2,
+	Is,
 	VectorLit3,
 	VectorLit4, // 40
 	BreakPoint,

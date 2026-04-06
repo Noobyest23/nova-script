@@ -5,7 +5,14 @@
 #include "ExprNode.h"
 
 struct StmtNode : public ASTNode {
+	unsigned int line;
+	std::string GetLCSuffix() const {
+		return " : At Line " + std::to_string(line);
+	}
 
+	void Delete() override {
+		delete this;
+	}
 };
 
 struct VarDeclNode : public StmtNode {
@@ -217,6 +224,10 @@ struct ASTPrintNode : public StmtNode {
 
 	std::string Print() const override {
 		return "PRINT TREE";
+	}
+
+	void Delete() override {
+		delete this;
 	}
 
 };

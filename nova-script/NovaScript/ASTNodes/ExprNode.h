@@ -9,11 +9,16 @@ struct ExprNode : public ASTNode {
 };
 
 struct VariableNode : public ExprNode {
-	VariableNode(const std::string& id) : identifier(id) { };
+	VariableNode(const std::string& id, bool as_ptr = false) : identifier(id), as_ptr(as_ptr) { };
 	std::string identifier;
-
+	bool as_ptr = false;
 	std::string Print() const override {
 		return identifier;
+	}
+
+	void Delete() override{
+		identifier.clear();
+		delete this;
 	}
 };
 
@@ -157,6 +162,10 @@ struct IntLiteralNode : public ExprNode {
 		return std::to_string(number);
 	}
 
+	void Delete() override {
+		delete this;
+	}
+
 };
 
 struct FloatLiteralNode : public ExprNode {
@@ -166,6 +175,10 @@ struct FloatLiteralNode : public ExprNode {
 
 	std::string Print() const override {
 		return std::to_string(number);
+	}
+
+	void Delete() override {
+		delete this;
 	}
 
 };
@@ -179,6 +192,11 @@ struct StringLiteralNode : public ExprNode {
 		return '"' + string + '"';
 	}
 
+	void Delete() override {
+		string.clear();
+		delete this;
+	}
+
 };
 
 struct BoolLiteralNode : public ExprNode {
@@ -188,6 +206,10 @@ struct BoolLiteralNode : public ExprNode {
 
 	std::string Print() const override {
 		return value ? "true" : "false";
+	}
+
+	void Delete() override {
+		delete this;
 	}
 
 };
@@ -296,12 +318,20 @@ struct OptimizedExpr : public ExprNode {
 		return "This expression was optimized away, and is unavailable";
 	}
 
+	void Delete() override {
+		delete this;
+	}
+
 };
 
 struct NullLiteralNode : public ExprNode {
 
 	std::string Print() const override {
 		return "null";
+	}
+
+	void Delete() override {
+		delete this;
 	}
 
 };
@@ -323,6 +353,42 @@ struct NotNode : public ExprNode {
 		if (expression) {
 			expression->Delete();
 		}
+		delete this;
+	}
+
+};
+
+struct IsNode : public ExprNode {
+	IsNode(ExprNode* lhs, ExprNode* rhs) : lhs(lhs), rhs(rhs) {};
+	ExprNode* lhs;
+	ExprNode* rhs;
+
+	std::string Print() const override {
+		std::string output;
+		if (lhs) {
+			output = lhs->Print();
+		}
+		else {
+			output = "ERROR_EXPR_NULL";
+		}
+		output += " is ";
+		if (rhs) {
+			output += rhs->Print();
+		}
+		else {
+			output += "ERROR_EXPR_NULL";
+		}
+		return output;
+	}
+
+	void Delete() override {
+		if (lhs) {
+			lhs->Delete();
+		}
+		if (rhs) {
+			rhs->Delete();
+		}
+
 		delete this;
 	}
 

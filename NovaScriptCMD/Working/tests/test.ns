@@ -1,5 +1,7 @@
 include "io" as io
 include "functional"
+include "math" as math
+include "types"
 
 io.Print("Hello NovaScript!")
 
@@ -10,18 +12,31 @@ func AddTen(x) {
 func SetTen(x) {
 	x = 10
 }
-
-var x = 20
+var x = 50
 var y = x
 x = 1
-
-io.Print(x)
-io.Print(y)
+x += 2
+io.Print("x", x)
+io.Print("y", y)
 
 var sig = Signal()
 sig.Connect(SetTen)
 sig.Connect(AddTen)
-sig.Emit(y)
-io.Print(y)
-io.Print(x)
-io.Print(sig)
+
+for function in sig.GetConnections() {
+	function(1)
+}
+
+for (Eep in [1, 2, 3]) {
+	io.Print("bangalangadooda", Eep)
+}
+
+io.Print(math.RandF())
+
+io.Print([1, 2, 3, 4, 5, 6, 7].Size())
+
+if (1 is "Int") {
+	io.Print("Yippee")
+}
+
+io.Print(Float("10"));

@@ -49,6 +49,9 @@ void Scope::Set(const std::string& name, NovaValue* val) {
 
 bool Scope::Has(const std::string& name) {
 	auto it = variables.find(name);
+	if (parent and it == variables.end()) {
+		return parent->Has(name);
+	}
 	return it != variables.end();
 }
 

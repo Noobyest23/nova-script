@@ -218,15 +218,12 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClInclude Include="NovaScript\Interpretor\Value.h" />
     <ClInclude Include="NovaScript\Library\NovaModule.h" />
     <ClInclude Include="NovaScript\Library\nova_asset_db.h" />
-    <ClInclude Include="NovaScript\Library\nova_engine.h" />
     <ClInclude Include="NovaScript\Library\nova_functional.h" />
     <ClInclude Include="NovaScript\Library\nova_io.h" />
     <ClInclude Include="NovaScript\Library\nova_math.h" />
     <ClInclude Include="NovaScript\Library\nova_std.h" />
     <ClInclude Include="NovaScript\Library\nova_std_macro.h" />
-    <ClInclude Include="NovaScript\Library\nova_string.h" />
-    <ClInclude Include="NovaScript\Library\nova_vector.h" />
-    <ClInclude Include="NovaScript\Library\WinInputDialog\resource.h" />
+    <ClInclude Include="NovaScript\Library\nova_types.h" />
     <ClInclude Include="NovaScript\NovaScript.h" />
     <ClInclude Include="NovaScript\Parser\Lexer.h" />
     <ClInclude Include="NovaScript\Parser\Optimizer.h" />
@@ -242,7 +239,6 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClInclude Include="NovaScript\Value\SignalValue.h" />
     <ClInclude Include="NovaScript\Value\StringValue.h" />
     <ClInclude Include="NovaScript\Value\Value.h" />
-    <ClInclude Include="NovaScript\Value\Vector2Value.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NovaErrorPush.cpp" />
@@ -256,7 +252,6 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClCompile Include="Src\NovaTypes\IntValue.cpp" />
     <ClCompile Include="Src\NovaTypes\NovaObject.cpp" />
     <ClCompile Include="Src\NovaTypes\SignalValue.cpp" />
-    <ClCompile Include="Src\NovaTypes\Vector2Value.cpp" />
     <ClCompile Include="Src\Scope.cpp" />
     <ClCompile Include="Src\NovaTypes\StringValue.cpp" />
     <ClCompile Include="Src\NovaTypes\Value.cpp" />
@@ -265,9 +260,6 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClCompile Include="Src\Lexer.cpp" />
     <ClCompile Include="Src\Optimizer.cpp" />
     <ClCompile Include="Src\Parser.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="NovaScript\Library\WinInputDialog\dialog.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NovaScript\NovaErrorPush.h" />

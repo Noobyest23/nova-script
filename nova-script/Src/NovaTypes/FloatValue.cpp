@@ -2,15 +2,23 @@
 #include "../NovaScript/Value/IntValue.h"
 #include "../NovaScript/Value/BoolValue.h"
 
-float& NovaFloat::Num() {
-	return cppnum.get();
+float* NovaFloat::Num() {
+	if (is_cpp) {
+		cppnum;
+	}
+	else {
+		return &novanum;
+	}
 }
 
-const float& NovaFloat::CNum() const {
-	return cppnum.get();
+const float NovaFloat::CNum() const {
+	if (is_cpp) {
+		return *cppnum;
+	}
+	return novanum;
 }
 
-NovaValue* NovaFloat::Copy() const {
+NovaValue* NovaFloat::Copy() {
 	NovaFloat* f = new NovaFloat(CNum());
 	return f;
 }
@@ -127,19 +135,19 @@ NovaValue* NovaFloat::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) 
 		int result = CNum();
 		switch (op) {
 		case NovaOperator::CompoundPlus: {
-			Num() += r->CNum();
+			*Num() += r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMinus: {
-			Num() -= r->CNum();
+			*Num() -= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMultiply: {
-			Num() *= r->CNum();
+			*Num() *= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundDivide: {
-			Num() /= r->CNum();
+			*Num() /= r->CNum();
 			return this;
 		}
 		default:
@@ -153,19 +161,19 @@ NovaValue* NovaFloat::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) 
 		float result = CNum();
 		switch (op) {
 		case NovaOperator::CompoundPlus: {
-			Num() += r->CNum();
+			*Num() += r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMinus: {
-			Num() -= r->CNum();
+			*Num() -= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMultiply: {
-			Num() *= r->CNum();
+			*Num() *= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundDivide: {
-			Num() /= r->CNum();
+			*Num() /= r->CNum();
 			return this;
 		}
 		default:
@@ -183,13 +191,17 @@ NovaValue* NovaFloat::Assign(NovaValue* rhs) {
 	// Float can be assigned by Int or Float
 	if (rhs->Type() == "Int") {
 		NovaInt* i = static_cast<NovaInt*>(rhs);
-		Num() = float(i->CNum());
+		*Num() = float(i->CNum());
 		return this;
 	}
 	else if (rhs->Type() == "Float") {
 		NovaFloat* f = static_cast<NovaFloat*>(rhs);
-		Num() = f->CNum();
+		*Num() = f->CNum();
 		return this;
 	}
 	return nullptr;
+}
+
+void NovaFloat::OnDestroy() {
+	delete this;
 }

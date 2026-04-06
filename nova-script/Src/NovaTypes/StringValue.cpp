@@ -5,15 +5,21 @@
 #include "../NovaScript/Library/nova_std_macro.h"
 #include "../NovaScript/NovaErrorPush.h"
 
-std::string& NovaString::Str() {
-	return cppstr.get();
+std::string* NovaString::Str() {
+	if (cppstr) {
+		return cppstr;
+	}
+	return &novastr;
 }
 
 const std::string& NovaString::CStr() const {
-	return cppstr.get();
+	if (cppstr) {
+		return *cppstr;
+	}
+	return novastr;
 }
 
-NovaValue* NovaString::Copy() const {
+NovaValue* NovaString::Copy() {
 	return new NovaString(CStr());
 }
 
@@ -80,7 +86,7 @@ NovaValue* NovaString::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)
 NovaValue* NovaString::Assign(NovaValue* rhs) {
 	if (rhs->Type() == "String") {
 		NovaString* str = static_cast<NovaString*>(rhs);
-		this->Str() = str->CStr();
+		*Str() = str->CStr();
 		return this;
 	}
 	return nullptr;
@@ -214,7 +220,7 @@ NovaString::NovaString(const std::string& str) : novastr(str) {
 	};
 }
 
-NovaString::NovaString(std::reference_wrapper<std::string> cppstr) : cppstr(cppstr) {
+NovaString::NovaString(std::string* cppstr) : cppstr(cppstr) {
 	accessables = new std::unordered_map<std::string, NovaValue*>{
 	{"Length", new NovaFunction(Length)},
 	{"IsEmpty", new NovaFunction(IsEmpty)},
@@ -229,4 +235,8 @@ NovaString::NovaString(std::reference_wrapper<std::string> cppstr) : cppstr(cpps
 	{"ToLower", new NovaFunction(ToLower)},
 	{"this", nullptr}
 	};
+}
+
+void NovaString::OnDestroy() {
+	delete this;
 }

@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nova-script", "nova-script\nova-script.vcxproj", "{1D6EBA97-9D53-4F68-B4E2-055C8FA4EFCD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NovaScriptCMD", "NovaScriptCMD\TestProject.vcxproj", "{130870F2-B285-4040-B681-5C5D385D9502}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1D6EBA97-9D53-4F68-B4E2-055C8FA4EFCD} = {1D6EBA97-9D53-4F68-B4E2-055C8FA4EFCD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,12 +8,19 @@
 
 struct NovaSignal : public NovaValue {
 	NovaSignal();
-	NovaValue* Copy() const override { return new NovaSignal(*this); };
+	NovaValue* Copy() override { return new NovaSignal(*this); };
 	std::string ToString() const override { return "Signal with " + std::to_string(connections.size()) + " connections"; };
 	std::string Type() const override { return "Signal"; };
 	NovaValue* Assign(NovaValue* rhs) { return nullptr; };
 
+	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { return nullptr; };
+	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { return nullptr; };
+
 	std::vector<NovaValue*> connections;
+
+protected:
+
+	void OnDestroy() override;
 
 };
 

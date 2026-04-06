@@ -4,18 +4,26 @@
 
 struct NOVASCRIPT_API NovaFloat : public NovaValue {
 	NovaFloat(float num) : novanum(num) {};
-	NovaFloat(std::reference_wrapper<float> cppnum) : cppnum(cppnum) {};
+	NovaFloat(float* cppnum) : cppnum(cppnum) {};
+
 	float novanum = 0;
-	std::reference_wrapper<float> cppnum = novanum;
-	float& Num();
-	const float& CNum() const;
-	NovaValue* Copy() const override;
+	bool is_cpp = false;
+	float* cppnum = nullptr;
+
+	float* Num();
+	const float CNum() const;
+	NovaValue* Copy() override;
 	std::string ToString() const override;
 	std::string Type() const override;
 
 	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
 	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) override;
 	NovaValue* Assign(NovaValue* rhs) override;
+
+protected:
+
+	void OnDestroy() override;
+
 };
 
 

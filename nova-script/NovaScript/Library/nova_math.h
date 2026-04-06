@@ -2,134 +2,152 @@
 #define NOVA_SCRIPT_MATH_H
 #include "NovaModule.h"
 #include <algorithm>
+#include "../Value/FloatValue.h"
+#include "../Value/IntValue.h"
+#include "nova_std_macro.h"
 #undef min
 #undef max
-/*
-class NovaMathModule : public NovaModule {
 
+#include <random>
+
+// Static random engine to keep state between calls
+static std::mt19937& GetRandEngine() {
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	return gen;
+}
+
+class NovaMathModule : public NovaModule {
+	// --- Trig & Basic Arithmetic ---
 	nova_std_decl(Sin) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(sin(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(sin(val));
 	}
 
 	nova_std_decl(Cos) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(cos(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(cos(val));
 	}
 
 	nova_std_decl(Tan) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(tan(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(tan(val));
 	}
 
 	nova_std_decl(Sqrt) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(sqrt(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(sqrt(val));
 	}
 
 	nova_std_decl(Abs) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(abs(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(abs(val));
 	}
 
+	// --- Rounding ---
 	nova_std_decl(Round) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(round(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(round(val));
 	}
 
 	nova_std_decl(Floor) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(floor(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(floor(val));
 	}
 
 	nova_std_decl(Ceil) {
-		req_args(1);
-		float val = std::get<float>(args[0]->data);
-		return Value(ceil(val));
+		req_args(1); numfget(val, 0);
+		return new NovaFloat(ceil(val));
 	}
 
+	// --- Comparison & Interpolation ---
 	nova_std_decl(Min) {
-		req_args(2);
-		float val1 = std::get<float>(args[0]->data);
-		float val2 = std::get<float>(args[1]->data);
-		return Value(std::min(val1, val2));
+		req_args(2); numfget(v1, 0); numfget(v2, 1);
+		return new NovaFloat(std::min(v1, v2));
 	}
 
 	nova_std_decl(Max) {
-		req_args(2);
-		float val1 = std::get<float>(args[0]->data);
-		float val2 = std::get<float>(args[1]->data);
-		return Value(std::max(val1, val2));
+		req_args(2); numfget(v1, 0); numfget(v2, 1);
+		return new NovaFloat(std::max(v1, v2));
 	}
 
 	nova_std_decl(Clamp) {
-		req_args(3);
-		float val = std::get<float>(args[0]->data);
-		float min = std::get<float>(args[1]->data);
-		float max = std::get<float>(args[2]->data);
-		return Value(std::clamp(val, min, max));
+		req_args(3); numfget(v, 0); numfget(lo, 1); numfget(hi, 2);
+		return new NovaFloat(std::clamp(v, lo, hi));
 	}
 
 	nova_std_decl(Lerp) {
-		req_args(3);
-		float a = std::get<float>(args[0]->data);
-		float b = std::get<float>(args[1]->data);
-		float t = std::get<float>(args[2]->data);
-		return Value(a + t * (b - a));
+		req_args(3); numfget(a, 0); numfget(b, 1); numfget(t, 2);
+		return new NovaFloat(a + t * (b - a));
 	}
 
+	// --- Conversion ---
 	nova_std_decl(Degrees) {
-		req_args(1);
-		float radians = std::get<float>(args[0]->data);
-		return Value(radians * (180.0f / 3.14159265358979323846f));
+		req_args(1); numfget(rad, 0);
+		return new NovaFloat(rad * (180.0f / 3.1415926535f));
 	}
-	
+
 	nova_std_decl(Radians) {
-		req_args(1);
-		float degrees = std::get<float>(args[0]->data);
-		return Value(degrees * (3.14159265358979323846f / 180.0f));
+		req_args(1); numfget(deg, 0);
+		return new NovaFloat(deg * (3.1415926535f / 180.0f));
 	}
 
-	nova_std_decl(Random) {
+	// --- Randomization ---
+	nova_std_decl(RandF) {
 		req_args(0);
-		return Value(static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+		std::uniform_real_distribution<float> dis(0.0f, 1.0f);
+		return new NovaFloat(dis(GetRandEngine()));
 	}
 
-	nova_std_decl(RandomRange) {
+	nova_std_decl(RandI) {
+		req_args(0);
+		std::uniform_int_distribution<int> dis(0, std::numeric_limits<int>::max());
+		return new NovaInt(dis(GetRandEngine()));
+	}
+
+	nova_std_decl(RandFRange) {
 		req_args(2);
-		float min = std::get<float>(args[0]->data);
-		float max = std::get<float>(args[1]->data);
-		return Value(min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min))));
+		numfget(minV, 0);
+		numfget(maxV, 1);
+		std::uniform_real_distribution<float> dis(minV, maxV);
+		return new NovaFloat(dis(GetRandEngine()));
 	}
 
-	Scope GetModule() override {
-		Scope scope;
-		NOVA_BIND_METHOD(Sin);
-		NOVA_BIND_METHOD(Cos);
-		NOVA_BIND_METHOD(Tan);
-		NOVA_BIND_METHOD(Sqrt);
-		NOVA_BIND_METHOD(Abs);
-		NOVA_BIND_METHOD(Round);
-		NOVA_BIND_METHOD(Floor);
-		NOVA_BIND_METHOD(Ceil);
-		NOVA_BIND_METHOD(Min);
-		NOVA_BIND_METHOD(Max);
-		NOVA_BIND_METHOD(Clamp);
-		NOVA_BIND_METHOD(Lerp);
-		NOVA_BIND_METHOD(Degrees);
-		NOVA_BIND_METHOD(Radians);
-		NOVA_BIND_METHOD(Random);
-		NOVA_BIND_METHOD(RandomRange);
-		return scope;
+	nova_std_decl(RandIRange) {
+		req_args(2);
+		numfget(minV, 0);
+		numfget(maxV, 1);
+		std::uniform_int_distribution<int> dis(static_cast<int>(minV), static_cast<int>(maxV));
+		return new NovaInt(dis(GetRandEngine()));
 	}
 
+	NovaObject* GetModule() override {
+		NovaObject* obj = new NovaObject();
+
+		objbindmethod(obj, Sin);
+		objbindmethod(obj, Cos);
+		objbindmethod(obj, Tan);
+		objbindmethod(obj, Sqrt);
+		objbindmethod(obj, Abs);
+		objbindmethod(obj, Round);
+		objbindmethod(obj, Floor);
+		objbindmethod(obj, Ceil);
+		objbindmethod(obj, Min);
+		objbindmethod(obj, Max);
+		objbindmethod(obj, Clamp);
+		objbindmethod(obj, Lerp);
+		objbindmethod(obj, Degrees);
+		objbindmethod(obj, Radians);
+		objbindmethod(obj, RandF);
+		objbindmethod(obj, RandI);
+		objbindmethod(obj, RandFRange);
+		objbindmethod(obj, RandIRange);
+		obj->PushBack("PI", new NovaFloat(3.1415926535f));
+		obj->PushBack("E", new NovaFloat(2.7182818284f));
+		return obj;
+	}
 };
-*/
+
+
+
 #endif

@@ -4,22 +4,31 @@
 #include <vector>
 
 struct NOVASCRIPT_API NovaArray : public NovaValue {
-	NovaArray(std::vector<NovaValue*>& arr) : novaarr(arr) {};
-	NovaArray(std::reference_wrapper<std::vector<NovaValue*>> cpparr) : cpparr(cpparr) {};
-	std::vector<NovaValue*> novaarr;
-	std::reference_wrapper<std::vector<NovaValue*>> cpparr = novaarr;
+	NovaArray(std::vector<NovaValue*>& arr);
+	NovaArray(std::vector<NovaValue*>* arr);
 
-	std::vector<NovaValue*>& Arr();
+	std::vector<NovaValue*> novaarr;
+	std::vector<NovaValue*>* cpparr = nullptr;
+
+	std::vector<NovaValue*>* Arr();
 	const std::vector<NovaValue*>& CArr() const;
 
-	NovaValue* Copy() const override;
+	NovaValue* Copy() override;
 	std::string ToString() const override;
 	std::string Type() const override;
 	NovaValue* Assign(NovaValue* rhs) override;
 
+
+	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { return nullptr; };
+	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { return nullptr; };
+
 protected:
 
 	void OnDestroy() override;
+
+private:
+
+	void Init();
 
 };
 

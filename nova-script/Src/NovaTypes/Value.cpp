@@ -8,7 +8,6 @@ void NovaValue::AddRef() {
 void NovaValue::Release() {
 	ref_count--;
 	if (ref_count <= 0) {
-		OnDestroy();
 		if (accessables) {
 			for (std::pair<std::string, NovaValue*> pair : *accessables) {
 				if (pair.second) {
@@ -17,7 +16,7 @@ void NovaValue::Release() {
 			}
 			delete accessables;
 		}
-		delete this;
+		OnDestroy();
 	}
 }
 

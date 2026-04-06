@@ -39,6 +39,7 @@ StmtNode* Parser::ParseStatement() {
 			}
 			VarDeclNode* decl = new VarDeclNode(var_name, expression);
 			decl->constant = is_const;
+			decl->line = Current().line;
 			return decl;
 		}
 		else {
@@ -78,8 +79,9 @@ StmtNode* Parser::ParseStatement() {
 					PushError("Expected {");
 				}
 				Advance();
-
-				return new FuncDeclNode(func_name, args, body);
+				auto* funcdecl = new FuncDeclNode(func_name, args, body);
+				funcdecl->line = Current().line;
+				return funcdecl;
 			}
 			else {
 				PushError("Expected (");
@@ -126,7 +128,9 @@ StmtNode* Parser::ParseStatement() {
 				}
 				
 			}
-			return new IfStmtNode(expression, body, else_body);
+			auto* ifstmt = new IfStmtNode(expression, body, else_body);
+			ifstmt->line = Current().line;
+			return ifstmt;
 		}
 		else {
 			PushError("Expected {");
@@ -157,8 +161,9 @@ StmtNode* Parser::ParseStatement() {
 					scope.push_back(stmt);
 				}
 				Advance();
-
-				return new TypeDeclNode(type_id, mirror_id, scope);
+				auto* tdecl = new TypeDeclNode(type_id, mirror_id, scope);
+				tdecl->line = Current().line;
+				return tdecl;
 			}
 			else {
 				PushError("Expected {");
@@ -177,9 +182,13 @@ StmtNode* Parser::ParseStatement() {
 			if (Accept(NovaTokenType::Identifier) and Current().content == "as") {
 				Advance();
 				ExprNode* as = ParseExpression();
-				return new IncludeNode(expr, as);
+				auto* incl = new IncludeNode(expr, as);
+				incl->line = Current().line;
+				return incl;
 			}
-			return new IncludeNode(expr);
+			auto* incl = new IncludeNode(expr);
+			incl->line = Current().line;
+			return incl;
 		}
 		else {
 			PushError("Expected an expression");
@@ -189,7 +198,9 @@ StmtNode* Parser::ParseStatement() {
 		Advance();
 		ExprNode* return_value = ParseExpression();
 		if (return_value) {
-			return new ReturnStmtNode(return_value);
+			auto* retstmt = new ReturnStmtNode(return_value);
+			retstmt->line = Current().line;
+			return retstmt;
 		}
 		else {
 			PushError("Expected an expression");
@@ -198,7 +209,9 @@ StmtNode* Parser::ParseStatement() {
 	if (Accept(NovaTokenType::BreakPoint)) {
 		Advance();
 		StmtNode* stmt = ParseStatement();
-		return new BreakPointNode(stmt);
+		auto* breakp = new BreakPointNode(stmt);
+		breakp->line = Current().line;
+		return breakp;
 	}
 	if (Accept(NovaTokenType::ASTPrint)) {
 		Advance();
@@ -206,11 +219,18 @@ StmtNode* Parser::ParseStatement() {
 	}
 	if (Accept(NovaTokenType::For)) {
 		Advance();
+		// Optional parenthesis
+		if (Accept(NovaTokenType::OpenParen)) {
+			Advance();
+		}
 		ExprNode* initializer = ParseExpression();
 		if (VariableNode* var = dynamic_cast<VariableNode*>(initializer)) {
 			if (Accept(NovaTokenType::In)) {
 				Advance();
 				ExprNode* container = ParseExpression();
+				if (Accept(NovaTokenType::CloseParen)) {
+					Advance();
+				}
 				if (Accept(NovaTokenType::OpenBrace)) {
 					Advance();
 					std::vector<StmtNode*> statements;
@@ -218,7 +238,9 @@ StmtNode* Parser::ParseStatement() {
 						statements.push_back(ParseStatement());
 					}
 					Advance();
-					return new ForEachNode(var, container, statements);
+					auto* fen = new ForEachNode(var, container, statements);
+					fen->line = Current().line;
+					return fen;
 				}
 				else {
 					PushError("Expected {");
@@ -242,14 +264,18 @@ StmtNode* Parser::ParseStatement() {
 				statements.push_back(ParseStatement());
 			}
 			Advance();
-			return new WhileNode(expression, statements);
+			auto* whiln = new WhileNode(expression, statements);
+			whiln->line = Current().line;
+			return whiln;
 		}
 		PushError("Expected {");
 	}
 	// If nothing else works we try to parse it as a standalone expression
 	ExprNode* expr = ParseExpression();
 	if (expr) {
-		return new ExprAsStmt(expr);
+		auto* exp = new ExprAsStmt(expr);
+		exp->line = Current().line;
+		return exp;
 	}
 
 	if (is_const and not handled_const) {
@@ -324,6 +350,12 @@ ExprNode* Parser::ParseEquality() {
 		Advance();
 		ExprNode* rhs = ParseComparison();
 		lhs = new OpNode(lhs, rhs, op);
+	}
+
+	while (Accept(NovaTokenType::Is)) {
+		Advance();
+		ExprNode* rhs = ParseComparison();
+		lhs = new IsNode(lhs, rhs);
 	}
 
 	return lhs;
@@ -410,6 +442,11 @@ ExprNode* Parser::ParseUnary() {
 }
 
 ExprNode* Parser::ParsePrimary() {
+	bool as_ptr = false;
+	if (Accept(NovaTokenType::MultOp)) {
+		as_ptr = true;
+		Advance();
+	}
 	if (Accept(NovaTokenType::OpenParen)) {
 		Advance();
 		ExprNode* expr = ParseTernary();
@@ -456,7 +493,7 @@ ExprNode* Parser::ParsePrimary() {
 			Advance();
 			return new FuncCallNode(id, args);
 		}
-		return new VariableNode(id);
+		return new VariableNode(id, as_ptr);
 	}
 	else if (Accept(NovaTokenType::OpenBracket)) {
 		std::vector<ExprNode*> values;

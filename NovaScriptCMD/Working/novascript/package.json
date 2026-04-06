@@ -1,0 +1,25 @@
+{
+  "name": "novascript",
+  "displayName": "NovaScript",
+  "description": "A VScode extension that adds support for NovaScript",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.110.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "novascript",
+      "aliases": ["NovaScript", "novascript"],
+      "extensions": [".ns",".nova"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "novascript",
+      "scopeName": "source.novascript",
+      "path": "./syntaxes/novascript.tmLanguage.json"
+    }]
+  }
+}

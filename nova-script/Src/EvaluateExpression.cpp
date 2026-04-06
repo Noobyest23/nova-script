@@ -33,13 +33,14 @@ ee_decl(ExprNode* node) {
 	ee(CompoundOp*)
 	ee(NullLiteralNode*)
 	ee(NotNode*)
+	ee(IsNode*)
 	PushError("Unrecognized Expression", node);
 	return nullptr;
 }
 
 ee_decl(VariableNode* node) {
-	NovaValue* val = scope->Get(node->identifier);
-	if (val) {
+	if (scope->Has(node->identifier)) {
+		NovaValue* val = scope->Get(node->identifier);
 		return val;
 	}
 	else {
@@ -52,12 +53,29 @@ ee_decl(AssignmentNode* node) {
 	NovaValue* lhs = EvaluateExpression(node->left);
 	if (!lhs) { PushError("Left side in assignment is null", node); return nullptr; }
 
-	NovaValue* rhs = EvaluateExpression(node->right);
+	NovaValue* rhs = nullptr;
+	if (VariableNode* v = dynamic_cast<VariableNode*>(node->right)) {
+		if (v->as_ptr) {
+			rhs = scope->Get(v->identifier);
+			rhs->AddRef();
+		}
+		else {
+			rhs = scope->Get(v->identifier)->Copy();
+		}
+	}
+	else {
+		rhs = EvaluateExpression(node->right);
+	}
 	if (!rhs) { PushError("Right side in assignment is null", node); return nullptr; }
 
 	if (VariableNode* var = dynamic_cast<VariableNode*>(node->left)) {
 		if (!lhs->Assign(rhs)) {
 			scope->Set(var->identifier, rhs);
+			if (VariableNode* v = dynamic_cast<VariableNode*>(node->right)) {
+				if (not v->as_ptr) {
+					rhs->Release();
+				}
+			}
 		}
 		return lhs;
 	}
@@ -65,10 +83,12 @@ ee_decl(AssignmentNode* node) {
 		if (VariableNode* var = dynamic_cast<VariableNode*>(dot->right)) {
 			if (!lhs->Assign(rhs)) {
 				lhs = EvaluateExpression(dot->left); // gives us the var in var.property
-				rhs->AddRef();
+				
+				
 				lhs->accessables->at(var->identifier)->Release();
 				lhs->accessables->insert_or_assign(var->identifier, rhs);
 				return rhs;
+				
 			}
 			return lhs;
 		}
@@ -80,16 +100,20 @@ ee_decl(AssignmentNode* node) {
 	else if (ArrayAccessNode* arr = dynamic_cast<ArrayAccessNode*>(node->left)) {
 		if (lhs->Type() == "Array") {
 			if (!lhs->Assign(rhs)) {
+
 				lhs = EvaluateExpression(arr->arr); // gives us the array itself, where lhs was just what we got from array at the index
 				NovaArray* narr = static_cast<NovaArray*>(lhs);
+
 				NovaValue* index = EvaluateExpression(arr->index);
 				if (!index or index->Type() != "Int") { PushError("Index in array assignment is not an int", node); return nullptr; }
 				NovaInt* int_index = static_cast<NovaInt*>(index);
 				if (int_index->CNum() > narr->CArr().size()) { PushError("Out of bounds array assignment", node); return nullptr; }
-				rhs->AddRef();
-				narr->Arr()[int_index->CNum()]->Release();
-				narr->Arr()[int_index->CNum()] = rhs;
+
+
+				(*narr->Arr())[int_index->CNum()]->Release();
+				(*narr->Arr())[int_index->CNum()] = rhs;
 				return narr->CArr()[int_index->CNum()];
+				
 			}
 			return lhs;
 		}
@@ -117,7 +141,6 @@ ee_decl(CompoundOp* node) {
 	}
 
 	NovaValue* result = lhs->PerformCompoundOp(rhs, op);
-	literal_stack.push_back(result);
 	return result;
 }
 
@@ -125,8 +148,8 @@ ee_decl(OpNode* node) {
 	NovaValue* lhs = EvaluateExpression(node->left);
 	NovaValue* rhs = EvaluateExpression(node->right);
 
-	if (!lhs) PushError("Left hand side cannot be null in operation", node); return nullptr;
-	if (!rhs) PushError("Right hand side cannot be null in operation", node); return nullptr;
+	if (!lhs) { PushError("Left hand side cannot be null in operation", node); return nullptr; };
+	if (!rhs) { PushError("Right hand side cannot be null in operation", node); return nullptr; };
 
 	NovaValue::NovaOperator op = NovaValue::Plus;
 
@@ -168,10 +191,35 @@ ee_decl(FuncCallNode* node) {
 				args.push_back(scope->Get("this"));
 			}
 			for (ExprNode* arg : node->args) {
-				NovaValue* a_value = EvaluateExpression(arg);
+				NovaValue* a_value = nullptr;
+				if (VariableNode* var = dynamic_cast<VariableNode*>(arg)) {
+					if (var->as_ptr) {
+						a_value = scope->Get(var->identifier);
+						if (a_value) {
+							a_value->AddRef();
+						}
+					}
+					else {
+						if (auto* v = scope->Get(var->identifier)) {
+							a_value = v->Copy();
+						}
+					}
+				}
+				else {
+					a_value = EvaluateExpression(arg);
+					if (a_value) {
+						a_value->AddRef();
+					}
+				}
 				args.push_back(a_value);
 			}
 			NovaValue* result = fn->Call(args);
+			for (NovaValue* arg : args) {
+				if (scope->Get("this") != arg) {
+					arg->Release();
+				}
+			}
+			literal_stack.push_back(result);
 			return result;
 		}
 		else {
@@ -265,6 +313,7 @@ ee_decl(ArrayLiteralNode* node) {
 ee_decl(DotAccessNode* node) {
 	NovaValue* val = EvaluateExpression(node->left);
 	if (!val) { PushError("Left side of dot access is null", node); return nullptr; }
+	if (!val->accessables) { PushError("Left side of dot access does not have accessables", node); return nullptr; }
 	// val.func()
 	Scope* p_scope = scope;
 	Scope n_scope(p_scope);
@@ -276,6 +325,7 @@ ee_decl(DotAccessNode* node) {
 		n_scope.Set("this", val);
 	}
 	NovaValue* result = EvaluateExpression(node->right);
+	
 	scope = p_scope;
 	return result;
 }
@@ -289,7 +339,7 @@ ee_decl(ArrayAccessNode* node) {
 
 	if (arr->Type() == "Array") {
 		NovaArray* narr = static_cast<NovaArray*>(arr);
-		std::vector<NovaValue*>& list = narr->Arr();
+		std::vector<NovaValue*>& list = *narr->Arr();
 		if (index->Type() == "Int") {
 			NovaInt* nint = static_cast<NovaInt*>(index);
 			return list[nint->CNum()];
@@ -335,4 +385,29 @@ ee_decl(NotNode* node) {
 		PushError("Expected expression after unary operator", node);
 		return nullptr;
 	}
+}
+
+ee_decl(IsNode* node) {
+	NovaValue* value = EvaluateExpression(node->lhs);
+	NovaValue* str = EvaluateExpression(node->rhs);
+
+	if (!value) { PushError("Left side in type check is null", node); return nullptr; };
+	if (!str) { PushError("Type in type check is null", node); return nullptr; };
+
+	if (str->Type() == "String") {
+		if (value->Type() == str->ToString()) {
+			NovaBool* b = new NovaBool(true);
+			literal_stack.push_back(b);
+			return b;
+		}
+		else {
+			NovaBool* b = new NovaBool(false);
+			literal_stack.push_back(b);
+			return b;
+		}
+	}
+	else {
+		PushError("Expected String in type check", node);
+	}
+
 }

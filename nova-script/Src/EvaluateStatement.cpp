@@ -36,20 +36,36 @@ es_decl(VarDeclNode* node) {
 	// Add a variable to the scope
 	NovaValue* value = nullptr;
 	if (node->right) {
-		value = EvaluateExpression(node->right);
-	}
+		if (VariableNode* v = dynamic_cast<VariableNode*>(node->right)) {
+			if (!v->as_ptr) {
+				value = scope->Get(v->identifier)->Copy();
+				scope->Set(node->identifier, value);
+				value->Release();
+				return;
+			}
+			else {
+				value = scope->Get(v->identifier);
+				scope->Set(node->identifier, value);
 
+				return;
+			}
+		}
+	}
+	value = EvaluateExpression(node->right);
 	scope->Set(node->identifier, value);
 }
 
 es_decl(FuncDeclNode* node) {
 	NovaFunction* func = new NovaFunction(node, this);
 	scope->Set(node->func_id, func);
+	func->Release();
 }
 
 es_decl(IfStmtNode* node) {
 	NovaValue* value = EvaluateExpression(node->expression);
 	
+	if (!value) { PushError("Conditional in if statement was null"); return; };
+
 	if (value->Type() == "Boolean") {
 		NovaBool* nbool = static_cast<NovaBool*>(value);
 		PushScope();
@@ -157,7 +173,41 @@ es_decl(ASTPrintNode* node) {
 }
 
 es_decl(ForEachNode* node) {
-	
+	if (VariableNode* var = dynamic_cast<VariableNode*>(node->variable)) {
+		NovaValue* val = EvaluateExpression(node->container);
+		if (val->Type() == "Array") {
+			NovaArray* arr = static_cast<NovaArray*>(val);
+			PushScope();			
+
+			for (int i = 0; i < arr->CArr().size(); i++) {
+				if (var->as_ptr) {
+					NovaValue* v = arr->CArr()[i];
+					scope->variables[var->identifier] = v;
+					v->AddRef();
+				}
+				else {
+					NovaValue* v = arr->CArr()[i]->Copy();
+					scope->variables[var->identifier] = v;
+				}
+
+				for (StmtNode* stmt : node->body) {
+					EvaluateStatement(stmt);
+				}
+
+				if (NovaValue* v = scope->variables[var->identifier]) {
+					v->Release();
+				}
+			}
+
+			PopScope();
+		}
+		else {
+			PushError("Type in for each loop is not a container. Type is " + val->Type(), node);
+		}
+	}
+	else {
+		PushError("Variable initializer in for loop is not a variable", node);
+	}
 }
 
 es_decl(WhileNode* node) {

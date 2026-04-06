@@ -170,7 +170,6 @@
     <ClInclude Include="Include\NovaScript\Library\nova_std_macro.h" />
     <ClInclude Include="Include\NovaScript\Library\nova_string.h" />
     <ClInclude Include="Include\NovaScript\Library\nova_vector.h" />
-    <ClInclude Include="Include\NovaScript\Library\WinInputDialog\resource.h" />
     <ClInclude Include="Include\NovaScript\NovaErrorPush.h" />
     <ClInclude Include="Include\NovaScript\NovaScript.h" />
     <ClInclude Include="Include\NovaScript\NovaScript_API.h" />
@@ -185,9 +184,6 @@
     <ClInclude Include="Include\NovaScript\Value\IntValue.h" />
     <ClInclude Include="Include\NovaScript\Value\StringValue.h" />
     <ClInclude Include="Include\NovaScript\Value\Value.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Include\NovaScript\Library\WinInputDialog\dialog.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

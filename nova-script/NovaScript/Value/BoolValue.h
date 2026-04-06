@@ -5,19 +5,26 @@
 
 struct NOVASCRIPT_API NovaBool : public NovaValue {
 	NovaBool(bool b) : novab(b) {};
-	NovaBool(std::reference_wrapper<bool> cppb) : cppb(cppb) {};
-	bool novab;
-	std::reference_wrapper<bool> cppb = novab;
+	NovaBool(bool* cppb) : cppb(cppb) {};
 
-	bool& B();
+	bool novab = false;
+	bool* cppb = nullptr;
+
+	bool* B();
 	const bool& CB() const;
 
-	NovaValue* Copy() const override;
+	NovaValue* Copy() override;
 	std::string ToString() const override;
 	std::string Type() const override;
 
 	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
+	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { return nullptr; };
 	NovaValue* Assign(NovaValue* rhs) override;
+
+protected:
+
+	void OnDestroy() override;
+
 };
 
 #endif

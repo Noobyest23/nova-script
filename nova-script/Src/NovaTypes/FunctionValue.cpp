@@ -10,7 +10,11 @@ NovaValue* NovaFunction::Call(std::vector<NovaValue*> args) const {
 		}
 		interpretor->PushScope();
 		for (int i = 0; i < args.size(); i++) {
-			interpretor->GetScopeAsObj()->Set(fn->args[i], args[i]);
+			args[i]->AddRef();
+			if (interpretor->GetScopeAsObj()->variables[fn->args[i]]) {
+				interpretor->GetScopeAsObj()->variables[fn->args[i]]->Release();
+			}
+			interpretor->GetScopeAsObj()->variables[fn->args[i]] = args[i];
 		}
 		for (StmtNode* node : fn->body) {
 			if (ReturnStmtNode* ret = dynamic_cast<ReturnStmtNode*>(node)) {
@@ -21,6 +25,7 @@ NovaValue* NovaFunction::Call(std::vector<NovaValue*> args) const {
 			}
 			interpretor->EvaluateStatement(node);
 		}
+		interpretor->PopScope();
 	}
 	else if (cppfn) {
 		return cppfn(args);
@@ -47,20 +52,18 @@ std::string NovaFunction::Type() const {
 	return "NovaFunction";
 }
 
-NovaValue* NovaFunction::Copy() const {
+NovaValue* NovaFunction::Copy() {
 	if (fn) {
 		return new NovaFunction(fn, interpretor);
 	}
-	else if (cppfn) {
-		return new NovaFunction(cppfn);
-	}
-	else {
-		PushError("This function is null");
-		return nullptr;
-	}
+	else return new NovaFunction(cppfn);
 }
 
 NovaValue* NovaFunction::Assign(NovaValue* rhs) {
 	// You cannot assign to a function
 	return this;
+}
+
+void NovaFunction::OnDestroy() {
+	delete this;
 }

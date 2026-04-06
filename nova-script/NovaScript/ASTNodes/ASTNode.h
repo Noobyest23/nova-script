@@ -8,13 +8,12 @@ struct ExprNode;
 
 struct ASTNode {
 	bool constant = false;
+	
 	virtual std::string Print() const {
 		return "Not Implemented";
 	};
 
-	virtual void Delete() {
-		delete this;
-	};
+	virtual void Delete() = 0;
 };
 
 

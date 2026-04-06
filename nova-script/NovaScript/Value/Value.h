@@ -25,18 +25,18 @@ struct NOVASCRIPT_API NovaValue {
 
 	void AddRef();
 	void Release();
-	virtual NovaValue* Copy() const = 0;
+	virtual NovaValue* Copy() = 0;
 	virtual std::string ToString() const = 0;
 	virtual std::string Type() const = 0;
-	virtual NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { OpFailed(rhs, op);  return nullptr; };
-	virtual NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { OpFailed(rhs, op); return nullptr; };
+	virtual NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const = 0;
+	virtual NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) = 0;
 	virtual NovaValue* Assign(NovaValue* rhs) = 0;
 	NovaValue* Access(const std::string& chain);
 	std::unordered_map<std::string, NovaValue*>* accessables = nullptr;
 	
 protected:
 
-	virtual void OnDestroy() {};
+	virtual void OnDestroy() = 0;
 	~NovaValue() = default;
 
 	void OpFailed(NovaValue* rhs, const NovaOperator& op) const;

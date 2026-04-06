@@ -2,15 +2,21 @@
 #include "../NovaScript/Value/FloatValue.h"
 #include "../NovaScript/Value/BoolValue.h"
 
-int& NovaInt::Num() {
-	return cppnum.get();
+int* NovaInt::Num() {
+	if (is_cpp) {
+		return cppnum;
+	}
+	return &novanum;
 }
 
-const int& NovaInt::CNum() const {
-	return cppnum.get();
+const int NovaInt::CNum() const {
+	if (is_cpp) {
+		return *cppnum;
+	}
+	return novanum;
 }
 
-NovaValue* NovaInt::Copy() const {
+NovaValue* NovaInt::Copy() {
 	NovaInt* i = new NovaInt(CNum());
 	return i;
 }
@@ -127,19 +133,19 @@ NovaValue* NovaInt::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
 		int result = CNum();
 		switch (op) {
 		case NovaOperator::CompoundPlus: {
-			Num() += r->CNum();
+			*Num() += r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMinus: {
-			Num() -= r->CNum();
+			*Num() -= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMultiply: {
-			Num() *= r->CNum();
+			*Num() *= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundDivide: {
-			Num() /= r->CNum();
+			*Num() /= r->CNum();
 			return this;
 		}
 		default:
@@ -153,19 +159,19 @@ NovaValue* NovaInt::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
 		float result = CNum();
 		switch (op) {
 		case NovaOperator::CompoundPlus: {
-			Num() += r->CNum();
+			*Num() += r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMinus: {
-			Num() -= r->CNum();
+			*Num() -= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundMultiply: {
-			Num() *= r->CNum();
+			*Num() *= r->CNum();
 			return this;
 		}
 		case NovaOperator::CompoundDivide: {
-			Num() /= r->CNum();
+			*Num() /= r->CNum();
 			return this;
 		}
 		default:
@@ -183,13 +189,17 @@ NovaValue* NovaInt::Assign(NovaValue* rhs) {
 	// Int can be assigned by Int or Float
 	if (rhs->Type() == "Int") {
 		NovaInt* i = static_cast<NovaInt*>(rhs);
-		Num() = i->CNum();
+		*Num() = i->CNum();
 		return this;
 	}
 	else if (rhs->Type() == "Float") {
 		NovaFloat* f = static_cast<NovaFloat*>(rhs);
-		Num() = int(f->CNum());
+		*Num() = int(f->CNum());
 		return this;
 	}
 	return nullptr;
+}
+
+void NovaInt::OnDestroy() {
+	delete this;
 }

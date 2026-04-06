@@ -17,8 +17,16 @@ struct NOVASCRIPT_API NovaFunction : public NovaValue {
 
 	std::string Type() const override;
 	std::string ToString() const override;
-	NovaValue* Copy() const override;
+	NovaValue* Copy() override;
 	NovaValue* Assign(NovaValue* rhs) override;
+
+	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { return nullptr; };
+	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { return nullptr; };
+
+protected:
+
+	void OnDestroy() override;
+
 };
 
 

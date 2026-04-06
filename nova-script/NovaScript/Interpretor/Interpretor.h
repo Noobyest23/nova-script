@@ -72,6 +72,7 @@ private:
 	ee(CompoundOp*);
 	ee(NullLiteralNode*);
 	ee(NotNode*);
+	ee(IsNode*);
 	#pragma endregion
 
 	ProgramNode* program;
