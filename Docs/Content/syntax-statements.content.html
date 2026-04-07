@@ -1,0 +1,119 @@
+<section>
+	<h1>Statements</h1>
+    <p>Statements are the building blocks of a program. They are the instructions that tell the computer what to do. In Nova Script, statements can be categorized into several types, including:</p>
+    <ul>
+        <li><a href="#variable-declarations">Variable Declarations</a></li>
+        <li><a href="#if-statements">If Statements</a></li>
+        <li><a href="#while-loops">While Loops</a></li>
+        <li><a href="#for-loops">For Loops</a></li>
+        <li><a href="#function-definitions">Function Definitions</a></li>
+        <li><a href="#return-statements">Return Statements</a></li>
+        <li><a href="#type-declarations">Type Declarations</a></li>
+        <li><a href="#include">Include Statements</a></li>
+        <li><a href="#breakpoint">Breakpoint</a></li>
+        <li><a href="#super-breakpoint">Super Breakpoint</a></li>
+        <li><a href="#expr-stmt">Expression Statement</a></li>
+    </ul>
+</section>
+
+<section id="variable-declarations">
+    <h2>Variable Declarations</h2>
+    <p>Variables are used to store data. In Nova Script, variables are typically declared using the <code>var</code> keyword.</p>
+    <pre><code>var x = 10
+var name = "Nova"</code></pre>
+</section>
+
+<hr>
+
+<section id="if-statements">
+    <h2>If Statements</h2>
+    <p>If statements allow you to execute code based on a condition. Optional <code>else</code> blocks provide an alternative path.</p>
+    <pre><code>if (x > 5) {
+    Print("Greater")
+} else {
+    Print("Lesser")
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="while-loops">
+    <h2>While Loops</h2>
+    <p>A <code>while</code> loop repeats a block of code as long as a specified condition remains true.</p>
+    <pre><code>var i = 0
+while (i < 5) {
+    Print(i)
+    i = i + 1
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="for-loops">
+    <h2>For Loops</h2>
+    <p>For loops are used to iterate through a container</p>
+    <pre><code>for (i in [1, 2, 3, 4, 5]) {
+    Print(i)
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="function-definitions">
+    <h2>Function Definitions</h2>
+    <p>Functions are reusable blocks of code. They can take parameters and return values.</p>
+    <pre><code>func add(a, b) {
+    return a + b
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="return-statements">
+    <h2>Return Statements</h2>
+    <p>The <code>return</code> statement exits a function and optionally sends a value back to the caller.</p>
+</section>
+
+<hr>
+
+<section id="type-declarations">
+    <h2>Type Declarations</h2>
+    <p>Used to define new types or classes in Nova Script with an optional constructor</p>
+    <pre><code>type Person {
+    Person(name, age) {
+        this.name = name
+        this.age = age
+    }
+    var name
+    var age
+}
+
+var bob = Person("Bob", 30)
+</code></pre>
+
+<section id="include">
+    <h2>Include Statements</h2>
+    <p>Used to import external libraries or other Nova Script files or C++ modules into the current context.</p>
+    <pre><code>include "math" as math
+include "my_script.ns"</code></pre>
+</section>
+
+<hr>
+
+<section id="breakpoint">
+    <h2>Breakpoint</h2>
+    <p>Decompiles the current statement and prints the output, as well as printing all the variables in the scope and their values</p>
+</section>
+
+<section id="super-breakpoint">
+    <h2>Super Breakpoint</h2>
+    <p>Decompiles the entire script and prints the output, as well as printing all the variables in the scope and their values</p>
+</section>
+
+<hr>
+
+<section id="expr-stmt">
+    <h2>Expression Statement</h2>
+    <p>An expression used as a standalone statement, such as a function call or an assignment.</p>
+    <pre><code>Print("Hello World"); # A function call expression</code></pre>
+</section>

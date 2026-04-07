@@ -359,6 +359,226 @@ io.Print("Hello World!")
         <li><code>Signal</code>: Creates a new signal</li>
     </ul>
 </section>`,
+  "syntax-expressions": `<section>
+	<h1>Expressions</h1>
+    <p>Expressions are combinations of values, variables, operators, and function calls that evaluate to a single value. They are the building blocks of statements and can be used wherever a value is expected. In Nova Script, expressions can be categorized into several types, including:</p>
+    <ul>
+        <li><a href="#literal-expressions">Literal Expressions</a></li>
+        <li><a href="#variable-expressions">Variable Expressions</a></li>
+        <li><a href="#operation-expressions">Operation Expressions</a></li>
+        <li><a href="#compound-operation-expressions">Compound Operation Expressions</a></li>
+        <li><a href="#assignment-expressions">Assignment Expressions</a></li>
+        <li><a href="#function-call-expressions">Function Call Expressions</a></li>
+        <li><a href="#ternary-expressions">Ternary Expressions</a></li>
+        <li><a href="#dot-access-expressions">Dot Access Expressions</a></li>
+        <li><a href="#array-access-expressions">Array Access Expressions</a></li>
+        <li><a href="#not-expressions">Not Expressions</a></li>
+        <li><a href="#type-check-expressions">Type Check Expressions</a></li>
+    </ul>
+</section>
+
+<hr>
+
+<section id="literal-expressions">
+    <h2>Literal Expressions</h2>
+    <p>The simplest form of expression. A literal is a fixed value written directly in the source code.</p>
+    <pre><code>42          # NovaInt
+3.14        # NovaFloat
+"Hello"     # NovaString
+true        # NovaBool
+[1, 2, 3]   # NovaArray
+null        # NovaNull</code></pre>
+</section>
+
+<section id="variable-expressions">
+    <h2>Variable Expressions</h2>
+    <p>Refers to the value stored in a previously declared variable by using its identifier.</p>
+    <pre><code>var score = 100
+Print(score) # 'score' is the expression</code></pre>
+</section>
+
+<section id="operation-expressions">
+    <h2>Operation Expressions</h2>
+    <p>Uses standard mathematical or logical operators to combine two values.</p>
+    <pre><code>10 + 5
+x * y
+isValid && hasKey</code></pre>
+</section>
+
+<section id="compound-operation-expressions">
+    <h2>Compound Operation Expressions</h2>
+    <p>Performs an operation and an assignment in a single step.</p>
+    <pre><code>x += 5  # Equivalent to x = x + 5
+y *= 2  # Equivalent to y = y * 2</code></pre>
+</section>
+
+<section id="assignment-expressions">
+    <h2>Assignment Expressions</h2>
+    <p>Assigns a new value to a variable. In Nova Script, the assignment itself evaluates to the assigned value.</p>
+    <pre><code>x = 20</code></pre>
+</section>
+
+<section id="function-call-expressions">
+    <h2>Function Call Expressions</h2>
+    <p>Invokes a function and evaluates to that function's return value.</p>
+    <pre><code>math.Sin(1.5)
+add(10, 20)</code></pre>
+</section>
+
+<section id="ternary-expressions">
+    <h2>Ternary Expressions</h2>
+    <p>A shorthand for <code>if-else</code> that evaluates to one of two values based on a condition.</p>
+    <p>Ternary operations must be wrapped in parentheses</p>
+    <pre><code>var status = ("Adult" if (age >= 18) else "Minor")</code></pre>
+</section>
+
+<section id="dot-access-expressions">
+    <h2>Dot Access Expressions</h2>
+    <p>Used to access properties or methods of a <code>NovaValue</code>.</p>
+    <pre><code>player.name
+io.Print("Hello")</code></pre>
+</section>
+
+<section id="array-access-expressions">
+    <h2>Array Access Expressions</h2>
+    <p>Retrieves a value from a <code>NovaArray</code> using an index inside square brackets.</p>
+    <pre><code>var firstItem = inventory[0]</code></pre>
+</section>
+
+<section id="not-expressions">
+    <h2>Not Expressions</h2>
+    <p>Inverts a boolean value using the <code>!</code> operator.</p>
+    <pre><code>!true   # evaluates to false
+!isDead # evaluates to true if isDead is false</code></pre>
+    <p>Also inverts a <code>NovaInt</code> or <code>NovaFloat</code> using the <code>-</code> operator</p>
+</section>
+
+<section id="type-check-expressions">
+    <h2>Type Check Expressions</h2>
+    <p>Checks if a value belongs to a specific type. returns a <code>NovaBool</code>.</p>
+    <pre><code>if (x is "Int") { ... }</code></pre>
+    <p><strong>Note:</strong> built in types will always be capitalized and grouped as one word ie: Int, Float, String, Bool, Array, Null</p>
+</section>`,
+  "syntax-statements": `<section>
+	<h1>Statements</h1>
+    <p>Statements are the building blocks of a program. They are the instructions that tell the computer what to do. In Nova Script, statements can be categorized into several types, including:</p>
+    <ul>
+        <li><a href="#variable-declarations">Variable Declarations</a></li>
+        <li><a href="#if-statements">If Statements</a></li>
+        <li><a href="#while-loops">While Loops</a></li>
+        <li><a href="#for-loops">For Loops</a></li>
+        <li><a href="#function-definitions">Function Definitions</a></li>
+        <li><a href="#return-statements">Return Statements</a></li>
+        <li><a href="#type-declarations">Type Declarations</a></li>
+        <li><a href="#include">Include Statements</a></li>
+        <li><a href="#breakpoint">Breakpoint</a></li>
+        <li><a href="#super-breakpoint">Super Breakpoint</a></li>
+        <li><a href="#expr-stmt">Expression Statement</a></li>
+    </ul>
+</section>
+
+<section id="variable-declarations">
+    <h2>Variable Declarations</h2>
+    <p>Variables are used to store data. In Nova Script, variables are typically declared using the <code>var</code> keyword.</p>
+    <pre><code>var x = 10
+var name = "Nova"</code></pre>
+</section>
+
+<hr>
+
+<section id="if-statements">
+    <h2>If Statements</h2>
+    <p>If statements allow you to execute code based on a condition. Optional <code>else</code> blocks provide an alternative path.</p>
+    <pre><code>if (x > 5) {
+    Print("Greater")
+} else {
+    Print("Lesser")
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="while-loops">
+    <h2>While Loops</h2>
+    <p>A <code>while</code> loop repeats a block of code as long as a specified condition remains true.</p>
+    <pre><code>var i = 0
+while (i < 5) {
+    Print(i)
+    i = i + 1
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="for-loops">
+    <h2>For Loops</h2>
+    <p>For loops are used to iterate through a container</p>
+    <pre><code>for (i in [1, 2, 3, 4, 5]) {
+    Print(i)
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="function-definitions">
+    <h2>Function Definitions</h2>
+    <p>Functions are reusable blocks of code. They can take parameters and return values.</p>
+    <pre><code>func add(a, b) {
+    return a + b
+}</code></pre>
+</section>
+
+<hr>
+
+<section id="return-statements">
+    <h2>Return Statements</h2>
+    <p>The <code>return</code> statement exits a function and optionally sends a value back to the caller.</p>
+</section>
+
+<hr>
+
+<section id="type-declarations">
+    <h2>Type Declarations</h2>
+    <p>Used to define new types or classes in Nova Script with an optional constructor</p>
+    <pre><code>type Person {
+    Person(name, age) {
+        this.name = name
+        this.age = age
+    }
+    var name
+    var age
+}
+
+var bob = Person("Bob", 30)
+</code></pre>
+
+<section id="include">
+    <h2>Include Statements</h2>
+    <p>Used to import external libraries or other Nova Script files or C++ modules into the current context.</p>
+    <pre><code>include "math" as math
+include "my_script.ns"</code></pre>
+</section>
+
+<hr>
+
+<section id="breakpoint">
+    <h2>Breakpoint</h2>
+    <p>Decompiles the current statement and prints the output, as well as printing all the variables in the scope and their values</p>
+</section>
+
+<section id="super-breakpoint">
+    <h2>Super Breakpoint</h2>
+    <p>Decompiles the entire script and prints the output, as well as printing all the variables in the scope and their values</p>
+</section>
+
+<hr>
+
+<section id="expr-stmt">
+    <h2>Expression Statement</h2>
+    <p>An expression used as a standalone statement, such as a function call or an assignment.</p>
+    <pre><code>Print("Hello World"); # A function call expression</code></pre>
+</section>
+`,
   "types": `<section>
     <h1>Types</h1>
     

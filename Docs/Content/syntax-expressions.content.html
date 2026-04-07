@@ -1,0 +1,100 @@
+<section>
+	<h1>Expressions</h1>
+    <p>Expressions are combinations of values, variables, operators, and function calls that evaluate to a single value. They are the building blocks of statements and can be used wherever a value is expected. In Nova Script, expressions can be categorized into several types, including:</p>
+    <ul>
+        <li><a href="#literal-expressions">Literal Expressions</a></li>
+        <li><a href="#variable-expressions">Variable Expressions</a></li>
+        <li><a href="#operation-expressions">Operation Expressions</a></li>
+        <li><a href="#compound-operation-expressions">Compound Operation Expressions</a></li>
+        <li><a href="#assignment-expressions">Assignment Expressions</a></li>
+        <li><a href="#function-call-expressions">Function Call Expressions</a></li>
+        <li><a href="#ternary-expressions">Ternary Expressions</a></li>
+        <li><a href="#dot-access-expressions">Dot Access Expressions</a></li>
+        <li><a href="#array-access-expressions">Array Access Expressions</a></li>
+        <li><a href="#not-expressions">Not Expressions</a></li>
+        <li><a href="#type-check-expressions">Type Check Expressions</a></li>
+    </ul>
+</section>
+
+<hr>
+
+<section id="literal-expressions">
+    <h2>Literal Expressions</h2>
+    <p>The simplest form of expression. A literal is a fixed value written directly in the source code.</p>
+    <pre><code>42          # NovaInt
+3.14        # NovaFloat
+"Hello"     # NovaString
+true        # NovaBool
+[1, 2, 3]   # NovaArray
+null        # NovaNull</code></pre>
+</section>
+
+<section id="variable-expressions">
+    <h2>Variable Expressions</h2>
+    <p>Refers to the value stored in a previously declared variable by using its identifier.</p>
+    <pre><code>var score = 100
+Print(score) # 'score' is the expression</code></pre>
+</section>
+
+<section id="operation-expressions">
+    <h2>Operation Expressions</h2>
+    <p>Uses standard mathematical or logical operators to combine two values.</p>
+    <pre><code>10 + 5
+x * y
+isValid && hasKey</code></pre>
+</section>
+
+<section id="compound-operation-expressions">
+    <h2>Compound Operation Expressions</h2>
+    <p>Performs an operation and an assignment in a single step.</p>
+    <pre><code>x += 5  # Equivalent to x = x + 5
+y *= 2  # Equivalent to y = y * 2</code></pre>
+</section>
+
+<section id="assignment-expressions">
+    <h2>Assignment Expressions</h2>
+    <p>Assigns a new value to a variable. In Nova Script, the assignment itself evaluates to the assigned value.</p>
+    <pre><code>x = 20</code></pre>
+</section>
+
+<section id="function-call-expressions">
+    <h2>Function Call Expressions</h2>
+    <p>Invokes a function and evaluates to that function's return value.</p>
+    <pre><code>math.Sin(1.5)
+add(10, 20)</code></pre>
+</section>
+
+<section id="ternary-expressions">
+    <h2>Ternary Expressions</h2>
+    <p>A shorthand for <code>if-else</code> that evaluates to one of two values based on a condition.</p>
+    <p>Ternary operations must be wrapped in parentheses</p>
+    <pre><code>var status = ("Adult" if (age >= 18) else "Minor")</code></pre>
+</section>
+
+<section id="dot-access-expressions">
+    <h2>Dot Access Expressions</h2>
+    <p>Used to access properties or methods of a <code>NovaValue</code>.</p>
+    <pre><code>player.name
+io.Print("Hello")</code></pre>
+</section>
+
+<section id="array-access-expressions">
+    <h2>Array Access Expressions</h2>
+    <p>Retrieves a value from a <code>NovaArray</code> using an index inside square brackets.</p>
+    <pre><code>var firstItem = inventory[0]</code></pre>
+</section>
+
+<section id="not-expressions">
+    <h2>Not Expressions</h2>
+    <p>Inverts a boolean value using the <code>!</code> operator.</p>
+    <pre><code>!true   # evaluates to false
+!isDead # evaluates to true if isDead is false</code></pre>
+    <p>Also inverts a <code>NovaInt</code> or <code>NovaFloat</code> using the <code>-</code> operator</p>
+</section>
+
+<section id="type-check-expressions">
+    <h2>Type Check Expressions</h2>
+    <p>Checks if a value belongs to a specific type. returns a <code>NovaBool</code>.</p>
+    <pre><code>if (x is "Int") { ... }</code></pre>
+    <p><strong>Note:</strong> built in types will always be capitalized and grouped as one word ie: Int, Float, String, Bool, Array, Null</p>
+</section>
