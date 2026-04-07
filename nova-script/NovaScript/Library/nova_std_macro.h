@@ -32,7 +32,7 @@ f = nova_float->CNum();\
 #define numiget(f, arg_i) if (args[arg_i] and args[arg_i]->Type() != "Int" and args[arg_i]->Type() != "Float") {\
 PushError("Expected number as argument " + std::to_string(arg_i)); return nullptr;}\
 int f = 0;\
-if (args[arg_i]->Type() != "Int") {\
+if (args[arg_i]->Type() == "Int") {\
 NovaInt* nova_int = static_cast<NovaInt*>(args[arg_i]);\
 f = nova_int->CNum();\
 }\

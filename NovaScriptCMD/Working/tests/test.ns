@@ -1,7 +1,8 @@
 include "io" as io
-include "functional"
+include "signal"
 include "math" as math
 include "types"
+include "os" as os
 
 io.Print("Hello NovaScript!")
 
@@ -40,3 +41,7 @@ if (1 is "Int") {
 }
 
 io.Print(Float("10"));
+io.Print("Waiting for 6 seconds")
+os.Wait(6000)
+io.Print("Finished Waiting")
+io.Print(os.Run("echo Hello World!"))

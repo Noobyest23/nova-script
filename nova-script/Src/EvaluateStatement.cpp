@@ -64,7 +64,7 @@ es_decl(FuncDeclNode* node) {
 es_decl(IfStmtNode* node) {
 	NovaValue* value = EvaluateExpression(node->expression);
 	
-	if (!value) { PushError("Conditional in if statement was null"); return; };
+	if (!value) { PushError("Conditional in if statement was null", node); return; };
 
 	if (value->Type() == "Boolean") {
 		NovaBool* nbool = static_cast<NovaBool*>(value);
@@ -117,7 +117,7 @@ es_decl(IncludeNode* node) {
 					scope->Set(as->identifier, object);
 					object->Release();
 				}
-				PushError("as in include statement is not a variable");
+				PushError("as in include statement is not a variable", node);
 			}
 			else {
 				for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
@@ -135,7 +135,7 @@ es_decl(IncludeNode* node) {
 						obj->Release();
 						return;
 					}
-					PushError("as in include statement is not a variable");
+					PushError("as in include statement is not a variable", node);
 				}
 				else {
 					for (std::pair<std::string, NovaValue*> pair : *obj->accessables) {
@@ -145,7 +145,9 @@ es_decl(IncludeNode* node) {
 					return;
 				}
 			}
-
+			else {
+				PushError("Module '" + file->ToString() + "' does not exist", node);
+			}
 		}
 	}
 	else {

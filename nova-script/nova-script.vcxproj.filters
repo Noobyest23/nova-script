@@ -108,6 +108,9 @@
     <ClInclude Include="NovaScript\Value\NullValue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NovaScript\Library\nova_os.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\EvaluateExpression.cpp">
