@@ -1,11 +1,10 @@
 #ifndef NOVASCRIPT_INTERPRETOR_H
 #define NOVASCRIPT_INTERPRETOR_H
 #include "../ASTNodes/ProgramNode.h"
+#include "../Value/NullValue.h"
 
 class NovaModule;
-struct NovaValue;
 struct Scope;
-
 #include <string>
 #include <unordered_map>
 
@@ -80,18 +79,12 @@ private:
 
 	void PushError(const std::string& message, ASTNode* current_node = nullptr);
 	
+	NovaNull* null = new NovaNull();
+
 	std::unordered_map<std::string, NovaModule*> modules;
 	std::unordered_map<TypeDeclNode*, FuncDeclNode*> nova_types;
 	std::vector<NovaValue*> literal_stack;
 };
 
-// Todo
-// Type Declare
-// Scene Tree
-// Extendable Objects
-// signal support
-// std lib stuff
-// vector
-// array
 
 #endif

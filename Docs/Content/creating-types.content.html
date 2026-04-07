@@ -6,10 +6,9 @@
     <li><code>ToString()</code>: Returns a string representation of the value.</li>
     <li><code>Copy()</code>: Returns a copy of the value.</li>
     <li><code>Assign(NovaValue* rhs)</code>: Assigns the value of rhs to this value, if the types are compatible. Returns this value if the assignment was successful, or nullptr if it was not.</li>
-    <p>These functions are optional to implement</p>
     <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
-    <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
-    <li><code>OnDestroy()</code>: Called when the value is destroyed.</li>
+    <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Modifies this and returns itself, or nullptr if the operation is not supported for this type.</li>
+    <li><code>OnDestroy()</code>: Called when the value is destroyed, you MUST use delete this in OnDestroy()</li>
     <p>For this example I will create an Image class for NovaScript</p>
     <pre><code class="cpp">class MyImageType : public NovaValue {
 public:
@@ -43,8 +42,6 @@ public:
         data = image_rhs->data;
         return this;
     }
-
-    // Optional NovaValue functions
     NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const {
         OpFailed(rhs, op);
         return nullptr;
@@ -55,7 +52,10 @@ public:
     }
 
 protected:
-    void OnDestroy() override { delete[] data; }
+    void OnDestroy() override { 
+        delete[] data; // Delete your own resources here
+        delete this; // Delete this last
+    }
 
 private:
     int width;

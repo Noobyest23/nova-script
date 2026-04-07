@@ -30,7 +30,7 @@ Interpretor::~Interpretor() {
 	for (std::pair<std::string, NovaModule*> pair : modules) {
 		delete pair.second;
 	}
-
+	delete null;
 	modules.clear();
 }
 
@@ -45,7 +45,7 @@ void Interpretor::Init() {
 	}
 	
 	modules["io"] = new NovaIOModule;
-	modules["functional"] = new NovaFunctionalModule;
+	modules["signal"] = new NovaFunctionalModule;
 	modules["math"] = new NovaMathModule;
 	modules["types"] = new NovaTypesModule;
 }

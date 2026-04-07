@@ -54,10 +54,9 @@ window.DOCS_CONTENT = {
     <li><code>ToString()</code>: Returns a string representation of the value.</li>
     <li><code>Copy()</code>: Returns a copy of the value.</li>
     <li><code>Assign(NovaValue* rhs)</code>: Assigns the value of rhs to this value, if the types are compatible. Returns this value if the assignment was successful, or nullptr if it was not.</li>
-    <p>These functions are optional to implement</p>
     <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
-    <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
-    <li><code>OnDestroy()</code>: Called when the value is destroyed.</li>
+    <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Modifies this and returns itself, or nullptr if the operation is not supported for this type.</li>
+    <li><code>OnDestroy()</code>: Called when the value is destroyed, you MUST use delete this in OnDestroy()</li>
     <p>For this example I will create an Image class for NovaScript</p>
     <pre><code class="cpp">class MyImageType : public NovaValue {
 public:
@@ -91,8 +90,6 @@ public:
         data = image_rhs->data;
         return this;
     }
-
-    // Optional NovaValue functions
     NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const {
         OpFailed(rhs, op);
         return nullptr;
@@ -103,7 +100,10 @@ public:
     }
 
 protected:
-    void OnDestroy() override { delete[] data; }
+    void OnDestroy() override { 
+        delete[] data; // Delete your own resources here
+        delete this; // Delete this last
+    }
 
 private:
     int width;
@@ -290,5 +290,216 @@ io.Print("Hello World!")
     </ul>
 </section>
 `,
-  "types": ``
+  "library-io": `<section>
+    <h1>IO Library</h1>
+    <p>The IO Library provides functions for input and output operations in Nova Script. It allows you to read from and write to files, as well as interact with the console.</p>
+    <h2>Functions</h2>
+    <ul>
+        <li><code>Print(v1, v2...)</code>: Prints one or more values to the console</li>
+        <li><code>PrintWarning(v1, v2...)</code>: Prints one or more warning messages to the console</li>
+        <li><code>PrintError(v1, v2...)</code>: Prints one or more error messages to the console</li>
+        <li><code>ReadFile(path : String)</code>: Reads the contents of a file and returns it as a string</li>
+        <li><code>WriteFile(path : String, content : String)</code>: Writes a string to a file</li>
+        <li><code>Input(prompt : String)</code>: Displays a prompt and returns a <code>String</code> input from the user</li>
+    </ul>
+    <p>Print, PrintWarning, PrintError, and Input only work with the console</p>
+</section>`,
+  "library-math": `<section>
+    <h1>Math Library</h1>
+    <p>The Math Library provides a collection of mathematical constants and functions for performing arithmetic, trigonometric, and randomization operations.</p>
+    
+    <h2>Constants</h2>
+    <ul>
+        <li><code>PI</code>: The ratio of a circle's circumference to its diameter (~3.14159)</li>
+        <li><code>E</code>: Euler's number, the base of natural logarithms (~2.71828)</li>
+    </ul>
+
+    <h2>Functions</h2>
+    <div class="function-group">
+        <h3>Trigonometry & Basic</h3>
+        <ul>
+            <li><code>Sin(rad)</code>, <code>Cos(rad)</code>, <code>Tan(rad)</code>: Returns trigonometric results for radians</li>
+            <li><code>Sqrt(v)</code>: Returns the square root of a value</li>
+            <li><code>Abs(v)</code>: Returns the absolute value</li>
+            <li><code>Degrees(rad)</code> / <code>Radians(deg)</code>: Converts between angle units</li>
+        </ul>
+
+        <h3>Rounding & Comparison</h3>
+        <ul>
+            <li><code>Round(v)</code>, <code>Floor(v)</code>, <code>Ceil(v)</code>: Standard rounding functions</li>
+            <li><code>Min(a, b)</code> / <code>Max(a, b)</code>: Returns the smaller or larger of two values</li>
+            <li><code>Clamp(v, lo, hi)</code>: Constrains a value between a minimum and maximum</li>
+            <li><code>Lerp(a, b, t)</code>: Linearly interpolates between <code>a</code> and <code>b</code> by factor <code>t</code></li>
+        </ul>
+
+        <h3>Randomization</h3>
+        <ul>
+            <li><code>RandF()</code>: Returns a random float between 0.0 and 1.0</li>
+            <li><code>RandI()</code>: Returns a random integer</li>
+            <li><code>RandFRange(min, max)</code>: Returns a random float within a range</li>
+            <li><code>RandIRange(min, max)</code>: Returns a random integer within a range</li>
+        </ul>
+    </div>
+</section>`,
+  "types": `<section>
+    <h1>Types</h1>
+    
+    <p><strong>Types</strong> are the different data types that Nova Script supports. They define the kind of data that can be stored and manipulated in variables, as well as the operations that can be performed on that data.</p>
+
+    <p>Here is a list of all built-in types in Nova Script:</p>
+
+    <ul>
+        <li><a href="#novavalue"><code>NovaValue</code></a>: The base type for all values in Nova Script. All other types inherit from NovaValue.</li>
+        <li><a href="#novaint"><code>NovaInt</code></a>: Represents integer numbers (e.g., 42, -7)</li>
+        <li><a href="#novafloat"><code>NovaFloat</code></a>: Represents floating-point numbers (e.g., 3.14, -0.001)</li>
+        <li><a href="#novastring"><code>NovaString</code></a>: Represents sequences of characters (e.g., "Hello, World!")</li>
+        <li><a href="#novabool"><code>NovaBool</code></a>: Represents boolean values (true or false)</li>
+        <li><a href="#novaarray"><code>NovaArray</code></a>: Represents ordered collections of values (e.g., [1, 2, 3])</li>
+        <li><a href="#novaobject"><code>NovaObject</code></a>: Represents key-value pairs (e.g., { name: "Alice", age: 30 })</li>
+    </ul>
+</section>
+
+<section id="novavalue">
+    <h1>NovaValue</h1>
+    <p><code>NovaValue</code> is the base type for all values in Nova Script. All other types inherit from NovaValue. It defines the common interface and behavior for all values, such as how they are copied, assigned, and how they perform operations.</p>
+    <h2>Methods</h2>
+    <ul>
+        <li><code>AddRef()</code>: Increments the reference count for the value</li>
+        <li><code>Release()</code>: Decrements the reference count for the value, if the value is reaches zero, calls <code>Release()</code> on all accessables and calls <code>OnDestroy()</code></li>
+        <li><code>Copy()</code>: Creates a copy of the value</li>
+        <li><code>Type()</code>: Returns the type of the value as a string</li>
+        <li><code>ToString()</code>: Returns a string representation of the value</li>
+        <li><code>Assign(NovaValue* rhs)</code>: Assigns a new value to this variable if possible</li>
+        <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs an operation with another value</li>
+        <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs a compound operation with another value</li>
+        <li><code>Access(const std::string& name)</code>: Returns the value of the member with the given name, or null if it does not exist</li>
+        <li><code>OnDestroy()</code>: Called when the value is destroyed</li>
+    </ul>
+</section>
+
+<section id="novaint">
+    <h1>NovaInt</h1>
+    <h2>Methods</h2>
+    <ul>
+        <li><code>Num()</code>: Returns a pointer to the C++ integer</li>
+        <li><code>CNum()</code>: Returns a const reference to the C++ integer</li>
+    </ul>
+    <h2>Operators</h2>
+    <p>NovaInt supports the following operators with NovaInt and NovaFloat values:</p>
+    <ul>
+        <li><code>+</code>: Addition</li>
+        <li><code>-</code>: Subtraction</li>
+        <li><code>*</code>: Multiplication</li>
+        <li><code>/</code>: Division</li>
+        <li><code>==</code>: Equality comparison</li>
+        <li><code>!=</code>: Inequality comparison</li>
+        <li><code>&lt;</code>: Less than comparison</li>
+        <li><code>&gt;</code>: Greater than comparison</li>
+        <li><code>&lt;=</code>: Less than or equal to comparison</li>
+        <li><code>&gt;=</code>: Greater than or equal to comparison</li>
+        <li><code>+=</code>: Addition assignment</li>
+        <li><code>-=</code>: Subtraction assignment</li>
+        <li><code>*=</code>: Multiplication assignment</li>
+        <li><code>/=</code>: Division assignment</li>
+    </ul>
+</section>
+
+<section id="novafloat">
+    <h1>NovaFloat</h1>
+    <h2>Methods</h2>
+    <ul>
+        <li><code>Num()</code>: Returns a pointer to the C++ float</li>
+        <li><code>CNum()</code>: Returns a const reference to the C++ float</li>
+    </ul>
+    <h2>Operators</h2>
+    <p>NovaFloat supports the following operators with NovaInt and NovaFloat values:</p>
+    <ul>
+        <li><code>+</code>: Addition</li>
+        <li><code>-</code>: Subtraction</li>
+        <li><code>*</code>: Multiplication</li>
+        <li><code>/</code>: Division</li>
+        <li><code>==</code>: Equality comparison</li>
+        <li><code>!=</code>: Inequality comparison</li>
+        <li><code>&lt;</code>: Less than comparison</li>
+        <li><code>&gt;</code>: Greater than comparison</li>
+        <li><code>&lt;=</code>: Less than or equal to comparison</li>
+        <li><code>&gt;=</code>: Greater than or equal to comparison</li>
+        <li><code>+=</code>: Addition assignment</li>
+        <li><code>-=</code>: Subtraction assignment</li>
+        <li><code>*=</code>: Multiplication assignment</li>
+        <li><code>/=</code>: Division assignment</li>
+    </ul>
+</section>
+
+<section id="novastring">
+    <h1>NovaString</h1>
+    <h2>Methods</h2>
+    <ul>
+        <li><code>Str()</code>: Returns a pointer to the C++ string</li>
+        <li><code>CStr()</code>: Returns a const reference to the C++ string</li>
+    </ul>
+    <h2>Operators</h2>
+    <p>NovaString supports the following operators with NovaString values:</p>
+    <ul>
+        <li><code>+</code>: Concatenation</li>
+        <li><code>==</code>: Equality comparison</li>
+        <li><code>!=</code>: Inequality comparison</li>
+        <li><code>+=</code>: Concatenation assignment</li>
+    </ul>
+    <h2>Members</h2>
+    <ul>
+        <li><code>Length()</code>: Returns the length of the string as a NovaInt</li>
+        <li><code>IsEmpty()</code>: Returns true if the string is empty, false otherwise</li>
+        <li><code>StartsWith(str : String)</code>: Returns true if the string starts with the given prefix, false otherwise</li>
+        <li><code>EndsWith(str : String)</code>: Returns true if the string ends with the given suffix, false otherwise</li>
+        <li><code>Contains(str : String)</code>: Returns true if the string contains the given substring, false otherwise</li>
+        <li><code>ToUpper()</code>: Returns a new string with all characters converted to uppercase</li>
+        <li><code>ToLower()</code>: Returns a new string with all characters converted to lowercase</li>
+        <li><code>Trim()</code>: Returns a new string with leading and trailing whitespace removed</li>
+        <li><code>Find(str : String)</code>: Returns the index of the first occurrence of the given substring, or -1 if not found</li>
+        <li><code>Replace(old : String, new : String)</code>: Returns a new string with all occurrences of the given substring replaced with another substring</li>
+        <li><code>Substr(start : Int, length : Int)</code>: Returns a new string that is a substring of the original string</li>
+    </ul>
+</section>
+
+<section id="novabool">
+    <h1>NovaBool</h1>
+    <h2>Methods</h2>
+    <ul>
+        <li><code>B()</code>: Returns a pointer to the C++ boolean</li>
+        <li><code>CB()</code>: Returns a const reference to the C++ boolean</li>
+    </ul>
+    <h2>Operators</h2>
+    <p>NovaBool supports the following operators with NovaBool values:</p>
+    <ul>
+        <li><code>==</code>: Equality comparison</li>
+        <li><code>!=</code>: Inequality comparison</li>
+    </ul>
+</section>
+
+<section id="novaarray">
+    <h1>NovaArray</h1>
+    <h2>Methods</h2>
+    <ul>
+        <li><code>Arr()</code>: Returns a pointer to the C++ vector of NovaValue pointers</li>
+        <li><code>CArr()</code>: Returns a const reference to the C++ vector of NovaValue pointers</li>
+    </ul>
+    <h2>Members</h2>
+    <ul>
+        <li><code>Size()</code>: Returns the number of elements in the array as a NovaInt</li>
+        <li><code>PushBack(value : NovaValue)</code>: Adds a new element to the end of the array</li>
+        <li><code>Pop()</code>: Removes the last element from the array</li>
+        <li><code>Clear()</code>: Removes all elements from the array</li>
+        <li><code>Erase(index : Int)</code>: Removes the element at the specified index</li>
+    </ul>
+</section>
+
+<section id="novaobject">
+    <h2>NovaObject</h2>
+    <p>A NovaObject is a value with no data other than accessables</p>
+    <h2>Members</h2>
+    <ul>
+        <li><code>PushBack(name : String, value : NovaValue)</code>: Adds a new member with the given name and value to the object</li>
+    </ul>
+</section>`
 };

@@ -236,6 +236,7 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClInclude Include="NovaScript\Value\IntValue.h" />
     <ClInclude Include="NovaScript\Value\FloatValue.h" />
     <ClInclude Include="NovaScript\Value\NovaObject.h" />
+    <ClInclude Include="NovaScript\Value\NullValue.h" />
     <ClInclude Include="NovaScript\Value\SignalValue.h" />
     <ClInclude Include="NovaScript\Value\StringValue.h" />
     <ClInclude Include="NovaScript\Value\Value.h" />
