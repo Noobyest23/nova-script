@@ -69,16 +69,16 @@ int main() {
 
     NovaValue* GetVar(std::string var_name) {
         ValueHandle handle = GetVariable(interpretor, var_name.c_str());
-        return static_cast<NovaValue*>(handle);
+        return static_cast&lt;NovaValue*&gt;(handle);
     }
 
     void SetVar(std::string var_name, NovaValue* value) {
         SetVariable(interpretor, var_name.c_str(), value);
     }
 
-    NovaValue* CallFunction(std::string func_name, std::vector<NovaValue*> args) {
+    NovaValue* CallFunction(std::string func_name, std::vector&lt;NovaValue*&gt; args) {
         ValueHandle handle = CallFunc(interpretor, func_name.c_str(), &args);
-        return static_cast<NovaValue*>(handle);
+        return static_cast&lt;NovaValue*&gt;(handle);
     }
 
     ~Script() {

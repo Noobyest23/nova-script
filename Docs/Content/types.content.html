@@ -13,6 +13,7 @@
         <li><a href="#novabool"><code>NovaBool</code></a>: Represents boolean values (true or false)</li>
         <li><a href="#novaarray"><code>NovaArray</code></a>: Represents ordered collections of values (e.g., [1, 2, 3])</li>
         <li><a href="#novaobject"><code>NovaObject</code></a>: Represents key-value pairs (e.g., { name: "Alice", age: 30 })</li>
+        <li><a href="#novasignal"><code>NovaSignal</code></a>: Represents a signal that can be emitted and listened to</li>
     </ul>
 </section>
 
@@ -157,5 +158,17 @@
     <h2>Members</h2>
     <ul>
         <li><code>PushBack(name : String, value : NovaValue)</code>: Adds a new member with the given name and value to the object</li>
+    </ul>
+</section>
+
+<section id="novasignal">
+    <h2>NovaSignal</h2>
+    <p>A NovaSignal is a value that can be emitted and listened to. It allows for communication between different parts of a program, enabling more modular and maintainable code.</p>
+    <h2>Members</h2>
+    <ul>
+        <li><code>Emit(args...)</code>: Emits the signal with the given arguments, calling all connected listeners with those arguments</li>
+        <li><code>Connect(listener : Function)</code>: Connects a listener function to the signal, which will be called whenever the signal is emitted</li>
+        <li><code>Disconnect(listener : Function)</code>: Disconnects a previously connected listener from the signal</li>
+        <li><code>GetConnections()</code>: Returns a list of all connected listeners</li>
     </ul>
 </section>

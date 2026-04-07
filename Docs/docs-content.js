@@ -203,16 +203,16 @@ int main() {
 
     NovaValue* GetVar(std::string var_name) {
         ValueHandle handle = GetVariable(interpretor, var_name.c_str());
-        return static_cast<NovaValue*>(handle);
+        return static_cast&lt;NovaValue*&gt;(handle);
     }
 
     void SetVar(std::string var_name, NovaValue* value) {
         SetVariable(interpretor, var_name.c_str(), value);
     }
 
-    NovaValue* CallFunction(std::string func_name, std::vector<NovaValue*> args) {
+    NovaValue* CallFunction(std::string func_name, std::vector&lt;NovaValue*&gt; args) {
         ValueHandle handle = CallFunc(interpretor, func_name.c_str(), &args);
-        return static_cast<NovaValue*>(handle);
+        return static_cast&lt;NovaValue*&gt;(handle);
     }
 
     ~Script() {
@@ -290,9 +290,9 @@ io.Print("Hello World!")
     </ul>
 </section>
 `,
-  "library-io": `<section>
-    <h1>IO Library</h1>
-    <p>The IO Library provides functions for input and output operations in Nova Script. It allows you to read from and write to files, as well as interact with the console.</p>
+  "module-io": `<section>
+    <h1>IO Module</h1>
+    <p>The IO Module provides functions for input and output operations in Nova Script. It allows you to read from and write to files, as well as interact with the console.</p>
     <h2>Functions</h2>
     <ul>
         <li><code>Print(v1, v2...)</code>: Prints one or more values to the console</li>
@@ -304,9 +304,9 @@ io.Print("Hello World!")
     </ul>
     <p>Print, PrintWarning, PrintError, and Input only work with the console</p>
 </section>`,
-  "library-math": `<section>
-    <h1>Math Library</h1>
-    <p>The Math Library provides a collection of mathematical constants and functions for performing arithmetic, trigonometric, and randomization operations.</p>
+  "module-math": `<section>
+    <h1>Math Module</h1>
+    <p>The Math Module provides a collection of mathematical constants and functions for performing arithmetic, trigonometric, and randomization operations.</p>
     
     <h2>Constants</h2>
     <ul>
@@ -341,6 +341,24 @@ io.Print("Hello World!")
         </ul>
     </div>
 </section>`,
+  "module-os": `<section>
+    <h1>OS Module</h1>
+    <p>The OS Module provides functions for interacting with the operating system in Nova Script. It allows you to perform tasks such as file manipulation, process management, and system information retrieval.</p>
+    <h2>Functions</h2>
+    <ul>
+        <li><code>Wait(ms : Number)</code>: Waits for a specified amount of time</li>
+        <li><code>Run(command : String)</code>: Runs a command in the operating system</li>
+        <li><code>Exit(msg : String)</code>: Exits the program with an optional message</li>
+    </ul>
+</section>`,
+  "module-signal": `<section>
+    <h1>Signal Module</h1>
+    <p>The Signal Module provides functions for creating and managing signals in Nova Script. Signals are used to communicate between different parts of a program, allowing for more modular and maintainable code.</p>
+    <h2>Functions</h2>
+    <ul>
+        <li><code>Signal</code>: Creates a new signal</li>
+    </ul>
+</section>`,
   "types": `<section>
     <h1>Types</h1>
     
@@ -356,6 +374,7 @@ io.Print("Hello World!")
         <li><a href="#novabool"><code>NovaBool</code></a>: Represents boolean values (true or false)</li>
         <li><a href="#novaarray"><code>NovaArray</code></a>: Represents ordered collections of values (e.g., [1, 2, 3])</li>
         <li><a href="#novaobject"><code>NovaObject</code></a>: Represents key-value pairs (e.g., { name: "Alice", age: 30 })</li>
+        <li><a href="#novasignal"><code>NovaSignal</code></a>: Represents a signal that can be emitted and listened to</li>
     </ul>
 </section>
 
@@ -501,5 +520,18 @@ io.Print("Hello World!")
     <ul>
         <li><code>PushBack(name : String, value : NovaValue)</code>: Adds a new member with the given name and value to the object</li>
     </ul>
-</section>`
+</section>
+
+<section id="novasignal">
+    <h2>NovaSignal</h2>
+    <p>A NovaSignal is a value that can be emitted and listened to. It allows for communication between different parts of a program, enabling more modular and maintainable code.</p>
+    <h2>Members</h2>
+    <ul>
+        <li><code>Emit(args...)</code>: Emits the signal with the given arguments, calling all connected listeners with those arguments</li>
+        <li><code>Connect(listener : Function)</code>: Connects a listener function to the signal, which will be called whenever the signal is emitted</li>
+        <li><code>Disconnect(listener : Function)</code>: Disconnects a previously connected listener from the signal</li>
+        <li><code>GetConnections()</code>: Returns a list of all connected listeners</li>
+    </ul>
+</section>
+`
 };
