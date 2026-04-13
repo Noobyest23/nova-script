@@ -20,7 +20,7 @@ NovaInt* i = static_cast<NovaInt*>(args[arg_i]);
 #define numfget(f, arg_i) if (args[arg_i] and args[arg_i]->Type() != "Int" and args[arg_i]->Type() != "Float") {\
 PushError("Expected number as argument " + std::to_string(arg_i)); return nullptr;}\
 float f = 0.0f;\
-if (args[arg_i]->Type() != "Int") {\
+if (args[arg_i]->Type() == "Int") {\
 NovaInt* nova_int = static_cast<NovaInt*>(args[arg_i]);\
 f = nova_int->CNum();\
 }\
@@ -45,7 +45,8 @@ f = nova_float->CNum();\
 PushError("Expected float as argument " + std::to_string(arg_i)); return nullptr;}\
 NovaFloat* f = static_cast<NovaFloat*>(args[arg_i]);
 
-#define boolget(b, arg_i) if (args[arg_i] and args[arg_i]->Type() != "Boolean") {\
+#define boolget(b, arg_i)\
+if (args[arg_i] and args[arg_i]->Type() != "Bool") {\
 PushError("Expected boolean as argument " + std::to_string(arg_i)); return nullptr;}\
 NovaBool* b = static_cast<NovaBool*>(args[arg_i]);
 

@@ -45,11 +45,11 @@ nova_std_decl(GetConnections) {
 
 NovaSignal::NovaSignal() {
 	accessables = new std::unordered_map<std::string, NovaValue*> {
-		{"Emit", new NovaFunction(Emit)},
-		{"Connect", new NovaFunction(Connect)},
-		{"GetConnections", new NovaFunction(GetConnections)},
-		{"Disconnect", new NovaFunction(Disconnect)},
-		{"this", nullptr}
+		{"Emit", new NovaFunction(Emit, true)},
+		{"Connect", new NovaFunction(Connect, true)},
+		{"GetConnections", new NovaFunction(GetConnections, true)},
+		{"Disconnect", new NovaFunction(Disconnect, true)},
+		{"_NOVA_THIS", nullptr}
 	};
 }
 

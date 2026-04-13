@@ -7,7 +7,7 @@ include "os" as os
 io.Print("Hello NovaScript!")
 
 func AddTen(x) {
-	x += 10
+	| io.Print(x)
 }
 
 func SetTen(x) {
@@ -23,7 +23,7 @@ io.Print("y", y)
 var sig = Signal()
 sig.Connect(SetTen)
 sig.Connect(AddTen)
-
+sig.Emit(10)
 for function in sig.GetConnections() {
 	function(1)
 }
@@ -41,7 +41,27 @@ if (1 is "Int") {
 }
 
 io.Print(Float("10"));
-io.Print("Waiting for 6 seconds")
-os.Wait(6000)
+#io.Print("Waiting for 6 seconds")
+#os.Wait(6000)
 io.Print("Finished Waiting")
 io.Print(os.Run("echo Hello World!"))
+
+io.Print(x >= 0)
+
+while (x >= 0) {
+	x -= 1
+}
+
+Execute("jonas-stuff-that-broken/jorange.ns")
+
+| for i in Range(5, 0, -1) {
+	io.Print(i)
+}
+
+for i in Range(0, 5) {
+	io.Print(i)
+}
+
+for i in Range(5) {
+	io.Print(i)
+}

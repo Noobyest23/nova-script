@@ -1,0 +1,14 @@
+
+func ReturnOne()
+{
+    return 1
+}
+
+func for_i(sig, i)
+{
+    sig.Emit(i)
+    if i > 0
+    {
+        for_i(sig, i - 1)
+    }
+}

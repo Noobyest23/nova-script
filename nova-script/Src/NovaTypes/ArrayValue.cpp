@@ -128,11 +128,11 @@ nova_std_decl(Clear) {
 
 void NovaArray::Init() {
 	accessables = new std::unordered_map<std::string, NovaValue*>{
-		{"PushBack", new NovaFunction(PushBack)},
-		{"Erase", new NovaFunction(Erase)},
-		{"Size", new NovaFunction(Size)},
-		{"Pop", new NovaFunction(Pop)},
-		{"Clear", new NovaFunction(Clear)},
-		{"this", nullptr}
+		{"PushBack", new NovaFunction(PushBack, true)},
+		{"Erase", new NovaFunction(Erase, true)},
+		{"Size", new NovaFunction(Size, true)},
+		{"Pop", new NovaFunction(Pop, true)},
+		{"Clear", new NovaFunction(Clear, true)},
+		{"_NOVA_THIS", nullptr}
 	};
 }

@@ -10,11 +10,7 @@ NovaValue* NovaFunction::Call(std::vector<NovaValue*> args) const {
 		}
 		interpretor->PushScope();
 		for (int i = 0; i < args.size(); i++) {
-			args[i]->AddRef();
-			if (interpretor->GetScopeAsObj()->variables[fn->args[i]]) {
-				interpretor->GetScopeAsObj()->variables[fn->args[i]]->Release();
-			}
-			interpretor->GetScopeAsObj()->variables[fn->args[i]] = args[i];
+			interpretor->GetScopeAsObj()->LimitedSet(fn->args[i], args[i]);
 		}
 		for (StmtNode* node : fn->body) {
 			if (ReturnStmtNode* ret = dynamic_cast<ReturnStmtNode*>(node)) {

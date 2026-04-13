@@ -55,7 +55,8 @@ enum class NovaTokenType {
 	OpenBrace,
 	CloseBrace,
 	Null, // 50
-	Not
+	Not,
+	Comma
 };
 
 struct Token {

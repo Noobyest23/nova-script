@@ -62,12 +62,16 @@ class NovaMathModule : public NovaModule {
 
 	// --- Comparison & Interpolation ---
 	nova_std_decl(Min) {
-		req_args(2); numfget(v1, 0); numfget(v2, 1);
+		req_args(2);
+		numfget(v1, 0);
+		numfget(v2, 1);
 		return new NovaFloat(std::min(v1, v2));
 	}
 
 	nova_std_decl(Max) {
-		req_args(2); numfget(v1, 0); numfget(v2, 1);
+		req_args(2);
+		numfget(v1, 0);
+		numfget(v2, 1);
 		return new NovaFloat(std::max(v1, v2));
 	}
 

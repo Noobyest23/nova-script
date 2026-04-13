@@ -1,0 +1,13 @@
+include "signal"
+include "io"
+var s = Signal()
+
+func PrintHi()
+{
+    Print("Hi")
+}
+s.Connect(PrintHi)
+
+#s += PrintHi
+
+s.Emit()

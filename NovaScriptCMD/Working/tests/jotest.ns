@@ -1,0 +1,14 @@
+include "io"
+include "signal"
+
+func PrintHi() {
+	Print("Hi")
+}
+
+var sig = Signal()
+
+sig.Connect(PrintHi)
+
+sig.Emit()
+
+Print(1 == 1)

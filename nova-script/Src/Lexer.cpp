@@ -190,6 +190,10 @@ std::vector<Token> Lexer::Parse() {
 			Advance();
 			result.push_back({ NovaTokenType::Not, "!", line, column });
 			continue;
+		case ',':
+			Advance();
+			result.push_back({ NovaTokenType::Comma, ",", line, column });
+			continue;
 		}
 
 		Advance();

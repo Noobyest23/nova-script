@@ -66,3 +66,34 @@ std::string Scope::Print() const {
 	}
 	return out;
 }
+
+bool Scope::LimitedHas(const std::string& name) {
+	auto it = variables.find(name);
+	return it != variables.end();
+}
+
+void Scope::LimitedSet(const std::string& name, NovaValue* val) {
+	auto it = variables.find(name);
+	if (it != variables.end()) {
+		val->AddRef();
+		if (variables[name]) {
+			variables[name]->Release();
+		}
+		variables[name] = val;
+	}
+	else {
+		if (val) {
+			val->AddRef();
+		}
+		variables.insert_or_assign(name, val);
+	}
+}
+
+NovaValue* Scope::LimitedGet(const std::string& name) {
+	auto it = variables.find(name);
+	if (it != variables.end()) {
+		return it->second;
+	}
+	if (parent) return parent->Get(name);
+	return nullptr;
+}

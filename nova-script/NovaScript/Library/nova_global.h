@@ -1,5 +1,5 @@
-#ifndef NOVASCRIPT_STD_TYPES_H
-#define NOVASCRIPT_STD_TYPES_H
+#ifndef NOVASCRIPT_STANDARD_GLOBAL_H
+#define NOVASCRIPT_STANDARD_GLOBAL_H
 #include "nova_std_macro.h"
 #include "../Value/Value.h"
 #include "../Value/IntValue.h"
@@ -11,7 +11,60 @@
 #include "../Value/BoolValue.h"
 #include "NovaModule.h"
 
-class NovaTypesModule : public NovaModule {
+class NovaGlobalModule : public NovaModule {
+public:
+
+	nova_std_decl(Range) {
+		req_args(1);
+		int from = 0;
+		int by = 1;
+		int to;
+
+		// Argument Handling
+		if (args.size() == 1) {
+			numiget(t, 0);
+			to = t;
+		}
+		else {
+			numiget(f, 0);
+			numiget(t, 1);
+			from = f;
+			to = t;
+			if (args.size() > 2) {
+				numiget(b, 2);
+				by = b;
+			}
+		}
+
+		if (by == 0) {
+			PushError("Step ('by') cannot be 0");
+			return nullptr;
+		}
+
+		std::vector<NovaValue*> array;
+
+		if (by > 0) {
+			
+			if (from > to) {
+				PushError("'from' must be less than 'to' for positive steps");
+				return nullptr;
+			}
+			for (int i = from; i < to; i += by) {
+				array.push_back(new NovaInt(i));
+			}
+		}
+		else {
+			if (from < to) {
+				PushError("'from' must be greater than 'to' for negative steps");
+				return nullptr;
+			}
+			for (int i = from; i > to; i += by) {
+				array.push_back(new NovaInt(i));
+			}
+		}
+
+		return new NovaArray(array);
+	}
 
 	nova_std_decl(Int) {
 		req_args(1);
@@ -49,7 +102,7 @@ class NovaTypesModule : public NovaModule {
 			floatget(flt, 0);
 			return flt->Copy();
 		}
-		else if (ptr->Type() == "Bool") {
+		else if (ptr->Type() == "bool") {
 			boolget(b, 0);
 			return b ? new NovaFloat(1.0f) : new NovaFloat(0.0f);
 		}
@@ -74,7 +127,7 @@ class NovaTypesModule : public NovaModule {
 		}
 	}
 
-	nova_std_decl(Boolean) {
+	nova_std_decl(Bool) {
 		req_args(1);
 		NovaValue* ptr = args[0];
 		if (ptr->Type() == "Int") {
@@ -85,7 +138,7 @@ class NovaTypesModule : public NovaModule {
 			floatget(flt, 0);
 			return new NovaBool(bool(flt->CNum()));
 		}
-		else if (ptr->Type() == "Bool") {
+		else if (ptr->Type() == "bool") {
 			boolget(b, 0);
 			return b->Copy();;
 		}
@@ -94,7 +147,7 @@ class NovaTypesModule : public NovaModule {
 			return nullptr;
 		}
 	}
-	
+
 	nova_std_decl(Array) {
 		NovaArray* arr = new NovaArray({});
 		for (NovaValue* arg : args) {
@@ -102,17 +155,29 @@ class NovaTypesModule : public NovaModule {
 		}
 		return arr;
 	}
+#include "../NovaScript.h"
+	nova_std_decl(Execute) {
+		req_args(1);
+		strget(path, 0);
+		InterpretorHandle i_handle = BuildScript(path->CStr().c_str());
+		ExecuteScript(i_handle);
+		DestroyScript(i_handle);
+		return nullptr;
+	}
 
 	NovaObject* GetModule() override {
 		NovaObject* obj = new NovaObject();
+		objbindmethod(obj, Range);
 		objbindmethod(obj, Int);
 		objbindmethod(obj, Float);
 		objbindmethod(obj, String);
-		objbindmethod(obj, Boolean);
+		objbindmethod(obj, Bool);
 		objbindmethod(obj, Array);
+		objbindmethod(obj, Execute);
 		return obj;
 	}
 
 };
+
 
 #endif

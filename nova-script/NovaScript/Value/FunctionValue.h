@@ -7,11 +7,12 @@
 class Interpretor;
 
 struct NOVASCRIPT_API NovaFunction : public NovaValue {
-	NovaFunction(FuncDeclNode* node, Interpretor* interpretor) : fn(node), interpretor(interpretor) {};
-	NovaFunction(NovaValue* (*cppfn)(std::vector<NovaValue*>&)) : cppfn(cppfn) {};
+	NovaFunction(FuncDeclNode* node, Interpretor* interpretor, bool this_qualified = false) : fn(node), interpretor(interpretor), this_qualified(this_qualified) {};
+	NovaFunction(NovaValue* (*cppfn)(std::vector<NovaValue*>&), bool this_qualified = false) : cppfn(cppfn), this_qualified(this_qualified) {};
 	FuncDeclNode* fn = nullptr;
 	NovaValue* (*cppfn)(std::vector<NovaValue*>&) = nullptr;
 	Interpretor* interpretor = nullptr;
+	bool this_qualified;
 
 	NovaValue* Call(std::vector<NovaValue*> args) const;
 

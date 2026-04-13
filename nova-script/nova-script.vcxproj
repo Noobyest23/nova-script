@@ -221,6 +221,7 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClInclude Include="NovaScript\Library\NovaModule.h" />
     <ClInclude Include="NovaScript\Library\nova_asset_db.h" />
     <ClInclude Include="NovaScript\Library\nova_functional.h" />
+    <ClInclude Include="NovaScript\Library\nova_global.h" />
     <ClInclude Include="NovaScript\Library\nova_io.h" />
     <ClInclude Include="NovaScript\Library\nova_math.h" />
     <ClInclude Include="NovaScript\Library\nova_os.h" />

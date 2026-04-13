@@ -205,35 +205,35 @@ nova_std_decl(ToLower) {
 
 NovaString::NovaString(const std::string& str) : novastr(str) {
 	accessables = new std::unordered_map<std::string, NovaValue*>{
-	{"Length", new NovaFunction(Length)},
-	{"IsEmpty", new NovaFunction(IsEmpty)},
-	{"StartsWith", new NovaFunction(StartsWith)},
-	{"EndsWith", new NovaFunction(EndsWith)},
-	{"Contains", new NovaFunction(Contains)},
-	{"Substr", new NovaFunction(Substr)},
-	{"Find", new NovaFunction(Find)},
-	{"Trim", new NovaFunction(Trim)},
-	{"Replace", new NovaFunction(Replace)},
-	{"ToUpper", new NovaFunction(ToUpper)},
-	{"ToLower", new NovaFunction(ToLower)},
-	{"this", nullptr}
+	{"Length", new NovaFunction(Length, true)},
+	{"IsEmpty", new NovaFunction(IsEmpty, true)},
+	{"StartsWith", new NovaFunction(StartsWith, true)},
+	{"EndsWith", new NovaFunction(EndsWith, true)},
+	{"Contains", new NovaFunction(Contains, true)},
+	{"Substr", new NovaFunction(Substr, true)},
+	{"Find", new NovaFunction(Find, true)},
+	{"Trim", new NovaFunction(Trim, true)},
+	{"Replace", new NovaFunction(Replace, true)},
+	{"ToUpper", new NovaFunction(ToUpper, true)},
+	{"ToLower", new NovaFunction(ToLower, true)},
+	{"_NOVA_THIS", nullptr}
 	};
 }
 
 NovaString::NovaString(std::string* cppstr) : cppstr(cppstr) {
 	accessables = new std::unordered_map<std::string, NovaValue*>{
-	{"Length", new NovaFunction(Length)},
-	{"IsEmpty", new NovaFunction(IsEmpty)},
-	{"StartsWith", new NovaFunction(StartsWith)},
-	{"EndsWith", new NovaFunction(EndsWith)},
-	{"Contains", new NovaFunction(Contains)},
-	{"Substr", new NovaFunction(Substr)},
-	{"Find", new NovaFunction(Find)},
-	{"Trim", new NovaFunction(Trim)},
-	{"Replace", new NovaFunction(Replace)},
-	{"ToUpper", new NovaFunction(ToUpper)},
-	{"ToLower", new NovaFunction(ToLower)},
-	{"this", nullptr}
+	{"Length", new NovaFunction(Length, true)},
+	{"IsEmpty", new NovaFunction(IsEmpty, true)},
+	{"StartsWith", new NovaFunction(StartsWith, true)},
+	{"EndsWith", new NovaFunction(EndsWith, true)},
+	{"Contains", new NovaFunction(Contains, true)},
+	{"Substr", new NovaFunction(Substr, true)},
+	{"Find", new NovaFunction(Find, true)},
+	{"Trim", new NovaFunction(Trim, true)},
+	{"Replace", new NovaFunction(Replace, true)},
+	{"ToUpper", new NovaFunction(ToUpper, true)},
+	{"ToLower", new NovaFunction(ToLower, true)},
+	{"_NOVA_THIS", nullptr}
 	};
 }
 

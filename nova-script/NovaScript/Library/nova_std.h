@@ -6,5 +6,6 @@
 #include "nova_functional.h"
 #include "nova_types.h"
 #include "nova_os.h"
+#include "nova_global.h"
 
 #endif

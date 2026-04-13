@@ -4,7 +4,7 @@
 
 struct NOVASCRIPT_API NovaFloat : public NovaValue {
 	NovaFloat(float num) : novanum(num) {};
-	NovaFloat(float* cppnum) : cppnum(cppnum) {};
+	NovaFloat(float* cppnum) : cppnum(cppnum) { is_cpp = true; };
 
 	float novanum = 0;
 	bool is_cpp = false;

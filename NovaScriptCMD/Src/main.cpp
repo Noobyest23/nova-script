@@ -130,6 +130,15 @@ int main(int argc, char* argv[]) {
 			Script script(arg1);
 			script.Execute();
 		}
+		else if (arg1.ends_with("/")) {
+			for (const auto& entry : std::filesystem::directory_iterator(arg1)) {
+				if (entry.path().extension() == ".ns") {
+					std::cout << "Running " + entry.path().string() + "\n";
+					Script script(entry.path().string());
+					script.Execute();
+				}
+			}
+		}
 		else if (arg1 == "parse") {
 			if (argc >= 3) PrintAST(argv[2]);
 			else std::cout << "Missing filename for parse.\n";

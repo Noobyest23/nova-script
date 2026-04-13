@@ -41,9 +41,6 @@
     <ClInclude Include="Include\NovaScript\Interpretor\Scope.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\NovaScript\Library\WinInputDialog\resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\NovaScript\Library\nova_engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -110,10 +107,5 @@
     <ClInclude Include="Include\NovaScript\NovaScript_API.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Include\NovaScript\Library\WinInputDialog\dialog.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>

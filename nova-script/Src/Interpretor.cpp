@@ -47,8 +47,13 @@ void Interpretor::Init() {
 	modules["io"] = new NovaIOModule;
 	modules["signal"] = new NovaFunctionalModule;
 	modules["math"] = new NovaMathModule;
-	modules["types"] = new NovaTypesModule;
 	modules["os"] = new NovaOSModule;
+	modules["global"] = new NovaGlobalModule;
+	NovaObject* globals = modules["global"]->GetModule();
+	for (std::pair<std::string, NovaValue*> pair : (*globals->accessables)) {
+		scope->Set(pair.first, pair.second);
+	}
+	globals->Release();
 }
 
 void Interpretor::Exec() {

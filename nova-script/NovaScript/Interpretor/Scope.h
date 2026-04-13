@@ -25,6 +25,10 @@ struct NOVASCRIPT_API Scope {
 
 	bool Has(const std::string& name);
 
+	bool LimitedHas(const std::string& name);
+	void LimitedSet(const std::string& name, NovaValue* val);
+	NovaValue* LimitedGet(const std::string& name);
+
 	std::unordered_map<std::string, NovaValue*>& GetAll() { return variables; };
 
 	std::string Print() const;

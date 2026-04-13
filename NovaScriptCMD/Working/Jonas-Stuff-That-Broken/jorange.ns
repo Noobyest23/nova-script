@@ -1,0 +1,41 @@
+include "io"
+include "math"
+include "types"
+
+# Things eric needs to fix
+# Comparision Opperators
+# Range function
+# Boolean -> Bool
+
+Print(10 <= 10)
+
+var pi = 0
+#Print(!(pi > 0) and !(pi < 0))
+func joequals(a, b)
+{
+    return Boolean(1 - Min(1, Abs(a - b)))
+}
+
+
+
+Print(Abs(4.0))
+
+
+#Print(Max(0, Abs(1 - 2)))
+#Print(joequals(1,2))
+
+
+
+func jorange(i)
+{
+    if !(i > 0) and !(i < 0)
+    {
+        return []
+    }
+
+    var a = jorange(i - 1)
+    a.PushBack(i)
+    return a
+}
+
+#Print(jorange(20))

@@ -66,7 +66,9 @@ StmtNode* Parser::ParseStatement() {
 						PushError("Expected identifier");
 						break;
 					}
-
+					if (Accept(NovaTokenType::Comma)) {
+						Advance();
+					}
 				}
 				Advance();
 				if (Accept(NovaTokenType::OpenBrace)) {
@@ -437,7 +439,12 @@ ExprNode* Parser::ParseUnary() {
 		ExprNode* right = ParseUnary();
 		return new NotNode(right);
 	}
-
+	
+	if (Accept(NovaTokenType::MinusOp)) {
+		Advance();
+		ExprNode* right = ParseUnary();
+		return new NotNode(right);
+	}
 	return ParsePrimary();
 }
 
@@ -488,6 +495,9 @@ ExprNode* Parser::ParsePrimary() {
 			Advance();
 			while (!Accept(NovaTokenType::CloseParen)) {
 				ExprNode* arg = ParseExpression();
+				if (Accept(NovaTokenType::Comma)) {
+					Advance();
+				}
 				args.push_back(arg);
 			}
 			Advance();
@@ -500,6 +510,9 @@ ExprNode* Parser::ParsePrimary() {
 		Advance();
 		while(!Accept(NovaTokenType::CloseBracket)) {
 			values.push_back(ParseExpression());
+			if (Accept(NovaTokenType::Comma)) {
+				Advance();
+			}
 		}
 		Advance();
 		return new ArrayLiteralNode(values);

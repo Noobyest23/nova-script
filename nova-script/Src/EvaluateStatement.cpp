@@ -52,7 +52,7 @@ es_decl(VarDeclNode* node) {
 		}
 	}
 	value = EvaluateExpression(node->right);
-	scope->Set(node->identifier, value);
+	scope->LimitedSet(node->identifier, value);
 }
 
 es_decl(FuncDeclNode* node) {
@@ -66,7 +66,7 @@ es_decl(IfStmtNode* node) {
 	
 	if (!value) { PushError("Conditional in if statement was null", node); return; };
 
-	if (value->Type() == "Boolean") {
+	if (value->Type() == "Bool") {
 		NovaBool* nbool = static_cast<NovaBool*>(value);
 		PushScope();
 		if (nbool->CB()) {
@@ -160,8 +160,8 @@ es_decl(IncludeNode* node) {
 es_decl(BreakPointNode* node) {
 	if (program) {
 		Callbacker::PushError("[NovaScript] Breakpoint Hit!", 2);
-		Callbacker::PushError(("[NovaScript] AST of this statement: " + node->stmt->Print()).c_str(), 1);
-		Callbacker::PushError("[NovaScript] Current variables in scope: ", 1);
+		Callbacker::PushError(("[NovaScript] AST of this statement: \n" + node->stmt->Print()).c_str(), 1);
+		Callbacker::PushError("[NovaScript] Current variables in scope:", 1);
 		Callbacker::PushError(scope->Print().c_str(), 1);
 	}
 	EvaluateStatement(node->stmt);
@@ -170,7 +170,7 @@ es_decl(BreakPointNode* node) {
 es_decl(ASTPrintNode* node) {
 	if (program) {
 		Callbacker::PushError("[NovaScript] Super Breakpoint Hit!", 2);
-		Callbacker::PushError(("[NovaScript] AST of this script: " + program->Print()).c_str(), 1);
+		Callbacker::PushError(("[NovaScript] AST of this script: \n" + program->Print()).c_str(), 1);
 	}
 }
 
@@ -214,7 +214,7 @@ es_decl(ForEachNode* node) {
 
 es_decl(WhileNode* node) {
 	NovaValue* condition = EvaluateExpression(node->expression);
-	if (condition->Type() == "Boolean") {
+	if (condition->Type() != "Bool") {
 		PushError("While loop condition is not a boolean", node);
 		return;
 	}
@@ -232,7 +232,7 @@ es_decl(WhileNode* node) {
 
 		condition->Release();
 		condition = EvaluateExpression(node->expression);
-		if (condition->Type() == "Boolean") {
+		if (condition->Type() == "Bool") {
 			nb = static_cast<NovaBool*>(condition);
 		}
 		else {

@@ -166,6 +166,9 @@ ee_decl(OpNode* node) {
 	else if (node->op == "<=") {
 		op = NovaValue::LesserEqual;
 	}
+	else if (node->op == "==") {
+		op = NovaValue::Equality;
+	}
 
 	NovaValue* result = lhs->PerformOp(rhs, op);
 	literal_stack.push_back(result);
@@ -179,38 +182,24 @@ ee_decl(FuncCallNode* node) {
 	if (func->Type() == "NovaFunction") {
 		NovaFunction* fn = static_cast<NovaFunction*>(func);
 		std::vector<NovaValue*> args;
-		if (scope->Has("this")) {
-			args.push_back(scope->Get("this"));
+		if (fn->this_qualified and scope->LimitedHas("_NOVA_THIS")) {
+			args.push_back(scope->LimitedGet("_NOVA_THIS"));
 		}
 		for (ExprNode* arg : node->args) {
 			NovaValue* a_value = nullptr;
-			if (VariableNode* var = dynamic_cast<VariableNode*>(arg)) {
-				if (var->as_ptr) {
-					a_value = scope->Get(var->identifier);
-					if (a_value) {
-						a_value->AddRef();
-					}
-				}
-				else {
-					if (auto* v = scope->Get(var->identifier)) {
-						a_value = v->Copy();
-					}
-				}
+			a_value = EvaluateExpression(arg);
+			if (a_value) {
+				a_value->AddRef();
+				args.push_back(a_value);
 			}
-			else {
-				a_value = EvaluateExpression(arg);
-				if (a_value) {
-					a_value->AddRef();
-				}
-			}
-			args.push_back(a_value);
+			
 		}
 		NovaValue* result = fn->Call(args);
 		if (!result) {
 			result = null;
 		}
 		for (NovaValue* arg : args) {
-			if (scope->Get("this") != arg) {
+			if (scope->Get("_NOVA_THIS") != arg) {
 				arg->Release();
 			}
 		}
@@ -247,7 +236,7 @@ ee_decl(FuncCallNode* node) {
 ee_decl(TernaryNode* node) {
 	NovaValue* val = EvaluateExpression(node->expression);
 
-	if (val->Type() == "Boolean") {
+	if (val->Type() == "bool") {
 		NovaBool* nb = static_cast<NovaBool*>(val);
 		if (nb->CB()) {
 			return EvaluateExpression(node->truthy_value);
@@ -308,10 +297,10 @@ ee_decl(DotAccessNode* node) {
 	Scope n_scope(p_scope);
 	scope = &n_scope;
 	for (const std::pair<std::string, NovaValue*>& pair : *val->accessables) {
-		n_scope.Set(pair.first, pair.second);
+		n_scope.LimitedSet(pair.first, pair.second);
 	}
-	if (n_scope.Has("this")) { // if the object has the "this" field we pass it up the chain
-		n_scope.Set("this", val);
+	if (n_scope.LimitedHas("_NOVA_THIS")) { // if the object has the "this" field we pass it up the chain
+		n_scope.LimitedSet("_NOVA_THIS", val);
 	}
 	NovaValue* result = EvaluateExpression(node->right);
 	
@@ -348,7 +337,7 @@ ee_decl(NullLiteralNode*) {
 ee_decl(NotNode* node) {
 	if (node->expression) {
 		NovaValue* val = EvaluateExpression(node->expression);
-		if (val->Type() == "Boolean") {
+		if (val->Type() == "bool") {
 			NovaBool* nb = static_cast<NovaBool*>(val);
 			NovaBool* notnb = new NovaBool(!nb->CB());
 			literal_stack.push_back(notnb);
@@ -356,13 +345,13 @@ ee_decl(NotNode* node) {
 		}
 		if (val->Type() == "Float") {
 			NovaFloat* nf = static_cast<NovaFloat*>(val);
-			NovaFloat* notnf = new NovaFloat(!nf->CNum());
+			NovaFloat* notnf = new NovaFloat(-nf->CNum());
 			literal_stack.push_back(notnf);
 			return notnf;
 		}
 		if (val->Type() == "Int") {
 			NovaInt* nf = static_cast<NovaInt*>(val);
-			NovaInt* notnf = new NovaInt(!nf->CNum());
+			NovaInt* notnf = new NovaInt(-nf->CNum());
 			literal_stack.push_back(notnf);
 			return notnf;
 		}

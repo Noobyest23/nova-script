@@ -23,11 +23,11 @@ std::string NovaBool::ToString() const {
 }
 
 std::string NovaBool::Type() const {
-	return "Boolean";
+	return "Bool";
 }
 
 NovaValue* NovaBool::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
-	if (rhs->Type() == "Boolean") {
+	if (rhs->Type() == "Bool") {
 		NovaBool* r = static_cast<NovaBool*>(rhs);
 		bool result;
 		switch (op) {
@@ -47,7 +47,7 @@ NovaValue* NovaBool::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 }
 
 NovaValue* NovaBool::Assign(NovaValue* rhs) {
-	if (rhs->Type() == "Boolean") {
+	if (rhs->Type() == "Bool") {
 		NovaBool* b = static_cast<NovaBool*>(rhs);
 		*B() = b->CB();
 		return this;

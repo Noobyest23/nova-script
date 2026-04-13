@@ -25,7 +25,7 @@
 
     NovaObject* GetModule() {
         NovaObject* module = new NovaObject();
-        module->PushBack("AddTen", AddTen); // This is how you add functions to your module, the first argument is the name of the function as it will be accessed from NovaScript, and the second argument is a pointer to the function itself
+        objbindmethod(AddTen); // This is a macro that binds the AddTen function to the module, this allows it to be
         return module;
     }
 
@@ -42,4 +42,15 @@
 <li><code>objget(var_name, arg_i)</code>
 <li><code>funcget(var_name, arg_i)</code>
 <li><code>arrget(var_name, arg_i)</code>
+<h2>Member Functions</h2>
+<p>Member functions are functions that operate on a specific instance of a class. If your function is supposed to be a member function, Then the first argument must always be your <code>NovaObject</code> instance</p>
+<p>And when binding your functions you must add "this" to the object as nullptr.</p>
+<pre><code>
+    NovaObject* GetModule() {
+        NovaObject* module = new NovaObject();
+        module->PushBack("AddTen", new NovaFunction(AddTen, true)); // This is how you bind a member function, the second argument of the NovaFunction constructor must be true to indicate that it is a member function
+        module->PushBack("this", nullptr); // This is how you add the "this" variable to your module, this is required for member functions to work
+        return module;
+    }
+</code></pre>
 </section>
