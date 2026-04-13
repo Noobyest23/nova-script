@@ -7,8 +7,8 @@ window.DOCS_CONTENT = {
     <li>Added a global module that is loaded on every script automatically</li>
     <li>Moved the "types" and "signal" modules to the global module</li>
     <li>Fixed nested member access calls overwriting their "this" property</li>
-    <li>Added a <code>Execute(filepath : String)</code> function to the global scope for executing scripts</li>
-    <li>Added a <code>Range(from, to, step)</code> function to the global scope for creating ranges can also be <code>Range(from, to), Range(to)</code></li>
+    <li>Added a <code>Execute(filepath : String)</code> function to the global module for executing scripts</li>
+    <li>Added a <code>Range(from, to, step)</code> function to the global module for creating ranges can also be <code>Range(from, to), Range(to)</code></li>
     <li>Fixed the numfget macro incorrectly casting between floats and ints</li>
 </section>`,
   "creating-modules": `<section>
@@ -765,7 +765,7 @@ include "my_script.ns"</code></pre>
 <section id="novaobject">
     <h2>NovaObject</h2>
     <p>A NovaObject is a value with no data other than accessables</p>
-    <h2>Members</h2>
+    <h2>Methods</h2>
     <ul>
         <li><code>PushBack(name : String, value : NovaValue)</code>: Adds a new member with the given name and value to the object</li>
     </ul>
