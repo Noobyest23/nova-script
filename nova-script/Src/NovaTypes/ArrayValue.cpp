@@ -74,10 +74,13 @@ static void PushError(std::string msg, int sevarity = 2) {
 
 nova_std_decl(PushBack) {
 	req_args(2);
-	arrget(arr, 0);
+	if (args[0] and args[0]->Type() != "Array") {
+		PushError("Expected array as argument " + std::to_string(0)); return nullptr;
+	}NovaArray* arr = static_cast<NovaArray*>(args[0]);;
 	NovaValue* ptr = args[1];
 	ptr->AddRef();
 	arr->Arr()->push_back(ptr);
+	return nullptr;
 }
 
 nova_std_decl(Erase) {
@@ -88,19 +91,19 @@ nova_std_decl(Erase) {
 	auto* vec = arr->Arr();
 	if (index->CNum() >= 0 && index->CNum() < vec->size()) {
 		NovaValue* val = (*vec)[index->CNum()];
-		if (val) val->Release(); // Clean up reference count
+		if (val) val->Release();
 		vec->erase(vec->begin() + index->CNum());
 	}
 	else {
 		PushError("Array index out of bounds in Erase()");
 	}
-	return null_value;
+	return nullptr;
 }
 
 nova_std_decl(Size) {
 	req_args(1);
 	arrget(arr, 0);
-	return new NovaInt(arr->Arr()->size()); // Assuming NovaNumber exists
+	return new NovaInt(arr->Arr()->size());
 }
 
 nova_std_decl(Pop) {
@@ -112,7 +115,7 @@ nova_std_decl(Pop) {
 		vec->pop_back();
 		return last;
 	}
-	return null_value;
+	return nullptr;
 }
 
 nova_std_decl(Clear) {
@@ -123,7 +126,7 @@ nova_std_decl(Clear) {
 		if (v) v->Release();
 	}
 	vec->clear();
-	return null_value;
+	return nullptr;
 }
 
 void NovaArray::Init() {

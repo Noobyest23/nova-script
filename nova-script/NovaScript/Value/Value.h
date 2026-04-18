@@ -20,7 +20,9 @@ struct NOVASCRIPT_API NovaValue {
 		CompoundPlus,
 		CompoundMinus,
 		CompoundMultiply,
-		CompoundDivide
+		CompoundDivide,
+		Mod,
+		CompoundMod,
 	};
 
 	void AddRef();

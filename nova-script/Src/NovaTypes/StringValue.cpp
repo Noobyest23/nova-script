@@ -2,6 +2,7 @@
 #include "../NovaScript/Value/BoolValue.h"
 #include "../NovaScript/Value/IntValue.h"
 #include "../NovaScript/Value/FunctionValue.h"
+#include "../NovaScript/Value/ArrayValue.h"
 #include "../NovaScript/Library/nova_std_macro.h"
 #include "../NovaScript/NovaErrorPush.h"
 
@@ -203,6 +204,35 @@ nova_std_decl(ToLower) {
 	return new NovaString(out);
 }
 
+nova_std_decl(Split) {
+	req_args(2);
+	strget(string, 0);
+	strget(delimiter, 1);
+
+	std::string text = string->CStr();
+	std::string delim = delimiter->CStr();
+
+	std::vector<NovaValue*> result;
+
+	if (delim.empty()) {
+		result.push_back(new NovaString(text));
+		return new NovaArray(result);
+	}
+
+	size_t start = 0;
+	size_t end = text.find(delim);
+
+	while (end != std::string::npos) {
+		result.push_back(new NovaString(text.substr(start, end - start)));
+		start = end + delim.length();
+		end = text.find(delim, start);
+	}
+
+	result.push_back(new NovaString(text.substr(start)));
+
+	return new NovaArray(result);
+}
+
 NovaString::NovaString(const std::string& str) : novastr(str) {
 	accessables = new std::unordered_map<std::string, NovaValue*>{
 	{"Length", new NovaFunction(Length, true)},
@@ -216,6 +246,7 @@ NovaString::NovaString(const std::string& str) : novastr(str) {
 	{"Replace", new NovaFunction(Replace, true)},
 	{"ToUpper", new NovaFunction(ToUpper, true)},
 	{"ToLower", new NovaFunction(ToLower, true)},
+	{"Split", new NovaFunction(Split, true)},
 	{"_NOVA_THIS", nullptr}
 	};
 }
@@ -233,6 +264,7 @@ NovaString::NovaString(std::string* cppstr) : cppstr(cppstr) {
 	{"Replace", new NovaFunction(Replace, true)},
 	{"ToUpper", new NovaFunction(ToUpper, true)},
 	{"ToLower", new NovaFunction(ToLower, true)},
+	{"Split", new NovaFunction(Split, true)},
 	{"_NOVA_THIS", nullptr}
 	};
 }

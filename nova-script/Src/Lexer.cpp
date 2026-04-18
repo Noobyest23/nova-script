@@ -19,6 +19,32 @@ Lexer::Lexer(const char* filepath) {
 	}
 }
 
+std::string unescape(const std::string& input) {
+	std::string result;
+	result.reserve(input.length());
+
+	for (size_t i = 0; i < input.length(); ++i) {
+		if (input[i] == '\\' && i + 1 < input.length()) {
+			switch (input[i + 1]) {
+			case 'n':  result += '\n'; break;
+			case 'r':  result += '\r'; break;
+			case 't':  result += '\t'; break;
+			case '\\': result += '\\'; break;
+			case '\"': result += '\"'; break;
+			default:
+				result += '\\';
+				result += input[i + 1];
+				break;
+			}
+			i++;
+		}
+		else {
+			result += input[i];
+		}
+	}
+	return result;
+}
+
 std::vector<Token> Lexer::Parse() {
 	std::vector<Token> result;
 
@@ -54,6 +80,16 @@ std::vector<Token> Lexer::Parse() {
 			}
 			else {
 				result.push_back({ NovaTokenType::PlusOp, "+", line, column });
+			}
+			continue;
+		case '%':
+			Advance();
+			if (Current() == '=') {
+				result.push_back({ NovaTokenType::CModOp, "%=", line, column });
+				Advance();
+			}
+			else {
+				result.push_back({ NovaTokenType::ModOp, "%", line, column });
 			}
 			continue;
 		case '-':
@@ -171,6 +207,7 @@ std::vector<Token> Lexer::Parse() {
 					Advance();
 				}
 				Advance();
+				content = unescape(content);
 				result.push_back({ NovaTokenType::StringLit, content, line, column });
 			}
 			continue;
@@ -305,6 +342,9 @@ Token Lexer::Identifier() {
 	}
 	else if (value == "is") {
 		return { NovaTokenType::Is, value, line, column };
+	}
+	else if (value == "this") {
+		return { NovaTokenType::This, value, line, column };
 	}
 	return Token{ NovaTokenType::Identifier, value, line, column };
 }

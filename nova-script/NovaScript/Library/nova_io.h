@@ -11,6 +11,9 @@
 #include "NovaModule.h"
 #include <fstream>
 #include <iostream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 class NovaIOModule : public NovaModule {
 public:
@@ -20,7 +23,7 @@ public:
 	}
 
 	nova_std_decl(Print) {
-		std::string output = "[NovaScript] ";
+		std::string output = "";
 		for (NovaValue* arg : args) {
 			output += arg ? arg->ToString() : "null"; if (arg != args.back()) { output += ", "; };
 		}
@@ -29,7 +32,7 @@ public:
 	}
 
 	nova_std_decl(PrintWarning) {
-		std::string output = "[NovaScript] ";
+		std::string output = "";
 		for (NovaValue* arg : args) {
 			output += arg->ToString(); if (arg != args.back()) { output += ", "; };
 		}
@@ -38,7 +41,7 @@ public:
 	}
 
 	nova_std_decl(PrintError) {
-		std::string output = "[NovaScript] ";
+		std::string output = "";
 		for (NovaValue* arg : args) {
 			output += arg->ToString(); if (arg != args.back()) { output += ", "; };
 		}
@@ -89,6 +92,42 @@ public:
 		return null_value;
 	}
 
+	nova_std_decl(RemoveFile) {
+		req_args(1);
+		strget(filepath, 0);
+		try {
+			if (fs::exists(filepath->CStr()) && fs::is_regular_file(filepath->CStr())) {
+				fs::remove(filepath->CStr());
+			}
+			else {
+				std::cerr << "Error: Path is not a file or does not exist." << std::endl;
+				PushError("Error: Path is not a file or does not exist.");
+			}
+		}
+		catch (const fs::filesystem_error& e) {
+			PushError("Filesystem Error: " + std::string(e.what()) + "\n");
+		}
+	}
+
+	nova_std_decl(RemoveDir) {
+		req_args(1);
+		strget(filepath, 0);
+
+		try {
+			if (fs::exists(filepath->CStr()) && fs::is_directory(filepath->CStr())) {
+				fs::remove(filepath->CStr());
+			}
+			else {
+				PushError("Error: Path is not a file or does not exist.");
+			}
+		}
+		catch (const fs::filesystem_error& e) {
+			PushError("Filesystem Error: " + std::string(e.what()) + "\n");
+		}
+
+	}
+
+
 	NovaObject* GetModule() {
 		NovaObject* obj = new NovaObject();
 		obj->PushBack("Print", new NovaFunction(Print));
@@ -97,6 +136,8 @@ public:
 		obj->PushBack("Input", new NovaFunction(Input));
 		objbindmethod(obj, ReadFile);
 		objbindmethod(obj, WriteFile);
+		objbindmethod(obj, RemoveFile);
+		objbindmethod(obj, RemoveDir);
 		return obj;
 	}
 

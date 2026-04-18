@@ -71,7 +71,11 @@ void Interpretor::Exec() {
 }
 
 void Interpretor::PushError(const std::string& message, ASTNode* current_node) {
-	std::string msg = message + (current_node ? " : " + current_node->Print() : "");
+	std::string msg = message;
+	if (current_node) {
+		msg += ". At line " + std::to_string(current_node->line) + ", Column " + std::to_string(current_node->column) + "\n";
+		msg += current_node->Print();
+	}
 	Callbacker::PushError(msg.c_str(), 2);
 };
 

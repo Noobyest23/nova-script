@@ -1,67 +1,24 @@
-include "io" as io
-include "signal"
-include "math" as math
-include "types"
-include "os" as os
-
-io.Print("Hello NovaScript!")
-
-func AddTen(x) {
-	| io.Print(x)
-}
-
-func SetTen(x) {
-	x = 10
-}
-var x = 50
-var y = x
-x = 1
-x += 2
-io.Print("x", x)
-io.Print("y", y)
-
-var sig = Signal()
-sig.Connect(SetTen)
-sig.Connect(AddTen)
-sig.Emit(10)
-for function in sig.GetConnections() {
-	function(1)
-}
-
-for (Eep in [1, 2, 3]) {
-	io.Print("bangalangadooda", Eep)
-}
-
-io.Print(math.RandF())
-
-io.Print([1, 2, 3, 4, 5, 6, 7].Size())
-
-if (1 is "Int") {
-	io.Print("Yippee")
-}
-
-io.Print(Float("10"));
-#io.Print("Waiting for 6 seconds")
-#os.Wait(6000)
-io.Print("Finished Waiting")
-io.Print(os.Run("echo Hello World!"))
-
-io.Print(x >= 0)
-
-while (x >= 0) {
-	x -= 1
-}
-
-Execute("jonas-stuff-that-broken/jorange.ns")
-
-| for i in Range(5, 0, -1) {
-	io.Print(i)
-}
-
-for i in Range(0, 5) {
-	io.Print(i)
-}
-
-for i in Range(5) {
-	io.Print(i)
-}
+var arr = []
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)
+arr.PushBack(1)

@@ -75,7 +75,9 @@ bool Scope::LimitedHas(const std::string& name) {
 void Scope::LimitedSet(const std::string& name, NovaValue* val) {
 	auto it = variables.find(name);
 	if (it != variables.end()) {
-		val->AddRef();
+		if (val) {
+			val->AddRef();
+		}
 		if (variables[name]) {
 			variables[name]->Release();
 		}

@@ -169,6 +169,12 @@ ee_decl(OpNode* node) {
 	else if (node->op == "==") {
 		op = NovaValue::Equality;
 	}
+	else if (node->op == "%") {
+		op = NovaValue::Mod;
+	}
+	else if (node->op == "%=") {
+		op = NovaValue::CompoundMod;
+	}
 
 	NovaValue* result = lhs->PerformOp(rhs, op);
 	literal_stack.push_back(result);
@@ -178,52 +184,60 @@ ee_decl(OpNode* node) {
 
 ee_decl(FuncCallNode* node) {
 	NovaValue* func = scope->Get(node->func_id);
-	if (!func) { PushError(node->func_id + " was not found in scope"); return null; }
-	if (func->Type() == "NovaFunction") {
-		NovaFunction* fn = static_cast<NovaFunction*>(func);
-		std::vector<NovaValue*> args;
-		if (fn->this_qualified and scope->LimitedHas("_NOVA_THIS")) {
-			args.push_back(scope->LimitedGet("_NOVA_THIS"));
-		}
-		for (ExprNode* arg : node->args) {
-			NovaValue* a_value = nullptr;
-			a_value = EvaluateExpression(arg);
-			if (a_value) {
-				a_value->AddRef();
-				args.push_back(a_value);
+	if (func) {
+		if (func->Type() == "NovaFunction") {
+			NovaFunction* fn = static_cast<NovaFunction*>(func);
+			std::vector<NovaValue*> args;
+			if (fn->this_qualified and scope->LimitedHas("_NOVA_THIS")) {
+				args.push_back(scope->LimitedGet("_NOVA_THIS"));
 			}
-			
-		}
-		NovaValue* result = fn->Call(args);
-		if (!result) {
-			result = null;
-		}
-		for (NovaValue* arg : args) {
-			if (scope->Get("_NOVA_THIS") != arg) {
-				arg->Release();
+			for (ExprNode* arg : node->args) {
+				NovaValue* a_value = nullptr;
+				a_value = EvaluateExpression(arg);
+				if (a_value) {
+					a_value->AddRef();
+					args.push_back(a_value);
+				}
+
 			}
+			NovaValue* result = fn->Call(args);
+			if (!result) {
+				result = null;
+			}
+			for (NovaValue* arg : args) {
+				if (scope->Get("_NOVA_THIS") != arg) {
+					arg->Release();
+				}
+			}
+			literal_stack.push_back(result);
+			return result;
 		}
-		literal_stack.push_back(result);
-		return result;
+		else {
+			PushError(node->func_id + " is not a function", node);
+		}
 	}
 	else {
 		for (std::pair<TypeDeclNode*, FuncDeclNode*> types : nova_types) {
 			if (types.first->type_name == node->func_id) {
-				Scope object;
-				Scope* p_scope = scope;
-				scope = &object;
-				for (StmtNode* declNode : types.first->definition) {
-					EvaluateStatement(declNode);
+				Scope this_obj(scope);
+				scope = &this_obj;
+				for (StmtNode* stmt : types.first->definition) {
+					EvaluateStatement(stmt);
 				}
-				if (types.second) {
-					EvaluateExpression(node);
-				}
-				scope = p_scope;
+				scope = this_obj.parent;
 				NovaObject* result = new NovaObject();
-				for (const std::pair<std::string, NovaValue*>& pair : object.variables) {
+				for (const std::pair<std::string, NovaValue*>& pair : this_obj.variables) {
 					pair.second->AddRef();
 					result->accessables->insert(pair);
 				}
+				if (types.second) {
+					PushScope();
+					scope->LimitedSet("_NOVA_THIS", result);
+					EvaluateStatement(types.second);
+					EvaluateExpression(node);
+					PopScope();
+				}
+				
 				literal_stack.push_back(result);
 				return result;
 			}
@@ -293,18 +307,16 @@ ee_decl(DotAccessNode* node) {
 	NovaValue* val = EvaluateExpression(node->left);
 	if (!val->accessables) { PushError("Left side of dot access does not have accessables", node); return null; }
 	// val.func()
-	Scope* p_scope = scope;
-	Scope n_scope(p_scope);
-	scope = &n_scope;
+	PushScope();
 	for (const std::pair<std::string, NovaValue*>& pair : *val->accessables) {
-		n_scope.LimitedSet(pair.first, pair.second);
+		scope->LimitedSet(pair.first, pair.second);
 	}
-	if (n_scope.LimitedHas("_NOVA_THIS")) { // if the object has the "this" field we pass it up the chain
-		n_scope.LimitedSet("_NOVA_THIS", val);
+	if (scope->LimitedHas("_NOVA_THIS")) { // if the object has the "this" field we pass it up the chain
+		scope->LimitedSet("_NOVA_THIS", val);
 	}
 	NovaValue* result = EvaluateExpression(node->right);
 	
-	scope = p_scope;
+	PopScope();
 	return result;
 }
 

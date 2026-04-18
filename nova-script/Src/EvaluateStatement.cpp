@@ -160,11 +160,15 @@ es_decl(IncludeNode* node) {
 es_decl(BreakPointNode* node) {
 	if (program) {
 		Callbacker::PushError("[NovaScript] Breakpoint Hit!", 2);
-		Callbacker::PushError(("[NovaScript] AST of this statement: \n" + node->stmt->Print()).c_str(), 1);
+		if (node->stmt) {
+			Callbacker::PushError(("[NovaScript] AST of this statement: \n" + node->stmt->Print()).c_str(), 1);
+		}
 		Callbacker::PushError("[NovaScript] Current variables in scope:", 1);
 		Callbacker::PushError(scope->Print().c_str(), 1);
 	}
-	EvaluateStatement(node->stmt);
+	if (node->stmt) {
+		EvaluateStatement(node->stmt);
+	}
 }
 
 es_decl(ASTPrintNode* node) {

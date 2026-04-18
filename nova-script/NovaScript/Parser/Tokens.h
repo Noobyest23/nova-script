@@ -43,8 +43,8 @@ enum class NovaTokenType {
 	Continue,
 	Dot,
 	Is,
-	VectorLit3,
-	VectorLit4, // 40
+	ModOp,
+	CModOp, // 40
 	BreakPoint,
 	NewLine,
 	Const,
@@ -56,7 +56,8 @@ enum class NovaTokenType {
 	CloseBrace,
 	Null, // 50
 	Not,
-	Comma
+	Comma,
+	This
 };
 
 struct Token {

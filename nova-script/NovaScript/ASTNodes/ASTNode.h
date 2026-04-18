@@ -7,11 +7,12 @@ struct StmtNode;
 struct ExprNode;
 
 struct ASTNode {
-	bool constant = false;
-	
 	virtual std::string Print() const {
 		return "Not Implemented";
 	};
+
+	int line, column;
+	bool constant = false;
 
 	virtual void Delete() = 0;
 };

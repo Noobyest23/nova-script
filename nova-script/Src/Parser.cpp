@@ -10,6 +10,8 @@ ProgramNode* Parser::Parse() {
 	}
 	ProgramNode* program = new ProgramNode(statements);
 	program->valid_program = not force_stop;
+	program->line = 0;
+	program->column = 0;
 	return program;
 }
 
@@ -17,6 +19,9 @@ StmtNode* Parser::ParseStatement() {
 	// Variable Declaration Node
 	bool is_const = false;
 	bool handled_const = false;
+	if (Accept(NovaTokenType::Eof)) {
+		return nullptr;
+	}
 	if (Accept(NovaTokenType::Const)) {
 		is_const = true;
 		Advance();
@@ -37,10 +42,11 @@ StmtNode* Parser::ParseStatement() {
 			else {
 				PushWarning("Uninitialized Variable");
 			}
-			VarDeclNode* decl = new VarDeclNode(var_name, expression);
-			decl->constant = is_const;
-			decl->line = Current().line;
-			return decl;
+			auto* node = new VarDeclNode(var_name, expression);
+			node->line = Current().line;
+			node->column = Current().column;
+			node->constant = is_const;
+			return node;
 		}
 		else {
 			PushError("Expected variable name");
@@ -81,9 +87,10 @@ StmtNode* Parser::ParseStatement() {
 					PushError("Expected {");
 				}
 				Advance();
-				auto* funcdecl = new FuncDeclNode(func_name, args, body);
-				funcdecl->line = Current().line;
-				return funcdecl;
+				auto* node = new FuncDeclNode(func_name, args, body);
+				node->line = Current().line;
+				node->column = Current().column;
+				return node;
 			}
 			else {
 				PushError("Expected (");
@@ -130,9 +137,10 @@ StmtNode* Parser::ParseStatement() {
 				}
 				
 			}
-			auto* ifstmt = new IfStmtNode(expression, body, else_body);
-			ifstmt->line = Current().line;
-			return ifstmt;
+			auto* node = new IfStmtNode(expression, body, else_body);
+			node->line = Current().line;
+			node->column = Current().column;
+			return node;
 		}
 		else {
 			PushError("Expected {");
@@ -163,9 +171,10 @@ StmtNode* Parser::ParseStatement() {
 					scope.push_back(stmt);
 				}
 				Advance();
-				auto* tdecl = new TypeDeclNode(type_id, mirror_id, scope);
-				tdecl->line = Current().line;
-				return tdecl;
+				auto* node = new TypeDeclNode(type_id, mirror_id, scope);
+				node->line = Current().line;
+				node->column = Current().column;
+				return node;
 			}
 			else {
 				PushError("Expected {");
@@ -184,13 +193,15 @@ StmtNode* Parser::ParseStatement() {
 			if (Accept(NovaTokenType::Identifier) and Current().content == "as") {
 				Advance();
 				ExprNode* as = ParseExpression();
-				auto* incl = new IncludeNode(expr, as);
-				incl->line = Current().line;
-				return incl;
+				auto* node = new IncludeNode(expr, as);
+				node->line = Current().line;
+				node->column = Current().column;
+				return node;
 			}
-			auto* incl = new IncludeNode(expr);
-			incl->line = Current().line;
-			return incl;
+			auto* node = new IncludeNode(expr);
+			node->line = Current().line;
+			node->column = Current().column;
+			return node;
 		}
 		else {
 			PushError("Expected an expression");
@@ -200,9 +211,10 @@ StmtNode* Parser::ParseStatement() {
 		Advance();
 		ExprNode* return_value = ParseExpression();
 		if (return_value) {
-			auto* retstmt = new ReturnStmtNode(return_value);
-			retstmt->line = Current().line;
-			return retstmt;
+			auto* node = new ReturnStmtNode(return_value);
+			node->line = Current().line;
+			node->column = Current().column;
+			return node;
 		}
 		else {
 			PushError("Expected an expression");
@@ -210,10 +222,14 @@ StmtNode* Parser::ParseStatement() {
 	}
 	if (Accept(NovaTokenType::BreakPoint)) {
 		Advance();
-		StmtNode* stmt = ParseStatement();
-		auto* breakp = new BreakPointNode(stmt);
-		breakp->line = Current().line;
-		return breakp;
+		StmtNode* stmt = nullptr;
+		if (t_index != tokens.size()) {
+			stmt = ParseStatement();
+		}
+		auto* node = new BreakPointNode(stmt);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	if (Accept(NovaTokenType::ASTPrint)) {
 		Advance();
@@ -240,9 +256,10 @@ StmtNode* Parser::ParseStatement() {
 						statements.push_back(ParseStatement());
 					}
 					Advance();
-					auto* fen = new ForEachNode(var, container, statements);
-					fen->line = Current().line;
-					return fen;
+					auto* node = new ForEachNode(var, container, statements);
+					node->line = Current().line;
+					node->column = Current().column;
+					return node;
 				}
 				else {
 					PushError("Expected {");
@@ -266,18 +283,20 @@ StmtNode* Parser::ParseStatement() {
 				statements.push_back(ParseStatement());
 			}
 			Advance();
-			auto* whiln = new WhileNode(expression, statements);
-			whiln->line = Current().line;
-			return whiln;
+			auto* node = new WhileNode(expression, statements);
+			node->line = Current().line;
+			node->column = Current().column;
+			return node;
 		}
 		PushError("Expected {");
 	}
 	// If nothing else works we try to parse it as a standalone expression
 	ExprNode* expr = ParseExpression();
 	if (expr) {
-		auto* exp = new ExprAsStmt(expr);
-		exp->line = Current().line;
-		return exp;
+		auto* node = new ExprAsStmt(expr);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 
 	if (is_const and not handled_const) {
@@ -316,7 +335,10 @@ ExprNode* Parser::ParseTernary() {
 
 		ExprNode* falsy = ParseExpression();
 
-		return new TernaryNode(condition, truthy, falsy);
+		auto* node = new TernaryNode(condition, truthy, falsy);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	return truthy;
 }
@@ -326,7 +348,10 @@ ExprNode* Parser::ParseAssignment() {
 	if (Accept(NovaTokenType::Assignment)) {
 		Advance();
 		ExprNode* right = ParseExpression();
-		return new AssignmentNode(expression, right);
+		auto* node = new AssignmentNode(expression, right);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	return expression;
 }
@@ -338,7 +363,10 @@ ExprNode* Parser::ParseBoolean() {
 		std::string op = Current().content;
 		Advance();
 		ExprNode* rhs = ParseEquality();
-		lhs = new OpNode(lhs, rhs, op);
+		auto* node = new OpNode(lhs, rhs, op);
+		node->line = Current().line;
+		node->column = Current().column;
+		lhs = node;
 	}
 
 	return lhs;
@@ -351,13 +379,19 @@ ExprNode* Parser::ParseEquality() {
 		std::string op = Current().content;
 		Advance();
 		ExprNode* rhs = ParseComparison();
-		lhs = new OpNode(lhs, rhs, op);
+		auto* node = new OpNode(lhs, rhs, op);
+		node->line = Current().line;
+		node->column = Current().column;
+		lhs = node;
 	}
 
 	while (Accept(NovaTokenType::Is)) {
 		Advance();
 		ExprNode* rhs = ParseComparison();
-		lhs = new IsNode(lhs, rhs);
+		auto* node = new IsNode(lhs, rhs);
+		node->line = Current().line;
+		node->column = Current().column;
+		lhs = node;
 	}
 
 	return lhs;
@@ -371,7 +405,10 @@ ExprNode* Parser::ParseComparison() {
 		std::string op = Current().content;
 		Advance();
 		ExprNode* rhs = ParseArithmetic();
-		lhs = new OpNode(lhs, rhs, op);
+		auto* node = new OpNode(lhs, rhs, op);
+		node->line = Current().line;
+		node->column = Current().column;
+		lhs = node;
 	}
 
 	return lhs;
@@ -384,15 +421,21 @@ ExprNode* Parser::ParseArithmetic() {
 		std::string op = Current().content;
 		Advance();
 		ExprNode* rhs = ParseTerm();
-		lhs = new OpNode(lhs, rhs, op);
+		auto* node = new OpNode(lhs, rhs, op);
+		node->line = Current().line;
+		node->column = Current().column;
+		lhs = node;
 	}
-	while (Accept(NovaTokenType::CPlusOp) or Accept(NovaTokenType::CMinusOp) or Accept(NovaTokenType::CMultOp) or Accept(NovaTokenType::CDivOp)) {
+	while (Accept(NovaTokenType::CPlusOp) or Accept(NovaTokenType::CMinusOp) or Accept(NovaTokenType::CMultOp) or Accept(NovaTokenType::CDivOp) or Accept(NovaTokenType::CModOp)) {
 		std::string op = Current().content;
 		Advance();
 
 		ExprNode* rhs = ParseExpression();
 		if (rhs) {
-			return new CompoundOp(op, lhs, rhs);
+			auto* node = new CompoundOp(op, lhs, rhs);
+			node->line = Current().line;
+			node->column = Current().column;
+			lhs = node;
 		}
 		else {
 			PushError("Expected an expression");
@@ -404,11 +447,14 @@ ExprNode* Parser::ParseArithmetic() {
 ExprNode* Parser::ParseTerm() {
 	ExprNode* lhs = ParseAccesor();
 
-	while (Accept(NovaTokenType::MultOp) || Accept(NovaTokenType::DivOp)) {
+	while (Accept(NovaTokenType::MultOp) || Accept(NovaTokenType::DivOp) || Accept(NovaTokenType::ModOp)) {
 		std::string op = Current().content;
 		Advance();
 		ExprNode* rhs = ParseTerm();
-		lhs = new OpNode(lhs, rhs, op);
+		auto* node = new OpNode(lhs, rhs, op);
+		node->line = Current().line;
+		node->column = Current().column;
+		lhs = node;
 	}
 
 	return lhs;
@@ -419,7 +465,10 @@ ExprNode* Parser::ParseAccesor() {
 	if (Accept(NovaTokenType::Dot)) {
 		Advance();
 		ExprNode* right = ParsePrimary();
-		return new DotAccessNode(expression, right);
+		auto* node = new DotAccessNode(expression, right);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	if (Accept(NovaTokenType::OpenBracket)) {
 		Advance();
@@ -428,7 +477,10 @@ ExprNode* Parser::ParseAccesor() {
 			PushError("Expected ]");
 		}
 		Advance();
-		return new ArrayAccessNode(expression, index);
+		auto* node = new ArrayAccessNode(expression, index);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	return expression;
 }
@@ -437,13 +489,19 @@ ExprNode* Parser::ParseUnary() {
 	if (Accept(NovaTokenType::Not)) {
 		Advance();
 		ExprNode* right = ParseUnary();
-		return new NotNode(right);
+		auto* node = new NotNode(right);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	
 	if (Accept(NovaTokenType::MinusOp)) {
 		Advance();
 		ExprNode* right = ParseUnary();
-		return new NotNode(right);
+		auto* node = new NotNode(right);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	return ParsePrimary();
 }
@@ -469,22 +527,34 @@ ExprNode* Parser::ParsePrimary() {
 	if (Accept(NovaTokenType::IntLit)) {
 		int number = std::stoi(Current().content);
 		Advance();
-		return new IntLiteralNode(number);
+		auto* node = new IntLiteralNode(number);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	else if (Accept(NovaTokenType::FloatLit)) {
 		float number = std::stof(Current().content);
 		Advance();
-		return new FloatLiteralNode(number);
+		auto* node = new FloatLiteralNode(number);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	else if (Accept(NovaTokenType::StringLit)) {
 		std::string content = Current().content;
 		Advance();
-		return new StringLiteralNode(content);
+		auto* node = new StringLiteralNode(content);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	else if (Accept(NovaTokenType::BoolLit)) {
 		bool value = Current().content == "true" ? true : false;
 		Advance();
-		return new BoolLiteralNode(value);
+		auto* node = new BoolLiteralNode(value);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	else if (Accept(NovaTokenType::Identifier)) {
 		std::string id = Current().content;
@@ -501,9 +571,22 @@ ExprNode* Parser::ParsePrimary() {
 				args.push_back(arg);
 			}
 			Advance();
-			return new FuncCallNode(id, args);
+			auto* node = new FuncCallNode(id, args);
+			node->line = Current().line;
+			node->column = Current().column;
+			return node;
 		}
-		return new VariableNode(id, as_ptr);
+		auto* node = new VariableNode(id, as_ptr);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
+	}
+	else if (Accept(NovaTokenType::This)) {
+		Advance();
+		auto* node = new VariableNode("_NOVA_THIS", as_ptr);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	else if (Accept(NovaTokenType::OpenBracket)) {
 		std::vector<ExprNode*> values;
@@ -515,11 +598,17 @@ ExprNode* Parser::ParsePrimary() {
 			}
 		}
 		Advance();
-		return new ArrayLiteralNode(values);
+		auto* node = new ArrayLiteralNode(values);
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	else if (Accept(NovaTokenType::Null)) {
 		Advance();
-		return new NullLiteralNode();
+		auto* node = new NullLiteralNode();
+		node->line = Current().line;
+		node->column = Current().column;
+		return node;
 	}
 	return nullptr;
 }

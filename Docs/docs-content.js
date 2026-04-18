@@ -2,14 +2,15 @@
 window.DOCS_CONTENT = {
   "changelog": `<section>
     <h2>Changelog</h2>
-    <li>Added a changelog :]</li>
-    <li>Fixed comparison operators evaluating to +=</li>
-    <li>Added a global module that is loaded on every script automatically</li>
-    <li>Moved the "types" and "signal" modules to the global module</li>
-    <li>Fixed nested member access calls overwriting their "this" property</li>
-    <li>Added a <code>Execute(filepath : String)</code> function to the global module for executing scripts</li>
-    <li>Added a <code>Range(from, to, step)</code> function to the global module for creating ranges can also be <code>Range(from, to), Range(to)</code></li>
-    <li>Fixed the numfget macro incorrectly casting between floats and ints</li>
+    <li>Fixed a bug from member functions not returning any value and causing the program to sometimes crash.</li>
+    <li>Added line numbers to error messages.</li>
+    <li>Fixed type constructors not being accessible</li>
+    <li>Added escape characters to strings</li>
+    <li>Fixed placing a breakpoint at the end of a file crashing the program.</li>
+    <li>Added the % operator and the %= operator.</li>
+    <li>Added <code>String.Split(delimiter : String)</code> to the String member functions</li>
+    <li>Added <code>RemoveFile(filepath : String)</code> to the IO module</li>
+    <li>Added <code>RemoveDir(dirpath : String)</code> to the IO module</li>
 </section>`,
   "creating-modules": `<section>
 	<h1>Modules</h1>
@@ -338,6 +339,8 @@ io.Print("Hello World!")
         <li><code>ReadFile(path : String)</code>: Reads the contents of a file and returns it as a string</li>
         <li><code>WriteFile(path : String, content : String)</code>: Writes a string to a file</li>
         <li><code>Input(prompt : String)</code>: Displays a prompt and returns a <code>String</code> input from the user</li>
+        <li><code>RemoveFile(filepath : String)</code>: Removes a file</li>
+        <li><code>RemoveDir(dirpath : String)</code>: Removes a directory</li>
     </ul>
     <p>Print, PrintWarning, PrintError, and Input only work with the console</p>
 </section>`,
@@ -727,6 +730,7 @@ include "my_script.ns"</code></pre>
         <li><code>Find(str : String)</code>: Returns the index of the first occurrence of the given substring, or -1 if not found</li>
         <li><code>Replace(old : String, new : String)</code>: Returns a new string with all occurrences of the given substring replaced with another substring</li>
         <li><code>Substr(start : Int, length : Int)</code>: Returns a new string that is a substring of the original string</li>
+        <li><code>Split(delimiter : String)</code>: Splits the string into an array of substrings using the given delimiter</li>
     </ul>
 </section>
 

@@ -2,6 +2,8 @@
 #include "../NovaScript/Value/IntValue.h"
 #include "../NovaScript/Value/BoolValue.h"
 
+#define r(m) f##m
+
 float* NovaFloat::Num() {
 	if (is_cpp) {
 		cppnum;
@@ -72,6 +74,9 @@ NovaValue* NovaFloat::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 			bool b = result <= r->CNum();
 			return new NovaBool(b);
 		}
+		case NovaOperator::Mod: {
+			result %= r->CNum();
+		}
 		default:
 			OpFailed(rhs, op);
 		}
@@ -94,6 +99,8 @@ NovaValue* NovaFloat::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 		case NovaOperator::Divide:
 			result /= r->CNum();
 			break;
+		case NovaOperator::Mod:
+			result = r(mod)(CNum(), r->CNum());
 		case NovaOperator::Equality: {
 			bool b = result == r->CNum();
 			return new NovaBool(b);
@@ -150,6 +157,10 @@ NovaValue* NovaFloat::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) 
 			*Num() /= r->CNum();
 			return this;
 		}
+		case NovaOperator::CompoundMod: {
+			*Num() = r(mod)(CNum(), r->CNum());
+			return this;
+		}
 		default:
 			OpFailed(rhs, op);
 		}
@@ -174,6 +185,10 @@ NovaValue* NovaFloat::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) 
 		}
 		case NovaOperator::CompoundDivide: {
 			*Num() /= r->CNum();
+			return this;
+		}
+		case NovaOperator::CompoundMod: {
+			*Num() = r(mod)(CNum(), r->CNum());
 			return this;
 		}
 		default:
