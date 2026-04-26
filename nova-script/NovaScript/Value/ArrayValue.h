@@ -4,31 +4,28 @@
 #include <vector>
 
 struct NOVASCRIPT_API NovaArray : public NovaValue {
-	NovaArray(std::vector<NovaValue*>& arr);
-	NovaArray(std::vector<NovaValue*>* arr);
+	NovaArray(std::vector<std::shared_ptr<NovaValue>>& arr);
+	NovaArray(const std::vector<std::shared_ptr<NovaValue>>& arr);
+	NovaArray(std::vector<std::shared_ptr<NovaValue>>* arr);
 
-	std::vector<NovaValue*> novaarr;
-	std::vector<NovaValue*>* cpparr = nullptr;
+	std::vector<std::shared_ptr<NovaValue>> novaarr;
+	std::vector<std::shared_ptr<NovaValue>>* cpparr = nullptr;
 
-	std::vector<NovaValue*>* Arr();
-	const std::vector<NovaValue*>& CArr() const;
+	std::vector<std::shared_ptr<NovaValue>>* Arr();
+	const std::vector<std::shared_ptr<NovaValue>>& CArr() const;
 
-	NovaValue* Copy() override;
+	std::shared_ptr<NovaValue> Copy() const override;
+	std::shared_ptr<NovaValue> CopyPtr() override;
 	std::string ToString() const override;
 	std::string Type() const override;
-	NovaValue* Assign(NovaValue* rhs) override;
+	bool Assign(std::shared_ptr<NovaValue> rhs) override;
 
+	std::unordered_map<std::string, std::shared_ptr<NovaValue>> GetFullAccessableList() override;
 
-	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { return nullptr; };
-	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { return nullptr; };
+	std::shared_ptr<NovaValue> PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const { return nullptr; };
+	bool PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) { return false; };
 
-protected:
-
-	void OnDestroy() override;
-
-private:
-
-	void Init();
+	static std::unordered_map<std::string, std::shared_ptr<NovaValue>> array_accessables;
 
 };
 

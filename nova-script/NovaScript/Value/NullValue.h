@@ -4,30 +4,25 @@
 
 struct NovaNull : public NovaValue {
 
-	NovaValue* Copy() override {
-		return this;
-	};
+	std::shared_ptr<NovaValue> Copy() const override;
 	std::string ToString() const override {
 		return "null";
 	};
 	std::string Type() const override {
 		return "null";
 	};
-	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override {
-		OpFailed(rhs, op);  return nullptr;
-	};
-	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) override {
-		OpFailed(rhs, op);  return nullptr;
-	};
-	NovaValue* Assign(NovaValue* rhs) override {
+	std::shared_ptr<NovaValue> PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const override {
 		return nullptr;
+	};
+	bool PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) override {
+		return false;
+	};
+	bool Assign(std::shared_ptr<NovaValue> rhs) override {
+		return false;
 	};
 
 protected:
 
-	void OnDestroy() override {
-		AddRef();
-	};
 
 };
 

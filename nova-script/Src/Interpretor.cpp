@@ -9,6 +9,8 @@
 #include "../NovaScript/NovaErrorPush.h"
 #include "../NovaScript/Parser/Optimizer.h"
 
+std::shared_ptr<NovaNull> Interpretor::null = std::make_shared<NovaNull>();
+
 Interpretor::Interpretor(const std::string& filepath) {
 	Lexer lexer(filepath.c_str());
 	auto tokens = lexer.Parse();
@@ -27,10 +29,10 @@ Interpretor::~Interpretor() {
 	while (scope) { 
 		PopScope(); 
 	}
+
 	for (std::pair<std::string, NovaModule*> pair : modules) {
 		delete pair.second;
 	}
-	delete null;
 	modules.clear();
 }
 
@@ -45,15 +47,13 @@ void Interpretor::Init() {
 	}
 	
 	modules["io"] = new NovaIOModule;
-	modules["signal"] = new NovaFunctionalModule;
 	modules["math"] = new NovaMathModule;
 	modules["os"] = new NovaOSModule;
 	modules["global"] = new NovaGlobalModule;
-	NovaObject* globals = modules["global"]->GetModule();
-	for (std::pair<std::string, NovaValue*> pair : (*globals->accessables)) {
+	std::shared_ptr<NovaObject> globals = modules["global"]->GetModule();
+	for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : (*globals->accessables)) {
 		scope->Set(pair.first, pair.second);
 	}
-	globals->Release();
 }
 
 void Interpretor::Exec() {
@@ -65,30 +65,35 @@ void Interpretor::Exec() {
 		return;
 	}
 	for (StmtNode* stmt : program->Statements) {
+		if (should_stop) {
+			break;
+		}
 		EvaluateStatement(stmt);
 		PurgeStack();
 	}
 }
 
 void Interpretor::PushError(const std::string& message, ASTNode* current_node) {
-	std::string msg = message;
+	std::string msg = "Runtime Error: " + message + "\n";
 	if (current_node) {
-		msg += ". At line " + std::to_string(current_node->line) + ", Column " + std::to_string(current_node->column) + "\n";
-		msg += current_node->Print();
+		msg += current_node->Print() + " At line " + std::to_string(current_node->line) + ", Column " + std::to_string(current_node->column) + "\n";
+		msg += "^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
 	}
+	msg += "Quitting after error";
+	should_stop = true;
 	Callbacker::PushError(msg.c_str(), 2);
 };
 
-void Interpretor::Set(const std::string& var_name, NovaValue* value) {
+void Interpretor::Set(const std::string& var_name, std::shared_ptr<NovaValue> value) {
 	scope->Set(var_name, value);
 }
 
-NovaValue* Interpretor::Call(const std::string& func_name, std::vector<NovaValue*>& args) {
-	NovaValue* v = scope->Get(func_name);
+std::shared_ptr<NovaValue> Interpretor::Call(const std::string& func_name, std::vector<std::shared_ptr<NovaValue>>& args) {
+	std::shared_ptr<NovaValue> v = scope->Get(func_name);
 	if (v) {
-		if (v->Type() == "NovaFunction") {
-			NovaFunction* fn = static_cast<NovaFunction*>(v);
-			NovaValue* result = fn->Call(args);
+		if (v->Type() == "Function") {
+			NovaFunction* fn = static_cast<NovaFunction*>(v.get());
+			std::shared_ptr<NovaValue> result = fn->Call(args);
 			return result;
 		}
 		else {
@@ -118,9 +123,8 @@ void Interpretor::PopScope() {
 	}
 }
 
-NovaValue* Interpretor::Get(const std::string& var_name) {
-	NovaValue* v = scope->Get(var_name);
-	v->AddRef();
+std::shared_ptr<NovaValue> Interpretor::Get(const std::string& var_name) {
+	std::shared_ptr<NovaValue> v = scope->Get(var_name);
 	return v;
 }
 
@@ -134,10 +138,7 @@ void Interpretor::PushModule(NovaModule* mod) {
 }
 
 void Interpretor::PurgeStack() {
-	for (NovaValue* lit : literal_stack) {
-		if (lit) {
-			lit->Release();
-		}
+	for (std::shared_ptr<NovaValue> lit : literal_stack) {
 		literal_stack.clear();
 	}
 }

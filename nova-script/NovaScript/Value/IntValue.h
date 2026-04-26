@@ -10,17 +10,14 @@ struct NOVASCRIPT_API NovaInt : public NovaValue {
 	int* cppnum = nullptr;
 	int* Num();
 	const int CNum() const;
-	NovaValue* Copy() override;
+	std::shared_ptr<NovaValue> Copy() const override;
+	std::shared_ptr<NovaValue> CopyPtr() override;
 	std::string ToString() const override;
 	std::string Type() const override;
 
-	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
-	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) override;
-	NovaValue* Assign(NovaValue* rhs) override;
-
-protected:
-
-	void OnDestroy() override;
+	std::shared_ptr<NovaValue> PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const override;
+	bool PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) override;
+	bool Assign(std::shared_ptr<NovaValue> rhs) override;
 
 };
 

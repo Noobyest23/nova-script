@@ -13,7 +13,7 @@ public:
 
 	std::string module_name = "";
 
-	virtual NovaObject* GetModule() = 0;
+	virtual std::shared_ptr<NovaObject> GetModule() = 0;
 
 	virtual ~NovaModule() = default;
 

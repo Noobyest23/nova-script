@@ -6,14 +6,14 @@ static void PushError(std::string msg, int sev = 2) {
 
 nova_std_decl(Emit) {
 	req_args(1);
-	NovaSignal* signal = static_cast<NovaSignal*>(args[0]);
-	std::vector<NovaValue*> new_args;
+	NovaSignal* signal = static_cast<NovaSignal*>(args[0].get());
+	std::vector<std::shared_ptr<NovaValue>> new_args;
 	for (int i = 1; i < args.size(); i++) {
 		new_args.push_back(args[i]);
 	}
 
-	for (NovaValue* val : signal->connections) {
-		auto* func = static_cast<NovaFunction*>(val);
+	for (std::shared_ptr<NovaValue> val : signal->connections) {
+		auto* func = static_cast<NovaFunction*>(val.get());
 		func->Call(new_args);
 	}
 	return nullptr;
@@ -21,41 +21,53 @@ nova_std_decl(Emit) {
 
 nova_std_decl(Connect) {
 	req_args(2);
-	funcget(func, 1);
-	NovaSignal* signal = static_cast<NovaSignal*>(args[0]);
-	signal->connections.push_back(func);
-	func->AddRef();
+	funcget(f, 1)
+	NovaSignal* signal = static_cast<NovaSignal*>(args[0].get());
+	signal->connections.push_back(std::make_shared<NovaFunction>(*f));
 	return nullptr;
 }
 
 nova_std_decl(Disconnect) {
 	req_args(2);
 	funcget(func, 1);
-	NovaSignal* signal = static_cast<NovaSignal*>(args[0]);
-	signal->connections.erase(std::remove(signal->connections.begin(), signal->connections.end(), func));
-	func->Release();
+
+	NovaSignal* signal = static_cast<NovaSignal*>(args[0].get());
+
+	auto it = std::remove_if(signal->connections.begin(),
+		signal->connections.end(),
+		[func](const std::shared_ptr<NovaFunction>& connected_ptr) {
+			return connected_ptr.get() == func;
+		});
+
+	signal->connections.erase(it, signal->connections.end());
+
 	return nullptr;
 }
 
 nova_std_decl(GetConnections) {
 	req_args(1);
-	NovaSignal* signal = static_cast<NovaSignal*>(args[0]);
-	return new NovaArray(signal->connections);
-}
-
-NovaSignal::NovaSignal() {
-	accessables = new std::unordered_map<std::string, NovaValue*> {
-		{"Emit", new NovaFunction(Emit, true)},
-		{"Connect", new NovaFunction(Connect, true)},
-		{"GetConnections", new NovaFunction(GetConnections, true)},
-		{"Disconnect", new NovaFunction(Disconnect, true)},
-		{"_NOVA_THIS", nullptr}
-	};
-}
-
-void NovaSignal::OnDestroy() {
-	for (NovaValue* f : connections) {
-		f->Release();
+	NovaSignal* signal = static_cast<NovaSignal*>(args[0].get());
+	std::vector<std::shared_ptr<NovaValue>> base_connections;
+	for (auto c : signal->connections) {
+		base_connections.push_back(c->Copy());
 	}
-	delete this;
+	return std::make_shared<NovaArray>(base_connections);
+}
+
+std::unordered_map<std::string, std::shared_ptr<NovaValue>> NovaSignal::signal_accessables = {
+	{"Emit", std::make_shared<NovaFunction>(Emit, true)},
+	{"Connect", std::make_shared<NovaFunction>(Connect, true)},
+	{"Disconnect", std::make_shared<NovaFunction>(Connect, true)},
+	{"GetConnections", std::make_shared<NovaFunction>(Connect, true)},
+	{"_NOVA_THIS", nullptr }
+};
+
+std::unordered_map<std::string, std::shared_ptr<NovaValue>> NovaSignal::GetFullAccessableList() {
+	std::unordered_map<std::string, std::shared_ptr<NovaValue>> map = NovaValue::GetFullAccessableList();
+
+	for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : signal_accessables) {
+		map[pair.first] = pair.second;
+	}
+
+	return map;
 }

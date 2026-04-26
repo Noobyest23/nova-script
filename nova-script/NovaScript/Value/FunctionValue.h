@@ -8,25 +8,23 @@ class Interpretor;
 
 struct NOVASCRIPT_API NovaFunction : public NovaValue {
 	NovaFunction(FuncDeclNode* node, Interpretor* interpretor, bool this_qualified = false) : fn(node), interpretor(interpretor), this_qualified(this_qualified) {};
-	NovaFunction(NovaValue* (*cppfn)(std::vector<NovaValue*>&), bool this_qualified = false) : cppfn(cppfn), this_qualified(this_qualified) {};
+	NovaFunction(std::shared_ptr<NovaValue>(*cppfn)(std::vector<std::shared_ptr<NovaValue>>&), bool this_qualified = false) : cppfn(cppfn), this_qualified(this_qualified) {};
 	FuncDeclNode* fn = nullptr;
-	NovaValue* (*cppfn)(std::vector<NovaValue*>&) = nullptr;
+	std::shared_ptr<NovaValue>(*cppfn)(std::vector<std::shared_ptr<NovaValue>>&) = nullptr;
 	Interpretor* interpretor = nullptr;
 	bool this_qualified;
 
-	NovaValue* Call(std::vector<NovaValue*> args) const;
+	std::shared_ptr<NovaValue> Call(std::vector<std::shared_ptr<NovaValue>> args) const;
 
 	std::string Type() const override;
 	std::string ToString() const override;
-	NovaValue* Copy() override;
-	NovaValue* Assign(NovaValue* rhs) override;
+	std::shared_ptr<NovaValue> Copy() const override;
+	bool Assign(std::shared_ptr<NovaValue> rhs) override;
 
-	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const { return nullptr; };
-	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { return nullptr; };
+	std::shared_ptr<NovaValue> PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const override { return nullptr; };
+	bool PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) override { return false; };
 
 protected:
-
-	void OnDestroy() override;
 
 };
 

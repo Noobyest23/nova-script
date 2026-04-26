@@ -24,8 +24,13 @@ public:
 
 	nova_std_decl(Print) {
 		std::string output = "";
-		for (NovaValue* arg : args) {
-			output += arg ? arg->ToString() : "null"; if (arg != args.back()) { output += ", "; };
+		for (size_t i = 0; i < args.size(); ++i) {
+			
+			output += args[i] ? args[i]->ToString() : "null";
+
+			if (i < args.size() - 1) {
+				output += ", ";
+			}
 		}
 		Callbacker::PushError(output.c_str(), 0);
 		return null_value;
@@ -33,8 +38,13 @@ public:
 
 	nova_std_decl(PrintWarning) {
 		std::string output = "";
-		for (NovaValue* arg : args) {
-			output += arg->ToString(); if (arg != args.back()) { output += ", "; };
+		for (size_t i = 0; i < args.size(); ++i) {
+
+			output += args[i] ? args[i]->ToString() : "null";
+
+			if (i < args.size() - 1) {
+				output += ", ";
+			}
 		}
 		Callbacker::PushError(output.c_str(), 1);
 		return null_value;
@@ -42,8 +52,13 @@ public:
 
 	nova_std_decl(PrintError) {
 		std::string output = "";
-		for (NovaValue* arg : args) {
-			output += arg->ToString(); if (arg != args.back()) { output += ", "; };
+		for (size_t i = 0; i < args.size(); ++i) {
+
+			output += args[i] ? args[i]->ToString() : "null";
+
+			if (i < args.size() - 1) {
+				output += ", ";
+			}
 		}
 		Callbacker::PushError(output.c_str(), 2);
 		return null_value;
@@ -55,7 +70,7 @@ public:
 		std::string in;
 		std::cout << string->ToString() << " >: ";
 		std::getline(std::cin, in);
-		return new NovaString(in);
+		return std::make_shared<NovaString>(in);
 	}
 
 	nova_std_decl(ReadFile) {
@@ -72,7 +87,7 @@ public:
 			std::istreambuf_iterator<char>());
 
 		file.close();
-		return new NovaString(content);
+		return std::make_shared<NovaString>(content);
 	}
 
 	nova_std_decl(WriteFile) {
@@ -128,12 +143,12 @@ public:
 	}
 
 
-	NovaObject* GetModule() {
-		NovaObject* obj = new NovaObject();
-		obj->PushBack("Print", new NovaFunction(Print));
-		obj->PushBack("PrintWarning", new NovaFunction(PrintWarning));
-		obj->PushBack("PrintError", new NovaFunction(PrintError));
-		obj->PushBack("Input", new NovaFunction(Input));
+	std::shared_ptr<NovaObject> GetModule() {
+		std::shared_ptr<NovaObject> obj = std::make_shared<NovaObject>();
+		objbindmethod(obj, Print);
+		objbindmethod(obj, PrintWarning);
+		objbindmethod(obj, PrintError);
+		objbindmethod(obj, Input);
 		objbindmethod(obj, ReadFile);
 		objbindmethod(obj, WriteFile);
 		objbindmethod(obj, RemoveFile);

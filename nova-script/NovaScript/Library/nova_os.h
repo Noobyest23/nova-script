@@ -22,7 +22,7 @@ public:
 		req_args(1);
 		strget(string, 0);
 		int result = system(string->CStr().c_str());
-		return new NovaInt(result);
+		return std::make_shared<NovaInt>(result);
 	}
 
 	nova_std_decl(Exit) {
@@ -33,8 +33,8 @@ public:
 		Callbacker::ExitCallback("");
 	}
 
-	NovaObject* GetModule() {
-		NovaObject* obj = new NovaObject();
+	std::shared_ptr<NovaObject> GetModule() {
+		std::shared_ptr<NovaObject> obj = std::make_shared<NovaObject>();
 		objbindmethod(obj, Wait);
 		objbindmethod(obj, Run);
 		objbindmethod(obj, Exit);

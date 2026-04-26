@@ -41,7 +41,7 @@ public:
 			return nullptr;
 		}
 
-		std::vector<NovaValue*> array;
+		std::vector<std::shared_ptr<NovaValue>> array;
 
 		if (by > 0) {
 			
@@ -50,7 +50,7 @@ public:
 				return nullptr;
 			}
 			for (int i = from; i < to; i += by) {
-				array.push_back(new NovaInt(i));
+				array.push_back(std::make_shared<NovaInt>(i));
 			}
 		}
 		else {
@@ -59,31 +59,36 @@ public:
 				return nullptr;
 			}
 			for (int i = from; i > to; i += by) {
-				array.push_back(new NovaInt(i));
+				array.push_back(std::make_shared<NovaInt>(i));
 			}
 		}
 
-		return new NovaArray(array);
+		return std::make_shared<NovaArray>(array);
 	}
 
 	nova_std_decl(Int) {
 		req_args(1);
-		NovaValue* ptr = args[0];
+		std::shared_ptr<NovaValue> ptr = args[0];
 		if (ptr->Type() == "Int") {
 			intget(i, 0);
 			return i->Copy();
 		}
 		else if (ptr->Type() == "Float") {
 			floatget(flt, 0);
-			return new NovaInt(int(flt->CNum()));
+			return std::make_shared<NovaInt>(int(flt->CNum()));
 		}
 		else if (ptr->Type() == "Bool") {
 			boolget(b, 0);
-			return b ? new NovaInt(1) : new NovaInt(0);
+			return b ? std::make_shared<NovaInt>(1) : std::make_shared<NovaInt>(0);
 		}
 		else if (ptr->Type() == "String") {
 			strget(str, 0);
-			return new NovaInt(std::stoi(str->CStr()));
+			try {
+				return std::make_shared<NovaInt>(std::stoi(str->CStr()));
+			}
+			catch (std::exception e) {
+				std::cout << "Invalid String to Int conversion " + str->ToString();
+			}
 		}
 		else {
 			PushError("Cannot cast " + ptr->Type() + "To a int");
@@ -93,10 +98,10 @@ public:
 
 	nova_std_decl(Float) {
 		req_args(1);
-		NovaValue* ptr = args[0];
+		std::shared_ptr<NovaValue> ptr = args[0];
 		if (ptr->Type() == "Int") {
 			intget(i, 0);
-			return new NovaFloat(float(i->CNum()));
+			return std::make_shared<NovaFloat>(float(i->CNum()));
 		}
 		else if (ptr->Type() == "Float") {
 			floatget(flt, 0);
@@ -104,11 +109,16 @@ public:
 		}
 		else if (ptr->Type() == "bool") {
 			boolget(b, 0);
-			return b ? new NovaFloat(1.0f) : new NovaFloat(0.0f);
+			return b ? std::make_shared<NovaFloat>(1.0f) : std::make_shared<NovaFloat>(0.0f);
 		}
 		else if (ptr->Type() == "String") {
 			strget(str, 0);
-			return new NovaFloat(std::stof(str->CStr()));
+			try {
+				return std::make_shared<NovaFloat>(std::stof(str->CStr()));
+			}
+			catch (std::exception e) {
+				PushError("Invalid String to Float conversion (" + str->ToString() + ")");
+			}
 		}
 		else {
 			PushError("Cannot cast " + ptr->Type() + "To a float");
@@ -119,7 +129,7 @@ public:
 	nova_std_decl(String) {
 		req_args(1);
 		if (args[0]) {
-			return new NovaString(args[0]->ToString());
+			return std::make_shared<NovaString>(args[0]->ToString());
 		}
 		else {
 			PushError("Value in string constructor evaluated to null");
@@ -129,18 +139,18 @@ public:
 
 	nova_std_decl(Bool) {
 		req_args(1);
-		NovaValue* ptr = args[0];
+		std::shared_ptr<NovaValue> ptr = args[0];
 		if (ptr->Type() == "Int") {
 			intget(i, 0);
-			return new NovaBool(bool(i->CNum()));
+			return std::make_shared<NovaBool>(bool(i->CNum()));
 		}
 		else if (ptr->Type() == "Float") {
 			floatget(flt, 0);
-			return new NovaBool(bool(flt->CNum()));
+			return std::make_shared<NovaBool>(bool(flt->CNum()));
 		}
 		else if (ptr->Type() == "bool") {
 			boolget(b, 0);
-			return b->Copy();;
+			return b->Copy();
 		}
 		else {
 			PushError("Cannot cast " + ptr->Type() + "To a boolean");
@@ -149,9 +159,9 @@ public:
 	}
 
 	nova_std_decl(Array) {
-		NovaArray* arr = new NovaArray({});
-		for (NovaValue* arg : args) {
-			arr->Arr()->push_back(arg->Copy());
+		std::shared_ptr<NovaArray> arr = std::make_shared<NovaArray>(std::vector<std::shared_ptr<NovaValue>>{});
+		for (std::shared_ptr<NovaValue> arg : args) {
+			arr->Arr()->push_back(arg);
 		}
 		return arr;
 	}
@@ -165,8 +175,8 @@ public:
 		return nullptr;
 	}
 
-	NovaObject* GetModule() override {
-		NovaObject* obj = new NovaObject();
+	std::shared_ptr<NovaObject> GetModule() override {
+		std::shared_ptr<NovaObject> obj = std::make_shared<NovaObject>();
 		objbindmethod(obj, Range);
 		objbindmethod(obj, Int);
 		objbindmethod(obj, Float);

@@ -2,7 +2,7 @@
 #include "../NovaScript/Interpretor/Interpretor.h"
 #include "../NovaScript/Interpretor/Scope.h"
 
-NovaValue* NovaFunction::Call(std::vector<NovaValue*> args) const {
+std::shared_ptr<NovaValue> NovaFunction::Call(std::vector<std::shared_ptr<NovaValue>> args) const {
 	if (fn) {
 		if (args.size() != fn->args.size()) {
 			PushError("Argument size mismatch, function expected " + std::to_string(fn->args.size()) + " but got " + std::to_string(args.size()));
@@ -13,9 +13,11 @@ NovaValue* NovaFunction::Call(std::vector<NovaValue*> args) const {
 			interpretor->GetScopeAsObj()->LimitedSet(fn->args[i], args[i]);
 		}
 		for (StmtNode* node : fn->body) {
+			if (interpretor->should_stop) {
+				break;
+			}
 			if (ReturnStmtNode* ret = dynamic_cast<ReturnStmtNode*>(node)) {
-				NovaValue* return_val = interpretor->EvaluateExpression(ret->return_value);
-				return_val->AddRef();
+				std::shared_ptr<NovaValue> return_val = interpretor->EvaluateExpression(ret->return_value);
 				interpretor->PopScope();
 				return return_val;
 			}
@@ -26,9 +28,6 @@ NovaValue* NovaFunction::Call(std::vector<NovaValue*> args) const {
 	else if (cppfn) {
 		return cppfn(args);
 	}
-	else {
-		PushError("This function is null");
-	}
 	return nullptr;
 }
 
@@ -36,30 +35,21 @@ std::string NovaFunction::ToString() const {
 	if (fn) {
 		return fn->Print();
 	}
-	else if (cppfn) {
-		return "CPP side NovaFunction, Unable to print body";
-	}
-	else {
-		PushError("This function is null");
-	}
-}
 
+	return "CPP side NovaFunction, Unable to print body";
+	
+}
 std::string NovaFunction::Type() const {
-	return "NovaFunction";
+	return "Function";
 }
 
-NovaValue* NovaFunction::Copy() {
+std::shared_ptr<NovaValue> NovaFunction::Copy() const {
 	if (fn) {
-		return new NovaFunction(fn, interpretor);
+		return std::make_shared<NovaFunction>(fn, interpretor, this_qualified);
 	}
-	else return new NovaFunction(cppfn);
+	else return std::make_shared<NovaFunction>(cppfn);
 }
 
-NovaValue* NovaFunction::Assign(NovaValue* rhs) {
-	// You cannot assign to a function
-	return this;
-}
-
-void NovaFunction::OnDestroy() {
-	delete this;
+bool NovaFunction::Assign(std::shared_ptr<NovaValue> rhs) {
+	return true;
 }

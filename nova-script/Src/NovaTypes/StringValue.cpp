@@ -20,9 +20,6 @@ const std::string& NovaString::CStr() const {
 	return novastr;
 }
 
-NovaValue* NovaString::Copy() {
-	return new NovaString(CStr());
-}
 
 std::string NovaString::ToString() const {
 	return CStr();
@@ -32,9 +29,17 @@ std::string NovaString::Type() const {
 	return "String";
 }
 
-NovaValue* NovaString::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
+std::shared_ptr<NovaValue> NovaString::Copy() const {
+	return std::make_shared<NovaString>(CStr());
+}
+
+std::shared_ptr<NovaValue> NovaString::CopyPtr() {
+	return std::make_shared<NovaString>(Str());
+}
+
+std::shared_ptr<NovaValue> NovaString::PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const {
 	if (Type() == "String") {
-		NovaString* r = static_cast<NovaString*>(rhs);
+		NovaString* r = static_cast<NovaString*>(rhs.get());
 		std::string result;
 		switch(op) {
 		case NovaOperator::Plus:
@@ -42,55 +47,51 @@ NovaValue* NovaString::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 			break;
 		case NovaOperator::Equality: {
 			bool b = CStr() == r->CStr();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::NotEqual: {
 			bool b = CStr() != r->CStr();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		default:
-			OpFailed(rhs, op);
 			return nullptr;
 			break;
 		}
 
-		return new NovaString(result);
+		return std::make_shared<NovaString>(result);
 	}
 
-	OpFailed(rhs, op);
 	return nullptr;
 }
 
 
-NovaValue* NovaString::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
+bool NovaString::PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) {
 	if (Type() == "String") {
-		NovaString* r = static_cast<NovaString*>(rhs);
+		NovaString* r = static_cast<NovaString*>(rhs.get());
 		std::string result;
 		switch (op) {
 		case NovaOperator::CompoundPlus:
 			result += r->CStr();
-			return this;
+			return true;
 		break;
 		default:
-			OpFailed(rhs, op);
-			return nullptr;
+			return false;
 			break;
 		}
 
 		return new NovaString(result);
 	}
 
-	OpFailed(rhs, op);
-	return nullptr;
+	return false;
 }
 
-NovaValue* NovaString::Assign(NovaValue* rhs) {
+bool NovaString::Assign(std::shared_ptr<NovaValue> rhs) {
 	if (rhs->Type() == "String") {
-		NovaString* str = static_cast<NovaString*>(rhs);
+		NovaString* str = static_cast<NovaString*>(rhs.get());
 		*Str() = str->CStr();
-		return this;
+		return true;
 	}
-	return nullptr;
+	false;
 }
 
 static void PushError(std::string msg) {
@@ -100,34 +101,34 @@ static void PushError(std::string msg) {
 nova_std_decl(Length) {
 	req_args(1);
 	strget(string, 0);
-	return new NovaInt(int(string->CStr().size()));
+	return std::make_shared<NovaBool>(int(string->CStr().size()));
 }
 
 nova_std_decl(IsEmpty) {
 	req_args(1);
 	strget(string, 0);
-	return new NovaBool(string->CStr().empty());
+	return std::make_shared<NovaBool>(string->CStr().empty());
 }
 
 nova_std_decl(StartsWith) {
 	req_args(2);
 	strget(string, 0);
 	strget(prefix, 1);
-	return new NovaBool(string->CStr().starts_with(prefix->CStr()));
+	return std::make_shared<NovaBool>(string->CStr().starts_with(prefix->CStr()));
 }
 
 nova_std_decl(EndsWith) {
 	req_args(2);
 	strget(string, 0);
 	strget(suffix, 1);
-	return new NovaBool(string->CStr().ends_with(suffix->CStr()));
+	return std::make_shared<NovaBool>(string->CStr().ends_with(suffix->CStr()));
 }
 
 nova_std_decl(Contains) {
 	req_args(2);
 	strget(string, 0);
 	strget(search, 1);
-	return new NovaBool(string->CStr().find(search->CStr()) != std::string::npos);
+	return std::make_shared<NovaBool>(string->CStr().find(search->CStr()) != std::string::npos);
 }
 
 nova_std_decl(Substr) {
@@ -138,10 +139,10 @@ nova_std_decl(Substr) {
 
 	if (start->CNum() < 0 || len->CNum() < 0 || start->CNum() >= string->CStr().size()) {
 		PushError("Invalid substring range");
-		return new NovaString("");
+		return std::make_shared<NovaString>("");
 	}
 
-	return new NovaString(string->CStr().substr(start->CNum(), len->CNum()));
+	return std::make_shared<NovaString>(string->CStr().substr(start->CNum(), len->CNum()));
 }
 
 nova_std_decl(Find) {
@@ -150,7 +151,7 @@ nova_std_decl(Find) {
 	strget(search, 1);
 
 	size_t pos = string->CStr().find(search->CStr());
-	return new NovaInt(pos == std::string::npos ? -1 : int(pos));
+	return std::make_shared<NovaInt>(pos == std::string::npos ? -1 : int(pos));
 }
 
 // thanks stack overflow very cool
@@ -165,7 +166,7 @@ static std::string TrimImpl(const std::string& s) {
 nova_std_decl(Trim) {
 	req_args(1);
 	strget(string, 0);
-	return new NovaString(TrimImpl(string->CStr()));
+	return std::make_shared<NovaString>(TrimImpl(string->CStr()));
 }
 
 nova_std_decl(Replace) {
@@ -175,11 +176,11 @@ nova_std_decl(Replace) {
 	strget(to, 2);
 
 	size_t pos = string->CStr().find(from->CStr());
-	if (pos == std::string::npos) return new NovaString(string->CStr());
+	if (pos == std::string::npos) return std::make_shared<NovaString>(string->CStr());
 
 	std::string result = string->CStr();
 	result.replace(pos, from->CStr().size(), to->CStr());
-	return new NovaString(result);
+	return std::make_shared<NovaString>(result);
 }
 
 nova_std_decl(ToUpper) {
@@ -190,7 +191,7 @@ nova_std_decl(ToUpper) {
 		c = std::toupper((unsigned char)c);
 	}
 
-	return new NovaString(out);
+	return std::make_shared<NovaString>(out);
 }
 
 nova_std_decl(ToLower) {
@@ -201,7 +202,7 @@ nova_std_decl(ToLower) {
 		c = std::tolower((unsigned char)c);
 	}
 
-	return new NovaString(out);
+	return std::make_shared<NovaString>(out);
 }
 
 nova_std_decl(Split) {
@@ -212,63 +213,54 @@ nova_std_decl(Split) {
 	std::string text = string->CStr();
 	std::string delim = delimiter->CStr();
 
-	std::vector<NovaValue*> result;
+	std::vector<std::shared_ptr<NovaValue>> result;
 
 	if (delim.empty()) {
-		result.push_back(new NovaString(text));
-		return new NovaArray(result);
+		result.push_back(std::make_shared<NovaString>(text));
+		return std::make_shared<NovaArray>(result);
 	}
 
 	size_t start = 0;
 	size_t end = text.find(delim);
 
 	while (end != std::string::npos) {
-		result.push_back(new NovaString(text.substr(start, end - start)));
+		result.push_back(std::make_shared<NovaString>(text.substr(start, end - start)));
 		start = end + delim.length();
 		end = text.find(delim, start);
 	}
 
-	result.push_back(new NovaString(text.substr(start)));
+	result.push_back(std::make_shared<NovaString>(text.substr(start)));
 
-	return new NovaArray(result);
+	return std::make_shared<NovaArray>(result);
 }
 
+std::unordered_map<std::string, std::shared_ptr<NovaValue>> NovaString::string_accessables = std::unordered_map<std::string, std::shared_ptr<NovaValue>>{
+	{"Length", std::make_shared<NovaFunction>(Length, true)},
+	{"IsEmpty", std::make_shared<NovaFunction>(IsEmpty, true)},
+	{"StartsWith",std::make_shared<NovaFunction>(StartsWith, true)},
+	{"EndsWith", std::make_shared<NovaFunction>(EndsWith, true)},
+	{"Substr", std::make_shared<NovaFunction>(Substr, true)},
+	{"Find", std::make_shared<NovaFunction>(Find, true)},
+	{"Replace", std::make_shared<NovaFunction>(Replace, true)},
+	{"ToUpper", std::make_shared<NovaFunction>(ToUpper, true)},
+	{"ToLower", std::make_shared<NovaFunction>(ToLower, true)},
+	{"Split", std::make_shared<NovaFunction>(Split, true)},
+	{"_NOVA_THIS", nullptr }
+};
+
 NovaString::NovaString(const std::string& str) : novastr(str) {
-	accessables = new std::unordered_map<std::string, NovaValue*>{
-	{"Length", new NovaFunction(Length, true)},
-	{"IsEmpty", new NovaFunction(IsEmpty, true)},
-	{"StartsWith", new NovaFunction(StartsWith, true)},
-	{"EndsWith", new NovaFunction(EndsWith, true)},
-	{"Contains", new NovaFunction(Contains, true)},
-	{"Substr", new NovaFunction(Substr, true)},
-	{"Find", new NovaFunction(Find, true)},
-	{"Trim", new NovaFunction(Trim, true)},
-	{"Replace", new NovaFunction(Replace, true)},
-	{"ToUpper", new NovaFunction(ToUpper, true)},
-	{"ToLower", new NovaFunction(ToLower, true)},
-	{"Split", new NovaFunction(Split, true)},
-	{"_NOVA_THIS", nullptr}
-	};
+	
 }
 
 NovaString::NovaString(std::string* cppstr) : cppstr(cppstr) {
-	accessables = new std::unordered_map<std::string, NovaValue*>{
-	{"Length", new NovaFunction(Length, true)},
-	{"IsEmpty", new NovaFunction(IsEmpty, true)},
-	{"StartsWith", new NovaFunction(StartsWith, true)},
-	{"EndsWith", new NovaFunction(EndsWith, true)},
-	{"Contains", new NovaFunction(Contains, true)},
-	{"Substr", new NovaFunction(Substr, true)},
-	{"Find", new NovaFunction(Find, true)},
-	{"Trim", new NovaFunction(Trim, true)},
-	{"Replace", new NovaFunction(Replace, true)},
-	{"ToUpper", new NovaFunction(ToUpper, true)},
-	{"ToLower", new NovaFunction(ToLower, true)},
-	{"Split", new NovaFunction(Split, true)},
-	{"_NOVA_THIS", nullptr}
-	};
+	
 }
 
-void NovaString::OnDestroy() {
-	delete this;
+std::unordered_map<std::string, std::shared_ptr<NovaValue>> NovaString::GetFullAccessableList() {
+	std::unordered_map<std::string, std::shared_ptr<NovaValue>> map = NovaValue::GetFullAccessableList();
+
+	for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : string_accessables) {
+		map[pair.first] = pair.second;
+	}
+	return map;
 }

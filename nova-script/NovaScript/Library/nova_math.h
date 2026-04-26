@@ -17,47 +17,61 @@ static std::mt19937& GetRandEngine() {
 	return gen;
 }
 
+static std::shared_ptr<NovaValue> nova_float_to_int(std::shared_ptr<NovaValue> f) {
+	if (f->Type() == "Float") {
+		NovaFloat* flt = static_cast<NovaFloat*>(f.get());
+		float rhs = flt->CNum();
+		if (std::fmod(rhs, 1.0) == 0) {
+			return std::make_shared<NovaInt>(int(rhs));
+		}
+	}
+	return f;
+}
+
 class NovaMathModule : public NovaModule {
+
+	
+
 	// --- Trig & Basic Arithmetic ---
 	nova_std_decl(Sin) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(sin(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(sin(val)));
 	}
 
 	nova_std_decl(Cos) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(cos(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(cos(val)));
 	}
 
 	nova_std_decl(Tan) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(tan(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(tan(val)));
 	}
 
 	nova_std_decl(Sqrt) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(sqrt(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(sqrt(val)));
 	}
 
 	nova_std_decl(Abs) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(abs(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(abs(val)));
 	}
 
 	// --- Rounding ---
 	nova_std_decl(Round) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(round(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(round(val)));
 	}
 
 	nova_std_decl(Floor) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(floor(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(floor(val)));
 	}
 
 	nova_std_decl(Ceil) {
 		req_args(1); numfget(val, 0);
-		return new NovaFloat(ceil(val));
+		return nova_float_to_int(std::make_shared<NovaFloat>(ceil(val)));
 	}
 
 	// --- Comparison & Interpolation ---
@@ -65,48 +79,48 @@ class NovaMathModule : public NovaModule {
 		req_args(2);
 		numfget(v1, 0);
 		numfget(v2, 1);
-		return new NovaFloat(std::min(v1, v2));
+		return nova_float_to_int(std::make_shared<NovaFloat>(std::min(v1, v2)));
 	}
 
 	nova_std_decl(Max) {
 		req_args(2);
 		numfget(v1, 0);
 		numfget(v2, 1);
-		return new NovaFloat(std::max(v1, v2));
+		return nova_float_to_int(std::make_shared<NovaFloat>(std::max(v1, v2)));
 	}
 
 	nova_std_decl(Clamp) {
 		req_args(3); numfget(v, 0); numfget(lo, 1); numfget(hi, 2);
-		return new NovaFloat(std::clamp(v, lo, hi));
+		return nova_float_to_int(std::make_shared<NovaFloat>(std::clamp(v, lo, hi)));
 	}
 
 	nova_std_decl(Lerp) {
 		req_args(3); numfget(a, 0); numfget(b, 1); numfget(t, 2);
-		return new NovaFloat(a + t * (b - a));
+		return nova_float_to_int(std::make_shared<NovaFloat>(a + t * (b - a)));
 	}
 
 	// --- Conversion ---
 	nova_std_decl(Degrees) {
 		req_args(1); numfget(rad, 0);
-		return new NovaFloat(rad * (180.0f / 3.1415926535f));
+		return nova_float_to_int(std::make_shared<NovaFloat>(rad * (180.0f / 3.1415926535f)));
 	}
 
 	nova_std_decl(Radians) {
 		req_args(1); numfget(deg, 0);
-		return new NovaFloat(deg * (3.1415926535f / 180.0f));
+		return nova_float_to_int(std::make_shared<NovaFloat>(deg * (3.1415926535f / 180.0f)));
 	}
 
 	// --- Randomization ---
 	nova_std_decl(RandF) {
 		req_args(0);
 		std::uniform_real_distribution<float> dis(0.0f, 1.0f);
-		return new NovaFloat(dis(GetRandEngine()));
+		return nova_float_to_int(std::make_shared<NovaFloat>(dis(GetRandEngine())));
 	}
 
 	nova_std_decl(RandI) {
 		req_args(0);
 		std::uniform_int_distribution<int> dis(0, std::numeric_limits<int>::max());
-		return new NovaInt(dis(GetRandEngine()));
+		return std::make_shared<NovaInt>(dis(GetRandEngine()));
 	}
 
 	nova_std_decl(RandFRange) {
@@ -114,7 +128,7 @@ class NovaMathModule : public NovaModule {
 		numfget(minV, 0);
 		numfget(maxV, 1);
 		std::uniform_real_distribution<float> dis(minV, maxV);
-		return new NovaFloat(dis(GetRandEngine()));
+		return nova_float_to_int(std::make_shared<NovaFloat>(dis(GetRandEngine())));
 	}
 
 	nova_std_decl(RandIRange) {
@@ -122,11 +136,11 @@ class NovaMathModule : public NovaModule {
 		numfget(minV, 0);
 		numfget(maxV, 1);
 		std::uniform_int_distribution<int> dis(static_cast<int>(minV), static_cast<int>(maxV));
-		return new NovaInt(dis(GetRandEngine()));
+		return std::make_shared<NovaInt>(dis(GetRandEngine()));
 	}
 
-	NovaObject* GetModule() override {
-		NovaObject* obj = new NovaObject();
+	std::shared_ptr<NovaObject> GetModule() override {
+		std::shared_ptr<NovaObject> obj = std::make_shared<NovaObject>();
 
 		objbindmethod(obj, Sin);
 		objbindmethod(obj, Cos);
@@ -146,8 +160,8 @@ class NovaMathModule : public NovaModule {
 		objbindmethod(obj, RandI);
 		objbindmethod(obj, RandFRange);
 		objbindmethod(obj, RandIRange);
-		obj->PushBack("PI", new NovaFloat(3.1415926535f));
-		obj->PushBack("E", new NovaFloat(2.7182818284f));
+		obj->PushBack("PI", std::make_shared<NovaFloat>(3.1415926535f));
+		obj->PushBack("E", std::make_shared<NovaFloat>(2.7182818284f));
 		return obj;
 	}
 };

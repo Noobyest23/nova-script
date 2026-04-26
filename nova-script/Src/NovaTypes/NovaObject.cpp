@@ -1,13 +1,16 @@
 #include "../NovaScript/Value/NovaObject.h"
 
-NovaValue* NovaObject::Copy() {
-	// all objects are ptrs
-	return this;
+std::shared_ptr<NovaValue> NovaObject::Copy() const {
+	std::shared_ptr<NovaObject> result = std::make_shared<NovaObject>();
+	for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : *accessables) {
+		result->PushBack(pair.first, pair.second->Copy());
+	}
+	return result;
 }
 
 std::string NovaObject::ToString() const {
 	std::string output = "{\n";
-	for (std::pair<std::string, NovaValue*> pair : *accessables) {
+	for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : *accessables) {
 		output += pair.first + " : " + pair.second->ToString() + "\n";
 	}
 	output += "}";
@@ -18,14 +21,10 @@ std::string NovaObject::Type() const {
 	return "Object";
 }
 
-void NovaObject::PushBack(const std::string& str, NovaValue* value) {
+void NovaObject::PushBack(const std::string& str, std::shared_ptr<NovaValue> value) {
 	accessables->emplace(str, value);
 }
 
-NovaValue* NovaObject::Assign(NovaValue* rhs) {
-	return nullptr;
-}
-
-void NovaObject::OnDestroy() {
-	delete this;
+bool NovaObject::Assign(std::shared_ptr<NovaValue> rhs) {
+	return false;
 }

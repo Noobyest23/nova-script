@@ -1,0 +1,48 @@
+include "io"
+include "os"
+include "python.ns"
+
+type DateTime{
+    func DateTime(str)
+    {
+        var date_and_time = str.Split(" ")
+        this.date_str = date_and_time[0]
+        var d = this.date_str
+        this.year = Int(d.Substr(0, 4))
+        this.month = Int(d.Substr(5, 2))
+        this.day = Int(d.Substr(8, 2))
+        this.time_str = date_and_time[1]
+        var t = this.time_str
+        this.hour = Int(t.Substr(0, 2))
+        this.minute = Int(t.Substr(3, 2))
+        this.second = Int(t.Substr(6, 2))
+        this.milisecond = Float(t.Substr(9, 6)) / 1000000.0
+    }
+    var date_str = ""
+    var year = 0
+    var month = 0
+    var time_str = ""
+    var day = 0
+    var hour = 0
+    var minute = 0
+    var second = 0
+    var milisecond = 0
+}
+func DateTimeNow()
+{
+    var time_file_name = "current_time.txt"
+    var better_script = "
+    from datetime import datetime
+    time_as_string = str(datetime.now())
+    with open(" + quote + time_file_name + quote + ", " + quote + "w" + quote + ") as f:
+    \tf.write(time_as_string)"
+
+
+    # Run the script
+    RunPython(better_script)
+
+    # Return a datetime
+    return DateTime(ReadFile(time_file_name))
+}
+
+Print(DateTimeNow())

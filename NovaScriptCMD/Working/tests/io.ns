@@ -1,8 +1,20 @@
-# test io library
+include "io" as io
 include "io"
 
-Print("Hello NovaScript!")
-PrintWarning("Hello NovaScript!")
-PrintError("Hello NovaScript!")
-var str = Input("Type INPUT otherwise the test for this file will fail")
-Print(str)
+io.Print("Hello NovaScript!")
+Print("Hello, NovaScript!")
+
+var str = Input("Zippidy doo da")
+
+func write_alphabet() {
+	var output = "The quick brown fox jumped over the lazy dog"
+	io.WriteFile("alphabet.txt", output)
+}
+
+write_alphabet()
+
+var input = ReadFile("alphabet.txt")
+PrintWarning(input)
+PrintError("Test Finished!")
+io.RemoveFile("alphabet.txt")
+io.Print(io.WriteFile)

@@ -1,0 +1,8 @@
+include "os"
+include "io"
+
+Print("Yippee")
+Wait(1000.0)
+Print("waited 1 seconds")
+Run("novascriptcmd.exe tests/arrays.ns")
+Exit("bye bye")

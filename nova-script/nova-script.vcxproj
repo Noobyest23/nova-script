@@ -256,6 +256,7 @@ if exist "$(TargetDir)$(TargetName).pdb" del /Q "$(TargetDir)$(TargetName).pdb" 
     <ClCompile Include="Src\NovaTypes\FunctionValue.cpp" />
     <ClCompile Include="Src\NovaTypes\IntValue.cpp" />
     <ClCompile Include="Src\NovaTypes\NovaObject.cpp" />
+    <ClCompile Include="Src\NovaTypes\NullValue.cpp" />
     <ClCompile Include="Src\NovaTypes\SignalValue.cpp" />
     <ClCompile Include="Src\Scope.cpp" />
     <ClCompile Include="Src\NovaTypes\StringValue.cpp" />

@@ -12,17 +12,15 @@ struct NOVASCRIPT_API NovaFloat : public NovaValue {
 
 	float* Num();
 	const float CNum() const;
-	NovaValue* Copy() override;
+	std::shared_ptr<NovaValue> Copy() const override;
 	std::string ToString() const override;
 	std::string Type() const override;
 
-	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
-	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) override;
-	NovaValue* Assign(NovaValue* rhs) override;
+	std::shared_ptr<NovaValue> PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const override;
+	bool PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) override;
+	bool Assign(std::shared_ptr<NovaValue> rhs) override;
 
 protected:
-
-	void OnDestroy() override;
 
 };
 

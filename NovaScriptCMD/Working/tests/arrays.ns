@@ -1,0 +1,16 @@
+include "io"
+
+var array = []
+array.PushBack("Hello")
+array.PushBack("NovaScript!")
+
+Print(array, array.Size())
+var index = array.Find("Hello")
+Print("Found 'Hello' at ", index)
+array.Erase(index)
+Print(array.Pop())
+Print(array._NOVA_THIS)
+array.PushBack("according to all known laws of aviation...")
+array.Pop()
+Print(array)
+Print(array.Clear())

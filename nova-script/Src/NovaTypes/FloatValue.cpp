@@ -20,9 +20,8 @@ const float NovaFloat::CNum() const {
 	return novanum;
 }
 
-NovaValue* NovaFloat::Copy() {
-	NovaFloat* f = new NovaFloat(CNum());
-	return f;
+std::shared_ptr<NovaValue> NovaFloat::Copy() const {
+	return std::make_shared<NovaFloat>(CNum());
 }
 
 std::string NovaFloat::ToString() const {
@@ -33,9 +32,9 @@ std::string NovaFloat::Type() const {
 	return "Float";
 }
 
-NovaValue* NovaFloat::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
+std::shared_ptr<NovaValue> NovaFloat::PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const {
 	if (rhs->Type() == "Int") {
-		NovaInt* r = static_cast<NovaInt*>(rhs);
+		NovaInt* r = static_cast<NovaInt*>(rhs.get());
 		int result = CNum();
 		switch (op) {
 		case NovaOperator::Plus:
@@ -47,44 +46,47 @@ NovaValue* NovaFloat::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 		case NovaOperator::Multiply:
 			result *= r->CNum();
 			break;
-		case NovaOperator::Divide:
-			result /= r->CNum();
+		case NovaOperator::Divide: {
+			float f_result = float(result) / r->CNum();
+			return std::make_shared<NovaFloat>(f_result);
 			break;
+		}
 		case NovaOperator::Equality: {
 			bool b = result == r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::NotEqual: {
 			bool b = result != r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::GreaterThen: {
 			bool b = result > r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::LesserThen: {
 			bool b = result < r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::GreaterEqual: {
 			bool b = result >= r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::LesserEqual: {
 			bool b = result <= r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::Mod: {
 			result %= r->CNum();
+			break;
 		}
 		default:
-			OpFailed(rhs, op);
+			return nullptr;
 		}
 
-		return new NovaFloat(result);
+		return std::make_shared<NovaFloat>(result);
 	}
 	else if (rhs->Type() == "Float") {
-		NovaFloat* r = static_cast<NovaFloat*>(rhs);
+		NovaFloat* r = static_cast<NovaFloat*>(rhs.get());
 		float result = CNum();
 		switch (op) {
 		case NovaOperator::Plus:
@@ -101,122 +103,115 @@ NovaValue* NovaFloat::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 			break;
 		case NovaOperator::Mod:
 			result = r(mod)(CNum(), r->CNum());
+			break;
 		case NovaOperator::Equality: {
 			bool b = result == r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::NotEqual: {
 			bool b = result != r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::GreaterThen: {
 			bool b = result > r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::LesserThen: {
 			bool b = result < r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::GreaterEqual: {
 			bool b = result >= r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		case NovaOperator::LesserEqual: {
 			bool b = result <= r->CNum();
-			return new NovaBool(b);
+			return std::make_shared<NovaBool>(b);
 		}
 		default:
-			OpFailed(rhs, op);
+			return nullptr;
 		}
 
-		return new NovaFloat(result);
+		return std::make_shared<NovaFloat>(result);
 	}
-	OpFailed(rhs, op);
+
 	return nullptr;
 }
 
 
-NovaValue* NovaFloat::PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
+bool NovaFloat::PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) {
 	if (rhs->Type() == "Int") {
-		NovaInt* r = static_cast<NovaInt*>(rhs);
+		NovaInt* r = static_cast<NovaInt*>(rhs.get());
 		int result = CNum();
 		switch (op) {
 		case NovaOperator::CompoundPlus: {
 			*Num() += r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundMinus: {
 			*Num() -= r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundMultiply: {
 			*Num() *= r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundDivide: {
 			*Num() /= r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundMod: {
 			*Num() = r(mod)(CNum(), r->CNum());
-			return this;
+			break;
 		}
 		default:
-			OpFailed(rhs, op);
+			return false;
 		}
 
-		return new NovaInt(result);
+		return true;
 	}
 	else if (rhs->Type() == "Float") {
-		NovaFloat* r = static_cast<NovaFloat*>(rhs);
+		NovaFloat* r = static_cast<NovaFloat*>(rhs.get());
 		float result = CNum();
 		switch (op) {
 		case NovaOperator::CompoundPlus: {
 			*Num() += r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundMinus: {
 			*Num() -= r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundMultiply: {
 			*Num() *= r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundDivide: {
 			*Num() /= r->CNum();
-			return this;
+			break;
 		}
 		case NovaOperator::CompoundMod: {
 			*Num() = r(mod)(CNum(), r->CNum());
-			return this;
+			break;
 		}
 		default:
-			OpFailed(rhs, op);
+			return false;
+			break;
 		}
 
-		return new NovaFloat(result);
+		return true;
 	}
 
-	OpFailed(rhs, op);
-	return nullptr;
+	return false;
 }
 
-NovaValue* NovaFloat::Assign(NovaValue* rhs) {
+bool NovaFloat::Assign(std::shared_ptr<NovaValue> rhs) {
 	// Float can be assigned by Int or Float
-	if (rhs->Type() == "Int") {
-		NovaInt* i = static_cast<NovaInt*>(rhs);
-		*Num() = float(i->CNum());
-		return this;
-	}
-	else if (rhs->Type() == "Float") {
-		NovaFloat* f = static_cast<NovaFloat*>(rhs);
+	if (rhs->Type() == "Float") {
+		NovaFloat* f = static_cast<NovaFloat*>(rhs.get());
 		*Num() = f->CNum();
-		return this;
+		return true;
 	}
-	return nullptr;
+	return false;
 }
 
-void NovaFloat::OnDestroy() {
-	delete this;
-}

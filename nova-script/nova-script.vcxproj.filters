@@ -173,6 +173,9 @@
     <ClCompile Include="Src\NovaTypes\SignalValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\NovaTypes\NullValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="NovaScript\NovaErrorPush.h" />

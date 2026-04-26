@@ -13,17 +13,15 @@ struct NOVASCRIPT_API NovaBool : public NovaValue {
 	bool* B();
 	const bool& CB() const;
 
-	NovaValue* Copy() override;
+	std::shared_ptr<NovaValue> Copy() const override;
 	std::string ToString() const override;
 	std::string Type() const override;
 
-	NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const override;
-	NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) { return nullptr; };
-	NovaValue* Assign(NovaValue* rhs) override;
+	std::shared_ptr<NovaValue> PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const override;
+	bool PerformCompoundOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) { return false; };
+	bool Assign(std::shared_ptr<NovaValue> rhs) override;
 
 protected:
-
-	void OnDestroy() override;
 
 };
 

@@ -1,22 +1,14 @@
 #include "../NovaScript/Value/Value.h"
 #include "../NovaScript/NovaErrorPush.h"
 
-void NovaValue::AddRef() {
-	ref_count++;
-}
+std::unordered_map<std::string, std::shared_ptr<NovaValue>> NovaValue::default_static_accessables = {
 
-void NovaValue::Release() {
-	ref_count--;
-	if (ref_count <= 0) {
-		if (accessables) {
-			for (std::pair<std::string, NovaValue*> pair : *accessables) {
-				if (pair.second) {
-					pair.second->Release();
-				}
-			}
-			delete accessables;
-		}
-		OnDestroy();
+};
+
+void NovaValue::OnDestroy() {
+	on_destroy();
+	if (accessables) {
+		delete accessables;
 	}
 }
 
@@ -28,19 +20,12 @@ void NovaValue::PushWarning(const std::string & msg) const {
 	Callbacker::PushError(msg, 1);
 }
 
-void NovaValue::OpFailed(NovaValue* rhs, const NovaOperator& op) const {
-	PushError(Type() + " failed to perform " + std::to_string(op) + " type operation with a value of " + rhs->Type());
-}
-
-NovaValue* NovaValue::Access(const std::string& str) {
+std::unordered_map<std::string, std::shared_ptr<NovaValue>> NovaValue::GetFullAccessableList() {
 	if (accessables) {
-		auto it = accessables->find(str);
-		if (it != accessables->end()) {
-			return accessables->at(str);
+		std::unordered_map<std::string, std::shared_ptr<NovaValue>> map;
+		for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : default_static_accessables) {
+			map[pair.first] = pair.second;
 		}
 	}
-	else {
-		PushError("Cannot access " + str + ", this value has no accessable values");
-		return nullptr;
-	}
+	return default_static_accessables;
 }

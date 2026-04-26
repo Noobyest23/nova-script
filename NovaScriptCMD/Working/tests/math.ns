@@ -1,0 +1,45 @@
+include "io"
+include "math"
+
+Print(Sin(0.5))
+Print(Cos(0.5))
+Print(Tan(PI))
+Print(Sqrt(16))
+Print(Round(PI))
+
+var x = 0
+
+x += 1 + 2
+x += 1.0 + 2
+x += 1 + 2.0
+x += 1.0 + 2.0
+Print(x)
+x = 0
+x += 1 * 2
+x += 1.0 * 2
+x += 1.0 * 2.0
+x += 1 * 2.0
+Print(x)
+x = 0.0
+x += 1 / 2
+Print(x)
+x += 1 / 2.0
+x += 1.0 / 2
+Print(x)
+x += 1.0 / 2.0
+Print(x)
+x = 0
+x += 1 - 2
+x += 1.0 - 2
+x += 1 - 2.0
+x += 1.0 - 2.0
+Print(x)
+x = 0
+x += 1 % 2
+x += 1.0 % 2
+x += 1 % 2.0
+x += 1.0 % 2.0
+Print(x)
+
+var str = "blah"
+str -= "blah"

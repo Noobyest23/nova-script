@@ -1,9 +1,0 @@
-include "io" as io
-include "vector"
-
-var my_vec = Vector2(10.0, 10.0)
-
-io.Print(my_vec)
-
-my_vec *= 20
-io.Print(my_vec)

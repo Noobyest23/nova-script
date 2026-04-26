@@ -14,8 +14,8 @@ const bool& NovaBool::CB() const {
 	return novab;
 }
 
-NovaValue* NovaBool::Copy() {
-	return new NovaBool(CB());
+std::shared_ptr<NovaValue> NovaBool::Copy() const {
+	return std::make_shared<NovaBool>(CB());
 }
 
 std::string NovaBool::ToString() const {
@@ -26,9 +26,9 @@ std::string NovaBool::Type() const {
 	return "Bool";
 }
 
-NovaValue* NovaBool::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
+std::shared_ptr<NovaValue> NovaBool::PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const {
 	if (rhs->Type() == "Bool") {
-		NovaBool* r = static_cast<NovaBool*>(rhs);
+		NovaBool* r = static_cast<NovaBool*>(rhs.get());
 		bool result;
 		switch (op) {
 		case NovaOperator::Equality:
@@ -38,23 +38,20 @@ NovaValue* NovaBool::PerformOp(NovaValue* rhs, const NovaOperator& op) const {
 			result = CB() != r->CB();
 			break;
 		default:
-			OpFailed(rhs, op);
+			return nullptr;
 			break;
 		}
+
+		return std::make_shared<NovaBool>(result);
 	}
-	OpFailed(rhs, op);
 	return nullptr;
 }
 
-NovaValue* NovaBool::Assign(NovaValue* rhs) {
+bool NovaBool::Assign(std::shared_ptr<NovaValue> rhs) {
 	if (rhs->Type() == "Bool") {
-		NovaBool* b = static_cast<NovaBool*>(rhs);
+		NovaBool* b = static_cast<NovaBool*>(rhs.get());
 		*B() = b->CB();
-		return this;
+		return true;
 	}
-	return nullptr;
-}
-
-void NovaBool::OnDestroy() {
-	delete this;
+	return false;
 }

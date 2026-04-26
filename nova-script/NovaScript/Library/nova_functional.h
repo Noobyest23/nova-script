@@ -5,21 +5,4 @@
 #include "../Value/SignalValue.h"
 #include "../Value/NovaObject.h"
 
-class NovaFunctionalModule : public NovaModule {
-public:
-
-	nova_std_decl(Signal) {
-		return new NovaSignal();
-	}
-
-	NovaObject* GetModule() {
-		NovaObject* obj = new NovaObject;
-		obj->PushBack("Signal", new NovaFunction(Signal));
-		return obj;
-	}
-
-};
-
-
-
 #endif

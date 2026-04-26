@@ -40,23 +40,25 @@ extern "C" {
 
 	ValueHandle GetVariable(InterpretorHandle i, const char* variable_name) {
 		Interpretor* interpretor = static_cast<Interpretor*>(i);
-		return interpretor->Get(variable_name);
+		return interpretor->Get(variable_name).get();
 	}
 
 	void PushVariable(InterpretorHandle i, const char* val_name, ValueHandle val) {
 		Interpretor* interpretor = static_cast<Interpretor*>(i);
 		NovaValue* value = static_cast<NovaValue*>(val);
-		interpretor->Set(val_name, value);
+		interpretor->Set(val_name, value->Copy());
 	}
 
 	ValueHandle CallFunc(InterpretorHandle i, const char* function_name, void* a) {
 		try {
 			Interpretor* interpretor = static_cast<Interpretor*>(i);
 			std::vector<NovaValue*>* args = static_cast<std::vector<NovaValue*>*>(a);
-			NovaValue* result = interpretor->Call(function_name, *args);
-			if (result) {
-				result->AddRef();
+			std::vector<std::shared_ptr<NovaValue>> new_args;
+			for (NovaValue* arg : *(args)) {
+				new_args.push_back(arg->Copy());
 			}
+			
+			NovaValue* result = interpretor->Call(function_name, new_args).get();
 			interpretor->PurgeStack();
 			return result;
 		}
@@ -94,7 +96,7 @@ extern "C" {
 		node->Delete();
 	}
 
-	const char* Version() { return "v0.1b"; };
+	const char* Version() { return "v0.4b"; };
 
 	const char* Changelog() { return ""; };
 

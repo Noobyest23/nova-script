@@ -7,9 +7,10 @@
 #include "../NovaScript/Value/StringValue.h"
 #include "../NovaScript/Value/ArrayValue.h"
 #include "../NovaScript/Value/NovaObject.h"
+#include "../NovaScript/Library/nova_math.h"
 
 #undef ee
-#define ee_decl(type) NovaValue* Interpretor::EvaluateExpression(type)
+#define ee_decl(type) std::shared_ptr<NovaValue> Interpretor::EvaluateExpression(type)
 #define ee(type) if (type n = dynamic_cast<type>(node)) {return EvaluateExpression(n);}
 
 #define STR(type) #type
@@ -40,7 +41,7 @@ ee_decl(ExprNode* node) {
 
 ee_decl(VariableNode* node) {
 	if (scope->Has(node->identifier)) {
-		NovaValue* val = scope->Get(node->identifier);
+		std::shared_ptr<NovaValue> val = scope->Get(node->identifier);
 		return val;
 	}
 	else {
@@ -50,13 +51,12 @@ ee_decl(VariableNode* node) {
 }
 
 ee_decl(AssignmentNode* node) {
-	NovaValue* lhs = EvaluateExpression(node->left);
+	std::shared_ptr<NovaValue> lhs = EvaluateExpression(node->left);
 
-	NovaValue* rhs = nullptr;
+	std::shared_ptr<NovaValue> rhs = nullptr;
 	if (VariableNode* v = dynamic_cast<VariableNode*>(node->right)) {
 		if (v->as_ptr) {
 			rhs = scope->Get(v->identifier);
-			rhs->AddRef();
 		}
 		else {
 			rhs = scope->Get(v->identifier)->Copy();
@@ -69,11 +69,6 @@ ee_decl(AssignmentNode* node) {
 	if (VariableNode* var = dynamic_cast<VariableNode*>(node->left)) {
 		if (!lhs->Assign(rhs)) {
 			scope->Set(var->identifier, rhs);
-			if (VariableNode* v = dynamic_cast<VariableNode*>(node->right)) {
-				if (not v->as_ptr) {
-					rhs->Release();
-				}
-			}
 		}
 		return lhs;
 	}
@@ -81,12 +76,8 @@ ee_decl(AssignmentNode* node) {
 		if (VariableNode* var = dynamic_cast<VariableNode*>(dot->right)) {
 			if (!lhs->Assign(rhs)) {
 				lhs = EvaluateExpression(dot->left); // gives us the var in var.property
-				
-				
-				lhs->accessables->at(var->identifier)->Release();
 				lhs->accessables->insert_or_assign(var->identifier, rhs);
 				return rhs;
-				
 			}
 			return lhs;
 		}
@@ -100,15 +91,14 @@ ee_decl(AssignmentNode* node) {
 			if (!lhs->Assign(rhs)) {
 
 				lhs = EvaluateExpression(arr->arr); // gives us the array itself, where lhs was just what we got from array at the index
-				NovaArray* narr = static_cast<NovaArray*>(lhs);
+				NovaArray* narr = static_cast<NovaArray*>(lhs.get());
 
-				NovaValue* index = EvaluateExpression(arr->index);
+				std::shared_ptr<NovaValue> index = EvaluateExpression(arr->index);
 				if (!index or index->Type() != "Int") { PushError("Index in array assignment is not an int", node); return null; }
-				NovaInt* int_index = static_cast<NovaInt*>(index);
+				NovaInt* int_index = static_cast<NovaInt*>(index.get());
 				if (int_index->CNum() > narr->CArr().size()) { PushError("Out of bounds array assignment", node); return null; }
 
 
-				(*narr->Arr())[int_index->CNum()]->Release();
 				(*narr->Arr())[int_index->CNum()] = rhs;
 				return narr->CArr()[int_index->CNum()];
 				
@@ -120,10 +110,21 @@ ee_decl(AssignmentNode* node) {
 }
 
 ee_decl(CompoundOp* node) {
-	NovaValue* lhs = EvaluateExpression(node->lhs);
-	NovaValue* rhs = EvaluateExpression(node->rhs);
+	std::shared_ptr<NovaValue> lhs = EvaluateExpression(node->lhs);
+	std::shared_ptr<NovaValue> rhs = EvaluateExpression(node->rhs);
 
 	NovaValue::NovaOperator op = NovaValue::CompoundPlus;
+
+	if (node->op == "/=") {
+		std::shared_ptr<NovaValue> rounded = nova_float_to_int(rhs);
+		if (rounded->Type() == "Int") {
+			NovaInt* nova_i = static_cast<NovaInt*>(rounded.get());
+			if (nova_i->CNum() == 0) {
+				PushError("Cannot divide by 0", node);
+				return null;
+			}
+		}
+	}
 
 	if (node->op == "-=") {
 		op = NovaValue::CompoundMinus;
@@ -134,16 +135,36 @@ ee_decl(CompoundOp* node) {
 	else if (node->op == "/=") {
 		op = NovaValue::CompoundDivide;
 	}
+	else if (node->op == "%=") {
+		op = NovaValue::CompoundMod;
+	}
 
-	NovaValue* result = lhs->PerformCompoundOp(rhs, op);
-	return result;
+	bool result = lhs->PerformCompoundOp(rhs, op);
+	if (result) {
+		return lhs;
+	}
+	else {
+		PushError("Failed to perform compound operation of (" + lhs->Type() + NovaValue::OpToString(op) + rhs->Type() + ")", node);
+		return null;
+	}
 }
 
 ee_decl(OpNode* node) {
-	NovaValue* lhs = EvaluateExpression(node->left);
-	NovaValue* rhs = EvaluateExpression(node->right);
+	std::shared_ptr<NovaValue> lhs = EvaluateExpression(node->left);
+	std::shared_ptr<NovaValue> rhs = EvaluateExpression(node->right);
 
 	NovaValue::NovaOperator op = NovaValue::Plus;
+	
+	if (node->op == "/") {
+		std::shared_ptr<NovaValue> rounded = nova_float_to_int(rhs);
+		if (rounded->Type() == "Int") {
+			NovaInt* nova_i = static_cast<NovaInt*>(rounded.get());
+			if (nova_i->CNum() == 0) {
+				PushError("Cannot divide by 0", node);
+				return null;
+			}
+		}
+	}
 
 	if (node->op == "-") {
 		op = NovaValue::Minus;
@@ -176,38 +197,38 @@ ee_decl(OpNode* node) {
 		op = NovaValue::CompoundMod;
 	}
 
-	NovaValue* result = lhs->PerformOp(rhs, op);
-	literal_stack.push_back(result);
-	return result;
+	std::shared_ptr<NovaValue> result = lhs->PerformOp(rhs, op);
+	if (result) {
+		literal_stack.push_back(result);
+		return result;
+	}
+	else {
+		PushError("Failed to perform operation of (" + lhs->Type() + NovaValue::OpToString(op) + rhs->Type() + ")", node);
+		return null;
+	}
 
 }
 
 ee_decl(FuncCallNode* node) {
-	NovaValue* func = scope->Get(node->func_id);
+	std::shared_ptr<NovaValue> func = scope->Get(node->func_id);
 	if (func) {
-		if (func->Type() == "NovaFunction") {
-			NovaFunction* fn = static_cast<NovaFunction*>(func);
-			std::vector<NovaValue*> args;
+		if (func->Type() == "Function") {
+			NovaFunction* fn = static_cast<NovaFunction*>(func.get());
+			std::vector<std::shared_ptr<NovaValue>> args;
 			if (fn->this_qualified and scope->LimitedHas("_NOVA_THIS")) {
 				args.push_back(scope->LimitedGet("_NOVA_THIS"));
 			}
 			for (ExprNode* arg : node->args) {
-				NovaValue* a_value = nullptr;
+				std::shared_ptr<NovaValue> a_value = nullptr;
 				a_value = EvaluateExpression(arg);
 				if (a_value) {
-					a_value->AddRef();
 					args.push_back(a_value);
 				}
 
 			}
-			NovaValue* result = fn->Call(args);
+			std::shared_ptr<NovaValue> result = fn->Call(args);
 			if (!result) {
 				result = null;
-			}
-			for (NovaValue* arg : args) {
-				if (scope->Get("_NOVA_THIS") != arg) {
-					arg->Release();
-				}
 			}
 			literal_stack.push_back(result);
 			return result;
@@ -225,9 +246,8 @@ ee_decl(FuncCallNode* node) {
 					EvaluateStatement(stmt);
 				}
 				scope = this_obj.parent;
-				NovaObject* result = new NovaObject();
-				for (const std::pair<std::string, NovaValue*>& pair : this_obj.variables) {
-					pair.second->AddRef();
+				std::shared_ptr<NovaValue> result = std::make_shared<NovaObject>();
+				for (const std::pair<std::string, std::shared_ptr<NovaValue>>& pair : this_obj.variables) {
 					result->accessables->insert(pair);
 				}
 				if (types.second) {
@@ -248,10 +268,10 @@ ee_decl(FuncCallNode* node) {
 }
 
 ee_decl(TernaryNode* node) {
-	NovaValue* val = EvaluateExpression(node->expression);
+	std::shared_ptr<NovaValue> val = EvaluateExpression(node->expression);
 
 	if (val->Type() == "bool") {
-		NovaBool* nb = static_cast<NovaBool*>(val);
+		NovaBool* nb = static_cast<NovaBool*>(val.get());
 		if (nb->CB()) {
 			return EvaluateExpression(node->truthy_value);
 		}
@@ -266,69 +286,65 @@ ee_decl(TernaryNode* node) {
 }
 
 ee_decl(IntLiteralNode* node) {
-	NovaInt* val = new NovaInt(node->number);
+	std::shared_ptr<NovaValue> val = std::make_shared<NovaInt>(node->number);
 	literal_stack.push_back(val);
 	return val;
 }
 
 ee_decl(FloatLiteralNode* node) {
-	NovaFloat* val = new NovaFloat(node->number);
+	std::shared_ptr<NovaValue> val = std::make_shared<NovaFloat>(node->number);
 	literal_stack.push_back(val);
 	return val;
 }
 
 ee_decl(BoolLiteralNode* node) {
-	NovaBool* val = new NovaBool(node->value);
+	std::shared_ptr<NovaValue> val = std::make_shared<NovaBool>(node->value);
 	literal_stack.push_back(val);
 	return val;
 }
 
 ee_decl(StringLiteralNode* node) {
-	NovaString* val = new NovaString(node->string);
+	std::shared_ptr<NovaValue> val = std::make_shared<NovaString>(node->string);
 	literal_stack.push_back(val);
 	return val;
 }
 
 ee_decl(ArrayLiteralNode* node) {
-	std::vector<NovaValue*> arr;
+	std::vector<std::shared_ptr<NovaValue>> arr;
 	for (ExprNode* expr : node->values) {
-		NovaValue* val = EvaluateExpression(expr);
-		if (val) {
-			val->AddRef();
-		}
+		std::shared_ptr<NovaValue> val = EvaluateExpression(expr);
 		arr.push_back(val);
 	}
-	NovaArray* narr = new NovaArray(arr);
+	std::shared_ptr<NovaValue> narr = std::make_shared<NovaArray>(arr);
 	literal_stack.push_back(narr);
 	return narr;
 }
 
 ee_decl(DotAccessNode* node) {
-	NovaValue* val = EvaluateExpression(node->left);
-	if (!val->accessables) { PushError("Left side of dot access does not have accessables", node); return null; }
+	std::shared_ptr<NovaValue> val = EvaluateExpression(node->left);
 	// val.func()
 	PushScope();
-	for (const std::pair<std::string, NovaValue*>& pair : *val->accessables) {
+	for (const std::pair<std::string, std::shared_ptr<NovaValue>>& pair : val->GetFullAccessableList()) {
 		scope->LimitedSet(pair.first, pair.second);
 	}
 	if (scope->LimitedHas("_NOVA_THIS")) { // if the object has the "this" field we pass it up the chain
 		scope->LimitedSet("_NOVA_THIS", val);
 	}
-	NovaValue* result = EvaluateExpression(node->right);
+	std::shared_ptr<NovaValue> result = EvaluateExpression(node->right);
 	
 	PopScope();
 	return result;
 }
 
 ee_decl(ArrayAccessNode* node) {
-	NovaValue* arr = EvaluateExpression(node->arr);
-	NovaValue* index = EvaluateExpression(node->index);
+	std::shared_ptr<NovaValue> arr = EvaluateExpression(node->arr);
+	std::shared_ptr<NovaValue> index = EvaluateExpression(node->index);
 
 	if (arr->Type() == "Array") {
-		NovaArray* narr = static_cast<NovaArray*>(arr);
-		std::vector<NovaValue*>& list = *narr->Arr();
+		NovaArray* narr = static_cast<NovaArray*>(arr.get());
+		std::vector<std::shared_ptr<NovaValue>>& list = *narr->Arr();
 		if (index->Type() == "Int") {
-			NovaInt* nint = static_cast<NovaInt*>(index);
+			NovaInt* nint = static_cast<NovaInt*>(index.get());
 			return list[nint->CNum()];
 		}
 		else {
@@ -348,27 +364,27 @@ ee_decl(NullLiteralNode*) {
 
 ee_decl(NotNode* node) {
 	if (node->expression) {
-		NovaValue* val = EvaluateExpression(node->expression);
+		std::shared_ptr<NovaValue> val = EvaluateExpression(node->expression);
 		if (val->Type() == "bool") {
-			NovaBool* nb = static_cast<NovaBool*>(val);
-			NovaBool* notnb = new NovaBool(!nb->CB());
+			NovaBool* nb = static_cast<NovaBool*>(val.get());
+			std::shared_ptr<NovaValue> notnb = std::make_shared<NovaBool>(!nb->CB());
 			literal_stack.push_back(notnb);
 			return notnb;
 		}
 		if (val->Type() == "Float") {
-			NovaFloat* nf = static_cast<NovaFloat*>(val);
-			NovaFloat* notnf = new NovaFloat(-nf->CNum());
+			NovaFloat* nf = static_cast<NovaFloat*>(val.get());
+			std::shared_ptr<NovaValue> notnf = std::make_shared<NovaFloat>(-nf->CNum());
 			literal_stack.push_back(notnf);
 			return notnf;
 		}
 		if (val->Type() == "Int") {
-			NovaInt* nf = static_cast<NovaInt*>(val);
-			NovaInt* notnf = new NovaInt(-nf->CNum());
+			NovaInt* nf = static_cast<NovaInt*>(val.get());
+			std::shared_ptr<NovaValue> notnf = std::make_shared<NovaInt>(-nf->CNum());
 			literal_stack.push_back(notnf);
 			return notnf;
 		}
 		else {
-			PushError("Unexpected value after unary operator", node);
+			PushError("Unexpected type(" + val->Type() + ") after unary operator", node);
 		}
 	}
 	else {
@@ -378,20 +394,14 @@ ee_decl(NotNode* node) {
 }
 
 ee_decl(IsNode* node) {
-	NovaValue* value = EvaluateExpression(node->lhs);
-	NovaValue* str = EvaluateExpression(node->rhs);
+	std::shared_ptr<NovaValue> value = EvaluateExpression(node->lhs);
+	std::shared_ptr<NovaValue> str = EvaluateExpression(node->rhs);
 
 	if (str->Type() == "String") {
-		if (value->Type() == str->ToString()) {
-			NovaBool* b = new NovaBool(true);
-			literal_stack.push_back(b);
-			return b;
-		}
-		else {
-			NovaBool* b = new NovaBool(false);
-			literal_stack.push_back(b);
-			return b;
-		}
+		bool is = value->Type() == str->ToString();
+		std::shared_ptr<NovaValue> result = std::make_shared<NovaBool>(is);
+		literal_stack.push_back(result);
+		return result;
 	}
 	else {
 		PushError("Expected String in type check", node);

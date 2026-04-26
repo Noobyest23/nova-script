@@ -1,0 +1,16 @@
+include "io"
+include "os"
+
+# Global Vars
+Run("where python > where.txt")
+var path_to_python = ReadFile("where.txt")
+
+var quote = ReadFile("quotation.txt")
+
+# Functions
+func RunPython(python_text)
+{
+    WriteFile(path_to_python + " py_in_ns.py", python_text)
+    Run("py_in_ns.py")
+}
+Print("Ran!")

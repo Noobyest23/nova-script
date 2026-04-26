@@ -8,7 +8,7 @@ struct Scope;
 #include <string>
 #include <unordered_map>
 
-#define ee(type) NovaValue* EvaluateExpression(type);
+#define ee(type) std::shared_ptr<NovaValue> EvaluateExpression(type);
 
 class Interpretor {
 public:
@@ -23,11 +23,11 @@ public:
 	void Exec();
 
 	// Calls a Function from nova script
-	NovaValue* Call(const std::string& func_name, std::vector<NovaValue*>& args);
+	std::shared_ptr<NovaValue> Call(const std::string& func_name, std::vector<std::shared_ptr<NovaValue>>& args);
 
-	NovaValue* Get(const std::string& var_name);
+	std::shared_ptr<NovaValue> Get(const std::string& var_name);
 
-	void Set(const std::string& var_name, NovaValue* var);
+	void Set(const std::string& var_name, std::shared_ptr<NovaValue> var);
 
 	Scope* GetScopeAsObj();
 
@@ -35,10 +35,14 @@ public:
 	void PopScope();
 
 	void EvaluateStatement(StmtNode*);
-	NovaValue* EvaluateExpression(ExprNode*);
+	std::shared_ptr<NovaValue> EvaluateExpression(ExprNode*);
 
 	void PushModule(NovaModule* mod);
 	void PurgeStack();
+
+	static std::shared_ptr<NovaNull> null;
+	bool should_stop = false;
+
 private:
 
 	#pragma region Evaluate Statement Overloads
@@ -78,12 +82,10 @@ private:
 	Scope* scope = nullptr;
 
 	void PushError(const std::string& message, ASTNode* current_node = nullptr);
-	
-	NovaNull* null = new NovaNull();
 
 	std::unordered_map<std::string, NovaModule*> modules;
 	std::unordered_map<TypeDeclNode*, FuncDeclNode*> nova_types;
-	std::vector<NovaValue*> literal_stack;
+	std::vector<std::shared_ptr<NovaValue>> literal_stack;
 };
 
 

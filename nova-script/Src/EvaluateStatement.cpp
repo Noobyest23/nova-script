@@ -34,13 +34,12 @@ es_decl(StmtNode* node) {
 
 es_decl(VarDeclNode* node) {
 	// Add a variable to the scope
-	NovaValue* value = nullptr;
+	std::shared_ptr<NovaValue> value = nullptr;
 	if (node->right) {
 		if (VariableNode* v = dynamic_cast<VariableNode*>(node->right)) {
 			if (!v->as_ptr) {
 				value = scope->Get(v->identifier)->Copy();
 				scope->Set(node->identifier, value);
-				value->Release();
 				return;
 			}
 			else {
@@ -56,18 +55,17 @@ es_decl(VarDeclNode* node) {
 }
 
 es_decl(FuncDeclNode* node) {
-	NovaFunction* func = new NovaFunction(node, this);
+	std::shared_ptr<NovaValue> func = std::make_shared<NovaFunction>(node, this);
 	scope->Set(node->func_id, func);
-	func->Release();
 }
 
 es_decl(IfStmtNode* node) {
-	NovaValue* value = EvaluateExpression(node->expression);
+	std::shared_ptr<NovaValue> value = EvaluateExpression(node->expression);
 	
 	if (!value) { PushError("Conditional in if statement was null", node); return; };
 
 	if (value->Type() == "Bool") {
-		NovaBool* nbool = static_cast<NovaBool*>(value);
+		NovaBool* nbool = static_cast<NovaBool*>(value.get());
 		PushScope();
 		if (nbool->CB()) {
 			for (StmtNode* stmt : node->body) {
@@ -101,7 +99,7 @@ es_decl(TypeDeclNode* node) {
 }
 
 es_decl(IncludeNode* node) {
-	NovaValue* file = EvaluateExpression(node->file_path);
+	std::shared_ptr<NovaValue> file = EvaluateExpression(node->file_path);
 	if (!file) { PushError("Filepath in include statement evaluated to null", node); return; }
 
 	if (file->Type() == "String") {
@@ -110,17 +108,17 @@ es_decl(IncludeNode* node) {
 			Interpretor i(file->ToString());
 			if (node->as) {
 				if (VariableNode* as = dynamic_cast<VariableNode*>(node->as)) {
-					NovaObject* object = new NovaObject;
-					for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
+					std::shared_ptr<NovaObject> object = std::make_shared<NovaObject>();
+					for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : i.GetScopeAsObj()->variables) {
 						object->PushBack(pair.first, pair.second);
 					}
+					object->PushBack("_NOVA_THIS", nullptr);
 					scope->Set(as->identifier, object);
-					object->Release();
 				}
 				PushError("as in include statement is not a variable", node);
 			}
 			else {
-				for (std::pair<std::string, NovaValue*> pair : i.GetScopeAsObj()->variables) {
+				for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : i.GetScopeAsObj()->variables) {
 					scope->Set(pair.first, pair.second);
 				}
 			}
@@ -128,20 +126,19 @@ es_decl(IncludeNode* node) {
 		else {
 			// include a cpp module
 			if (modules.find(file->ToString()) != modules.end()) {
-				NovaObject* obj = modules[file->ToString()]->GetModule();
+				std::shared_ptr<NovaObject> obj = modules[file->ToString()]->GetModule();
 				if (node->as) {
 					if (VariableNode* as = dynamic_cast<VariableNode*>(node->as)) {
+						obj->PushBack("_NOVA_THIS", nullptr);
 						scope->Set(as->identifier, obj);
-						obj->Release();
 						return;
 					}
 					PushError("as in include statement is not a variable", node);
 				}
 				else {
-					for (std::pair<std::string, NovaValue*> pair : *obj->accessables) {
+					for (std::pair<std::string, std::shared_ptr<NovaValue>> pair : *obj->accessables) {
 						scope->Set(pair.first, pair.second);
 					}
-					obj->Release();
 					return;
 				}
 			}
@@ -180,19 +177,18 @@ es_decl(ASTPrintNode* node) {
 
 es_decl(ForEachNode* node) {
 	if (VariableNode* var = dynamic_cast<VariableNode*>(node->variable)) {
-		NovaValue* val = EvaluateExpression(node->container);
+		std::shared_ptr<NovaValue> val = EvaluateExpression(node->container);
 		if (val->Type() == "Array") {
-			NovaArray* arr = static_cast<NovaArray*>(val);
+			NovaArray* arr = static_cast<NovaArray*>(val.get());
 			PushScope();			
 
 			for (int i = 0; i < arr->CArr().size(); i++) {
 				if (var->as_ptr) {
-					NovaValue* v = arr->CArr()[i];
+					std::shared_ptr<NovaValue> v = arr->CArr()[i];
 					scope->variables[var->identifier] = v;
-					v->AddRef();
 				}
 				else {
-					NovaValue* v = arr->CArr()[i]->Copy();
+					std::shared_ptr<NovaValue> v = arr->CArr()[i]->Copy();
 					scope->variables[var->identifier] = v;
 				}
 
@@ -200,9 +196,6 @@ es_decl(ForEachNode* node) {
 					EvaluateStatement(stmt);
 				}
 
-				if (NovaValue* v = scope->variables[var->identifier]) {
-					v->Release();
-				}
 			}
 
 			PopScope();
@@ -217,27 +210,22 @@ es_decl(ForEachNode* node) {
 }
 
 es_decl(WhileNode* node) {
-	NovaValue* condition = EvaluateExpression(node->expression);
+	std::shared_ptr<NovaValue> condition = EvaluateExpression(node->expression);
 	if (condition->Type() != "Bool") {
 		PushError("While loop condition is not a boolean", node);
 		return;
 	}
-	if (node->expression->constant) {
-		PushError("While loop condition is constant", node);
-		return;
-	}
 
-	NovaBool* nb = static_cast<NovaBool*>(condition);
+	NovaBool* nb = static_cast<NovaBool*>(condition.get());
 
 	while (nb->CB()) {
 		for (StmtNode* stmt : node->body) {
 			EvaluateStatement(stmt);
 		}
 
-		condition->Release();
 		condition = EvaluateExpression(node->expression);
 		if (condition->Type() == "Bool") {
-			nb = static_cast<NovaBool*>(condition);
+			nb = static_cast<NovaBool*>(condition.get());
 		}
 		else {
 			PushError("Condition is no longer a boolean value", node);
