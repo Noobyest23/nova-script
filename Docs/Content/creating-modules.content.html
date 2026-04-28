@@ -20,12 +20,12 @@
         intget(my_int, 0);
         // my_int is the name of the variables and 0 is the index of the argument (the first argument is index 0, the second is index 1, etc.)
         int result = my_int->num + 10;
-        return new NovaInt(result); // You must return a NovaValue* (or a subclass of NovaValue) from your function, this is how the result will be passed back to NovaScript
+        return std::make_shared&lt;NovaInt&gt;(result); // You must return a NovaValue* (or a subclass of NovaValue) from your function, this is how the result will be passed back to NovaScript
     }
 
-    NovaObject* GetModule() {
-        NovaObject* module = new NovaObject();
-        objbindmethod(AddTen); // This is a macro that binds the AddTen function to the module, this allows it to be
+    std::shared_ptr&lt;NovaObject&gt; GetModule() {
+        std::shared_ptr&lt;NovaObject&gt; module = std::make_shared&lt;NovaObject&gt;();
+        objbindmethod(module, AddTen); // This is a macro that binds the AddTen function to the module, this allows it to be
         return module;
     }
 
@@ -46,10 +46,11 @@
 <p>Member functions are functions that operate on a specific instance of a class. If your function is supposed to be a member function, Then the first argument must always be your <code>NovaObject</code> instance</p>
 <p>And when binding your functions you must add "this" to the object as nullptr.</p>
 <pre><code>
-    NovaObject* GetModule() {
-        NovaObject* module = new NovaObject();
-        module->PushBack("AddTen", new NovaFunction(AddTen, true)); // This is how you bind a member function, the second argument of the NovaFunction constructor must be true to indicate that it is a member function
-        module->PushBack("this", nullptr); // This is how you add the "this" variable to your module, this is required for member functions to work
+    std::shared_ptr&lt;NovaObject&gt; GetModule() {
+        std::shared_ptr&lt;NovaObject&gt; module = std::make_shared&lt;NovaObject&gt;();
+        module->PushBack("AddTen", std::make_shared&lt;NovaFunction&gt;(AddTen)); // This is how you bind a function
+        module->PushBack("MemberFunc", std::make_shared&lt;NovaFunction&gt;(MemberFunc, true)); // the second argument of the NovaFunction constructor must be true to indicate that it is a member function
+        module->PushBack("_NOVA_THIS", nullptr); // This is how you add the "this" variable to your module, this is required for member functions to work
         return module;
     }
 </code></pre>

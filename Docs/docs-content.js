@@ -2,15 +2,16 @@
 window.DOCS_CONTENT = {
   "changelog": `<section>
     <h2>Changelog</h2>
-    <li>Fixed a bug from member functions not returning any value and causing the program to sometimes crash.</li>
-    <li>Added line numbers to error messages.</li>
-    <li>Fixed type constructors not being accessible</li>
-    <li>Added escape characters to strings</li>
-    <li>Fixed placing a breakpoint at the end of a file crashing the program.</li>
-    <li>Added the % operator and the %= operator.</li>
-    <li>Added <code>String.Split(delimiter : String)</code> to the String member functions</li>
-    <li>Added <code>RemoveFile(filepath : String)</code> to the IO module</li>
-    <li>Added <code>RemoveDir(dirpath : String)</code> to the IO module</li>
+    <li>Fixed chained dot access</li>
+    <li>Added chained function calls</li>
+    <li>Made standard member functions a static list, reducing memory allocation overhead</li>
+    <li>Fixed modulo operators with float as the left side</li>
+    <li>Chained NovaValue from using its own ref counted system to using std::shared_ptr</li>
+    <li>Added Type() and ToString() to base NovaValue <code>var i = 0 Print(i.Type()) # prints Int</code>></li>
+    <li>Fixed including NovaScript files not executing the included script</li>
+    <li>Parser errors now print their tokentype as a string</li>
+    <li>Added a WorkingDir() function to the IO module</li>
+    <li>Improved invalid operator errors with line column and operation information</li>
 </section>`,
   "creating-modules": `<section>
 	<h1>Modules</h1>
@@ -34,12 +35,12 @@ window.DOCS_CONTENT = {
         intget(my_int, 0);
         // my_int is the name of the variables and 0 is the index of the argument (the first argument is index 0, the second is index 1, etc.)
         int result = my_int->num + 10;
-        return new NovaInt(result); // You must return a NovaValue* (or a subclass of NovaValue) from your function, this is how the result will be passed back to NovaScript
+        return std::make_shared&lt;NovaInt&gt;(result); // You must return a NovaValue* (or a subclass of NovaValue) from your function, this is how the result will be passed back to NovaScript
     }
 
-    NovaObject* GetModule() {
-        NovaObject* module = new NovaObject();
-        objbindmethod(AddTen); // This is a macro that binds the AddTen function to the module, this allows it to be
+    std::shared_ptr&lt;NovaObject&gt; GetModule() {
+        std::shared_ptr&lt;NovaObject&gt; module = std::make_shared&lt;NovaObject&gt;();
+        objbindmethod(module, AddTen); // This is a macro that binds the AddTen function to the module, this allows it to be
         return module;
     }
 
@@ -60,10 +61,11 @@ window.DOCS_CONTENT = {
 <p>Member functions are functions that operate on a specific instance of a class. If your function is supposed to be a member function, Then the first argument must always be your <code>NovaObject</code> instance</p>
 <p>And when binding your functions you must add "this" to the object as nullptr.</p>
 <pre><code>
-    NovaObject* GetModule() {
-        NovaObject* module = new NovaObject();
-        module->PushBack("AddTen", new NovaFunction(AddTen, true)); // This is how you bind a member function, the second argument of the NovaFunction constructor must be true to indicate that it is a member function
-        module->PushBack("this", nullptr); // This is how you add the "this" variable to your module, this is required for member functions to work
+    std::shared_ptr&lt;NovaObject&gt; GetModule() {
+        std::shared_ptr&lt;NovaObject&gt; module = std::make_shared&lt;NovaObject&gt;();
+        module->PushBack("AddTen", std::make_shared&lt;NovaFunction&gt;(AddTen)); // This is how you bind a function
+        module->PushBack("MemberFunc", std::make_shared&lt;NovaFunction&gt;(MemberFunc, true)); // the second argument of the NovaFunction constructor must be true to indicate that it is a member function
+        module->PushBack("_NOVA_THIS", nullptr); // This is how you add the "this" variable to your module, this is required for member functions to work
         return module;
     }
 </code></pre>
@@ -76,56 +78,61 @@ window.DOCS_CONTENT = {
     <li><code>Type()</code>: Returns the type of the value as a string.</li>
     <li><code>ToString()</code>: Returns a string representation of the value.</li>
     <li><code>Copy()</code>: Returns a copy of the value.</li>
-    <li><code>Assign(NovaValue* rhs)</code>: Assigns the value of rhs to this value, if the types are compatible. Returns this value if the assignment was successful, or nullptr if it was not.</li>
-    <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
-    <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Modifies this and returns itself, or nullptr if the operation is not supported for this type.</li>
-    <li><code>OnDestroy()</code>: Called when the value is destroyed, you MUST use delete this in OnDestroy()</li>
+    <li><code>Assign(std::shared_ptr&lt;NovaValue&gt; rhs)</code>: Assigns the value of rhs to this value, if the types are compatible. Returns this value if the assignment was successful, or nullptr if it was not.</li>
+    <li><code>PerformOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op)</code>: Performs the operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
+    <li><code>PerformCompoundOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Modifies this and returns itself, or nullptr if the operation is not supported for this type.</li>
+    <p>In addition to these functions, you can also override the <code>on_destroy()</code> function to clean up any resources used by your type when it is destroyed.</p>
     <p>For this example I will create an Image class for NovaScript</p>
     <pre><code class="cpp">class MyImageType : public NovaValue {
 public:
-    MyImageType(int width, int height) : width(width), height(height) {}
-    MyImageType(char* data) {}
+    MyImageType(int width, int height) : width(width), height(height) {MyImageInitFunction();}
+    MyImageType(char* data) {MyImageInitFunction();}
 
     void MyImageInitFunction() {
         // Initialize accessables if needed
         if (!accessables) {
-            accessables = new std::unordered_map<std::string, NovaValue*>();
+            accessables = new std::unordered_map&lt;std::string, NovaValue*&gt;();
         }
-        // Use reference_wrapper to allow scripts to modify C++ variables directly
-        (*accessables)["width"] = new NovaInt(std::reference_wrapper<int>(width));
-        (*accessables)["height"] = new NovaInt(std::reference_wrapper<int>(height));
+        // Use pointers to allow scripts to modify C++ variables directly
+        (*accessables)["width"] = std::make_shared&lt;NovaInt&gt;(&width);
+        (*accessables)["height"] = std::make_shared&lt;NovaInt&gt;(&height);
+        // adding these functions here would add more overhead every time you create an image, so instead we will add them to a static list of accessables that is shared between all images
+        //(*accessables)["static_method"] = std::make_shared&lt;NovaFunction&gt;(StaticMethod);
+        //(*accessables)["static_member"] = std::make_shared&lt;NovaFunction&gt;(StaticMember, true);
+        //(*accessables)["_NOVA_THIS"] = nullptr;
+        // adding width and height as accessables allows scripts to read and modify them directly, for example:
+        // var img = MyImageType(100, 200)
+        // Print(img.width) # prints 100
     }
 
     // Required NovaValue functions
     std::string Type() const override { return "MyImageType"; }
     std::string ToString() const override { return "MyImageType(" + std::to_string(width) + ", " + std::to_string(height) + ")"; }
-    NovaValue* Copy() const override { return new MyImageType(data); }
-    NovaValue* Assign(NovaValue* rhs) override {
+    std::shared_ptr&lt;NovaValue&gt; Copy() const override { return std::make_shared&lt;MyImageType&gt;(data); }
+    bool Assign(std::shared_ptr&lt;NovaValue&gt; rhs) override {
         if (rhs->Type() != Type()) {
-            PushError("TypeError: Cannot assign value of type " + rhs->Type() + " to type " + Type());
-            // Note that this variable will still be overriten.
-            // If you want a value that CANNOT be overwritten, you can simply return this instead of nullptr, but this is not recommended as it can lead to unexpected behavior.
-            return nullptr;
+            return false; // Types are not compatible, return false to indicate assignment failure
         }
-        MyImageType* image_rhs = static_cast<MyImageType*>(rhs);
+        // If the assigment fails then the variable being assigned to will be overwritten. So you should only return false if the types are incompatible, otherwise you should perform the assignment and return true.
+        MyImageType* image_rhs = static_cast&lt;MyImageType*&gt;(rhs);
         width = image_rhs->width;
         height = image_rhs->height;
         data = image_rhs->data;
-        return this;
+        return true;
     }
-    NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const {
-        OpFailed(rhs, op);
-        return nullptr;
+    std::shared_ptr&lt;NovaValue&gt; PerformOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op) const {
+        return nullptr; // prints the "operation not supported" error if the operation is not supported for this type
     }
-    NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
-        OpFailed(rhs, op);
-        return nullptr;
+    bool PerformCompoundOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op) {
+        return false;
     }
 
+    // for static accessables you can just make a static unordered map and override the GetAccessables function to return it + the the default value accessables;
+    static std::unordered_map&lt;std::string, std::shared_ptr&lt;NovaValue&gt;&gt; static_accessables;
+    std::unordered_map&lt;std::string, std::shared_ptr&lt;NovaValue&gt;&gt; GetFullAccessableList() override;
 protected:
-    void OnDestroy() override { 
+    void on_destroy() override { 
         delete[] data; // Delete your own resources here
-        delete this; // Delete this last
     }
 
 private:
@@ -133,6 +140,26 @@ private:
     int height;
     char* data;
 };
+
+// in your cpp file you would also need to define the static accessables variable and the GetFullAccessableList function
+
+nova_std_decl(StaticMethod) {
+    // This is a static method that can be called from NovaScript without an instance of MyImageType
+    return std::make_shared&lt;NovaString&gt;("This is a static method!"); // Just an example, you can return whatever you want here
+}
+
+nova_std_decl(StaticMember) {
+    // This is a function that would act as a member function.
+    // The first argument would be the instance of MyImageType that it is being called on
+    MyImageType* instance = static_cast&lt;MyImageType*&gt;(args[0].get());
+}
+
+std::unordered_map&lt;std::string, std::shared_ptr&lt;NovaValue&gt;&gt; MyImageType::static_accessables = {
+    {"static_method", std::make_shared&lt;NovaFunction&gt;(StaticMethod)},
+    {"static_member", std::make_shared&lt;NovaFunction&gt;(StaticMember, true)} // the second argument of the NovaFunction constructor must be true to indicate that it is a member function
+    {"_NOVA_THIS", nullptr} // This is how you add the "this" variable to your type, this is required for member functions to work
+};
+
 </code></pre>
     <p><strong>Note:</strong> Currently theres no way to instantiate MyImageType. What you could do is make an Image module and expose a function <code>Image()</code> that returns a new image</p>
     <p><strong>Note:</strong> This code comes straight from my noodle and probably wouldnt work first try as an actual image class, but it should give you a good starting point.</p>
@@ -142,6 +169,7 @@ private:
     Minus,
     Multiply,
     Divide,
+    Mod,
     Equality,
     GreaterThen,
     LesserThen,
@@ -151,8 +179,12 @@ private:
     CompoundPlus,
     CompoundMinus,
     CompoundMultiply,
-    CompoundDivide
+    CompoundDivide,
+    CompoundMod
 };
+
+
+
 </code></pre>
 </section>`,
   "getting-started": `<section>
@@ -248,7 +280,6 @@ int main() {
     InterpretorHandle interpretor = nullptr;
 };</code></pre>
     <p> This is a simple wrapper around the NovaScript API, it allows you to easily create and execute scripts, get and set variables within a Script, and call functions within those scripts.</p>
-    <p><b>Note:</b> you MUST manually release a return value from a script function via <code>NovaValue::Release()</code></p>
     <h1>Your First Script</h1>
     <p>Now that you have set up your environment and have a simple wrapper for the NovaScript API, you can create and execute your first script. Here's an example of how to do that:</p>
     <pre><code class="py"># This is a simple NovaScript file that prints "Hello, World!" to the console
@@ -270,7 +301,7 @@ io.Print("Hello World!")
 </section>
 `,
   "index": `<section>
-	<small><br>Docs Version: 0.2b - Slimey Owl</small>
+	<small><br>Docs Version: 0.4b - Enormous Mozzarella</small>
 	<h1>Welcome to the Documentation of Nova Script</h1>
 	<p><strong>Nova Script</strong> is an interpreted scripting language made to be integrated into other systems, made by a solo developer—powered by caffeine, late nights, and too much free time.</p>
 	<h2>What is Nova Script?</h2>
@@ -341,6 +372,7 @@ io.Print("Hello World!")
         <li><code>Input(prompt : String)</code>: Displays a prompt and returns a <code>String</code> input from the user</li>
         <li><code>RemoveFile(filepath : String)</code>: Removes a file</li>
         <li><code>RemoveDir(dirpath : String)</code>: Removes a directory</li>
+        <li><code>WorkingDir()</code>: Returns the current working directory</li>
     </ul>
     <p>Print, PrintWarning, PrintError, and Input only work with the console</p>
 </section>`,
@@ -573,7 +605,7 @@ while (i < 5) {
     <h2>Type Declarations</h2>
     <p>Used to define new types or classes in Nova Script with an optional constructor</p>
     <pre><code>type Person {
-    Person(name, age) {
+    func Person(name, age) { # Constructor is a function with the same name as the type
         this.name = name
         this.age = age
     }
@@ -633,28 +665,15 @@ include "my_script.ns"</code></pre>
 <section id="novavalue">
     <h1>NovaValue</h1>
     <p><code>NovaValue</code> is the base type for all values in Nova Script. All other types inherit from NovaValue. It defines the common interface and behavior for all values, such as how they are copied, assigned, and how they perform operations.</p>
-    <h2>Methods</h2>
+    <h2>Members</h2>
     <ul>
-        <li><code>AddRef()</code>: Increments the reference count for the value</li>
-        <li><code>Release()</code>: Decrements the reference count for the value, if the value is reaches zero, calls <code>Release()</code> on all accessables and calls <code>OnDestroy()</code></li>
-        <li><code>Copy()</code>: Creates a copy of the value</li>
         <li><code>Type()</code>: Returns the type of the value as a string</li>
         <li><code>ToString()</code>: Returns a string representation of the value</li>
-        <li><code>Assign(NovaValue* rhs)</code>: Assigns a new value to this variable if possible</li>
-        <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs an operation with another value</li>
-        <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs a compound operation with another value</li>
-        <li><code>Access(const std::string& name)</code>: Returns the value of the member with the given name, or null if it does not exist</li>
-        <li><code>OnDestroy()</code>: Called when the value is destroyed</li>
     </ul>
 </section>
 
 <section id="novaint">
     <h1>NovaInt</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Num()</code>: Returns a pointer to the C++ integer</li>
-        <li><code>CNum()</code>: Returns a const reference to the C++ integer</li>
-    </ul>
     <h2>Operators</h2>
     <p>NovaInt supports the following operators with NovaInt and NovaFloat values:</p>
     <ul>
@@ -677,11 +696,6 @@ include "my_script.ns"</code></pre>
 
 <section id="novafloat">
     <h1>NovaFloat</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Num()</code>: Returns a pointer to the C++ float</li>
-        <li><code>CNum()</code>: Returns a const reference to the C++ float</li>
-    </ul>
     <h2>Operators</h2>
     <p>NovaFloat supports the following operators with NovaInt and NovaFloat values:</p>
     <ul>
@@ -704,19 +718,6 @@ include "my_script.ns"</code></pre>
 
 <section id="novastring">
     <h1>NovaString</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Str()</code>: Returns a pointer to the C++ string</li>
-        <li><code>CStr()</code>: Returns a const reference to the C++ string</li>
-    </ul>
-    <h2>Operators</h2>
-    <p>NovaString supports the following operators with NovaString values:</p>
-    <ul>
-        <li><code>+</code>: Concatenation</li>
-        <li><code>==</code>: Equality comparison</li>
-        <li><code>!=</code>: Inequality comparison</li>
-        <li><code>+=</code>: Concatenation assignment</li>
-    </ul>
     <h2>Members</h2>
     <ul>
         <li><code>Length()</code>: Returns the length of the string as a NovaInt</li>
@@ -732,15 +733,18 @@ include "my_script.ns"</code></pre>
         <li><code>Substr(start : Int, length : Int)</code>: Returns a new string that is a substring of the original string</li>
         <li><code>Split(delimiter : String)</code>: Splits the string into an array of substrings using the given delimiter</li>
     </ul>
+    <h2>Operators</h2>
+    <p>NovaString supports the following operators with NovaString values:</p>
+    <ul>
+        <li><code>+</code>: Concatenation</li>
+        <li><code>==</code>: Equality comparison</li>
+        <li><code>!=</code>: Inequality comparison</li>
+        <li><code>+=</code>: Concatenation assignment</li>
+    </ul>
 </section>
 
 <section id="novabool">
     <h1>NovaBool</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>B()</code>: Returns a pointer to the C++ boolean</li>
-        <li><code>CB()</code>: Returns a const reference to the C++ boolean</li>
-    </ul>
     <h2>Operators</h2>
     <p>NovaBool supports the following operators with NovaBool values:</p>
     <ul>
@@ -751,11 +755,6 @@ include "my_script.ns"</code></pre>
 
 <section id="novaarray">
     <h1>NovaArray</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Arr()</code>: Returns a pointer to the C++ vector of NovaValue pointers</li>
-        <li><code>CArr()</code>: Returns a const reference to the C++ vector of NovaValue pointers</li>
-    </ul>
     <h2>Members</h2>
     <ul>
         <li><code>Size()</code>: Returns the number of elements in the array as a NovaInt</li>
@@ -768,11 +767,7 @@ include "my_script.ns"</code></pre>
 
 <section id="novaobject">
     <h2>NovaObject</h2>
-    <p>A NovaObject is a value with no data other than accessables</p>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>PushBack(name : String, value : NovaValue)</code>: Adds a new member with the given name and value to the object</li>
-    </ul>
+    <p>A NovaObject is a value with no data other than accessables, created with type declarations</p>
 </section>
 
 <section id="novasignal">

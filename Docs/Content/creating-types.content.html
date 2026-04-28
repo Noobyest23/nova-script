@@ -5,56 +5,61 @@
     <li><code>Type()</code>: Returns the type of the value as a string.</li>
     <li><code>ToString()</code>: Returns a string representation of the value.</li>
     <li><code>Copy()</code>: Returns a copy of the value.</li>
-    <li><code>Assign(NovaValue* rhs)</code>: Assigns the value of rhs to this value, if the types are compatible. Returns this value if the assignment was successful, or nullptr if it was not.</li>
-    <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
-    <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Modifies this and returns itself, or nullptr if the operation is not supported for this type.</li>
-    <li><code>OnDestroy()</code>: Called when the value is destroyed, you MUST use delete this in OnDestroy()</li>
+    <li><code>Assign(std::shared_ptr&lt;NovaValue&gt; rhs)</code>: Assigns the value of rhs to this value, if the types are compatible. Returns this value if the assignment was successful, or nullptr if it was not.</li>
+    <li><code>PerformOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op)</code>: Performs the operation op with this value and rhs. Returns the result of the operation, or nullptr if the operation is not supported for this type.</li>
+    <li><code>PerformCompoundOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op)</code>: Performs the compound operation op with this value and rhs. Modifies this and returns itself, or nullptr if the operation is not supported for this type.</li>
+    <p>In addition to these functions, you can also override the <code>on_destroy()</code> function to clean up any resources used by your type when it is destroyed.</p>
     <p>For this example I will create an Image class for NovaScript</p>
     <pre><code class="cpp">class MyImageType : public NovaValue {
 public:
-    MyImageType(int width, int height) : width(width), height(height) {}
-    MyImageType(char* data) {}
+    MyImageType(int width, int height) : width(width), height(height) {MyImageInitFunction();}
+    MyImageType(char* data) {MyImageInitFunction();}
 
     void MyImageInitFunction() {
         // Initialize accessables if needed
         if (!accessables) {
-            accessables = new std::unordered_map<std::string, NovaValue*>();
+            accessables = new std::unordered_map&lt;std::string, NovaValue*&gt;();
         }
-        // Use reference_wrapper to allow scripts to modify C++ variables directly
-        (*accessables)["width"] = new NovaInt(std::reference_wrapper<int>(width));
-        (*accessables)["height"] = new NovaInt(std::reference_wrapper<int>(height));
+        // Use pointers to allow scripts to modify C++ variables directly
+        (*accessables)["width"] = std::make_shared&lt;NovaInt&gt;(&width);
+        (*accessables)["height"] = std::make_shared&lt;NovaInt&gt;(&height);
+        // adding these functions here would add more overhead every time you create an image, so instead we will add them to a static list of accessables that is shared between all images
+        //(*accessables)["static_method"] = std::make_shared&lt;NovaFunction&gt;(StaticMethod);
+        //(*accessables)["static_member"] = std::make_shared&lt;NovaFunction&gt;(StaticMember, true);
+        //(*accessables)["_NOVA_THIS"] = nullptr;
+        // adding width and height as accessables allows scripts to read and modify them directly, for example:
+        // var img = MyImageType(100, 200)
+        // Print(img.width) # prints 100
     }
 
     // Required NovaValue functions
     std::string Type() const override { return "MyImageType"; }
     std::string ToString() const override { return "MyImageType(" + std::to_string(width) + ", " + std::to_string(height) + ")"; }
-    NovaValue* Copy() const override { return new MyImageType(data); }
-    NovaValue* Assign(NovaValue* rhs) override {
+    std::shared_ptr&lt;NovaValue&gt; Copy() const override { return std::make_shared&lt;MyImageType&gt;(data); }
+    bool Assign(std::shared_ptr&lt;NovaValue&gt; rhs) override {
         if (rhs->Type() != Type()) {
-            PushError("TypeError: Cannot assign value of type " + rhs->Type() + " to type " + Type());
-            // Note that this variable will still be overriten.
-            // If you want a value that CANNOT be overwritten, you can simply return this instead of nullptr, but this is not recommended as it can lead to unexpected behavior.
-            return nullptr;
+            return false; // Types are not compatible, return false to indicate assignment failure
         }
-        MyImageType* image_rhs = static_cast<MyImageType*>(rhs);
+        // If the assigment fails then the variable being assigned to will be overwritten. So you should only return false if the types are incompatible, otherwise you should perform the assignment and return true.
+        MyImageType* image_rhs = static_cast&lt;MyImageType*&gt;(rhs);
         width = image_rhs->width;
         height = image_rhs->height;
         data = image_rhs->data;
-        return this;
+        return true;
     }
-    NovaValue* PerformOp(NovaValue* rhs, const NovaOperator& op) const {
-        OpFailed(rhs, op);
-        return nullptr;
+    std::shared_ptr&lt;NovaValue&gt; PerformOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op) const {
+        return nullptr; // prints the "operation not supported" error if the operation is not supported for this type
     }
-    NovaValue* PerformCompoundOp(NovaValue* rhs, const NovaOperator& op) {
-        OpFailed(rhs, op);
-        return nullptr;
+    bool PerformCompoundOp(std::shared_ptr&lt;NovaValue&gt; rhs, const NovaOperator& op) {
+        return false;
     }
 
+    // for static accessables you can just make a static unordered map and override the GetAccessables function to return it + the the default value accessables;
+    static std::unordered_map&lt;std::string, std::shared_ptr&lt;NovaValue&gt;&gt; static_accessables;
+    std::unordered_map&lt;std::string, std::shared_ptr&lt;NovaValue&gt;&gt; GetFullAccessableList() override;
 protected:
-    void OnDestroy() override { 
+    void on_destroy() override { 
         delete[] data; // Delete your own resources here
-        delete this; // Delete this last
     }
 
 private:
@@ -62,6 +67,26 @@ private:
     int height;
     char* data;
 };
+
+// in your cpp file you would also need to define the static accessables variable and the GetFullAccessableList function
+
+nova_std_decl(StaticMethod) {
+    // This is a static method that can be called from NovaScript without an instance of MyImageType
+    return std::make_shared&lt;NovaString&gt;("This is a static method!"); // Just an example, you can return whatever you want here
+}
+
+nova_std_decl(StaticMember) {
+    // This is a function that would act as a member function.
+    // The first argument would be the instance of MyImageType that it is being called on
+    MyImageType* instance = static_cast&lt;MyImageType*&gt;(args[0].get());
+}
+
+std::unordered_map&lt;std::string, std::shared_ptr&lt;NovaValue&gt;&gt; MyImageType::static_accessables = {
+    {"static_method", std::make_shared&lt;NovaFunction&gt;(StaticMethod)},
+    {"static_member", std::make_shared&lt;NovaFunction&gt;(StaticMember, true)} // the second argument of the NovaFunction constructor must be true to indicate that it is a member function
+    {"_NOVA_THIS", nullptr} // This is how you add the "this" variable to your type, this is required for member functions to work
+};
+
 </code></pre>
     <p><strong>Note:</strong> Currently theres no way to instantiate MyImageType. What you could do is make an Image module and expose a function <code>Image()</code> that returns a new image</p>
     <p><strong>Note:</strong> This code comes straight from my noodle and probably wouldnt work first try as an actual image class, but it should give you a good starting point.</p>
@@ -71,6 +96,7 @@ private:
     Minus,
     Multiply,
     Divide,
+    Mod,
     Equality,
     GreaterThen,
     LesserThen,
@@ -80,7 +106,11 @@ private:
     CompoundPlus,
     CompoundMinus,
     CompoundMultiply,
-    CompoundDivide
+    CompoundDivide,
+    CompoundMod
 };
+
+
+
 </code></pre>
 </section>

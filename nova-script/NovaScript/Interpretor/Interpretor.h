@@ -86,6 +86,7 @@ private:
 	std::unordered_map<std::string, NovaModule*> modules;
 	std::unordered_map<TypeDeclNode*, FuncDeclNode*> nova_types;
 	std::vector<std::shared_ptr<NovaValue>> literal_stack;
+	std::shared_ptr<NovaValue> last_object = null;
 };
 
 

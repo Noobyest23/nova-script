@@ -193,9 +193,6 @@ ee_decl(OpNode* node) {
 	else if (node->op == "%") {
 		op = NovaValue::Mod;
 	}
-	else if (node->op == "%=") {
-		op = NovaValue::CompoundMod;
-	}
 
 	std::shared_ptr<NovaValue> result = lhs->PerformOp(rhs, op);
 	if (result) {
@@ -210,13 +207,13 @@ ee_decl(OpNode* node) {
 }
 
 ee_decl(FuncCallNode* node) {
-	std::shared_ptr<NovaValue> func = scope->Get(node->func_id);
+	std::shared_ptr<NovaValue> func = EvaluateExpression(node->callee);
 	if (func) {
 		if (func->Type() == "Function") {
 			NovaFunction* fn = static_cast<NovaFunction*>(func.get());
 			std::vector<std::shared_ptr<NovaValue>> args;
-			if (fn->this_qualified and scope->LimitedHas("_NOVA_THIS")) {
-				args.push_back(scope->LimitedGet("_NOVA_THIS"));
+			if (fn->this_qualified) {
+				args.push_back(last_object);
 			}
 			for (ExprNode* arg : node->args) {
 				std::shared_ptr<NovaValue> a_value = nullptr;
@@ -234,12 +231,12 @@ ee_decl(FuncCallNode* node) {
 			return result;
 		}
 		else {
-			PushError(node->func_id + " is not a function", node);
+			PushError(node->callee->Print() + " is not a function", node);
 		}
 	}
 	else {
 		for (std::pair<TypeDeclNode*, FuncDeclNode*> types : nova_types) {
-			if (types.first->type_name == node->func_id) {
+			if (types.first->type_name == node->callee->Print()) {
 				Scope this_obj(scope);
 				scope = &this_obj;
 				for (StmtNode* stmt : types.first->definition) {
@@ -262,7 +259,7 @@ ee_decl(FuncCallNode* node) {
 				return result;
 			}
 		}
-		PushError("Function (" + node->func_id + ") not found in scope", node);
+		PushError("Function (" + node->callee->Print() + ") not found in scope", node);
 		return null;
 	}
 }
@@ -328,7 +325,7 @@ ee_decl(DotAccessNode* node) {
 		scope->LimitedSet(pair.first, pair.second);
 	}
 	if (scope->LimitedHas("_NOVA_THIS")) { // if the object has the "this" field we pass it up the chain
-		scope->LimitedSet("_NOVA_THIS", val);
+		last_object = val;
 	}
 	std::shared_ptr<NovaValue> result = EvaluateExpression(node->right);
 	

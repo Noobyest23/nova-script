@@ -10,6 +10,7 @@
 #include "../Value/NovaObject.h"
 #include "../Value/BoolValue.h"
 #include "NovaModule.h"
+#include "../Value/SignalValue.h"
 
 class NovaGlobalModule : public NovaModule {
 public:
@@ -165,6 +166,21 @@ public:
 		}
 		return arr;
 	}
+
+	nova_std_decl(Signal) {
+		std::shared_ptr<NovaSignal> signal = std::make_shared<NovaSignal>();
+		for (std::shared_ptr<NovaValue> arg : args) {
+			if (arg->Type() == "Function") {
+				NovaFunction* func = static_cast<NovaFunction*>(arg.get());
+				signal->connections.push_back(std::make_shared<NovaFunction>(*func));
+			}
+			else {
+				PushError("Expected 'Function' in signal constructor arguments not '" + arg->Type() + "'");
+			}
+		}
+		return signal;
+	}
+
 #include "../NovaScript.h"
 	nova_std_decl(Execute) {
 		req_args(1);
@@ -183,6 +199,7 @@ public:
 		objbindmethod(obj, String);
 		objbindmethod(obj, Bool);
 		objbindmethod(obj, Array);
+		objbindmethod(obj, Signal);
 		objbindmethod(obj, Execute);
 		return obj;
 	}

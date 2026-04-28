@@ -1,13 +1,13 @@
 <section>
     <h2>Changelog</h2>
-    <li>Fixed a bug from member functions not returning any value and causing the program to sometimes crash.</li>
-    <li>Added line numbers to error messages.</li>
-    <li>Fixed type constructors not being accessible</li>
-    <li>Added escape characters to strings</li>
-    <li>Fixed placing a breakpoint at the end of a file crashing the program.</li>
-    <li>Added the % operator and the %= operator.</li>
-    <li>Added <code>String.Split(delimiter : String)</code> to the String member functions</li>
-    <li>Added <code>RemoveFile(filepath : String)</code> to the IO module</li>
-    <li>Added <code>RemoveDir(dirpath : String)</code> to the IO module</li>
-    <li>Removed [NovaScript] from the beginning of print messages</li>
+    <li>Fixed chained dot access</li>
+    <li>Added chained function calls</li>
+    <li>Made standard member functions a static list, reducing memory allocation overhead</li>
+    <li>Fixed modulo operators with float as the left side</li>
+    <li>Chained NovaValue from using its own ref counted system to using std::shared_ptr</li>
+    <li>Added Type() and ToString() to base NovaValue <code>var i = 0 Print(i.Type()) # prints Int</code>></li>
+    <li>Fixed including NovaScript files not executing the included script</li>
+    <li>Parser errors now print their tokentype as a string</li>
+    <li>Added a WorkingDir() function to the IO module</li>
+    <li>Improved invalid operator errors with line column and operation information</li>
 </section>

@@ -20,28 +20,15 @@
 <section id="novavalue">
     <h1>NovaValue</h1>
     <p><code>NovaValue</code> is the base type for all values in Nova Script. All other types inherit from NovaValue. It defines the common interface and behavior for all values, such as how they are copied, assigned, and how they perform operations.</p>
-    <h2>Methods</h2>
+    <h2>Members</h2>
     <ul>
-        <li><code>AddRef()</code>: Increments the reference count for the value</li>
-        <li><code>Release()</code>: Decrements the reference count for the value, if the value is reaches zero, calls <code>Release()</code> on all accessables and calls <code>OnDestroy()</code></li>
-        <li><code>Copy()</code>: Creates a copy of the value</li>
         <li><code>Type()</code>: Returns the type of the value as a string</li>
         <li><code>ToString()</code>: Returns a string representation of the value</li>
-        <li><code>Assign(NovaValue* rhs)</code>: Assigns a new value to this variable if possible</li>
-        <li><code>PerformOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs an operation with another value</li>
-        <li><code>PerformCompoundOp(NovaValue* rhs, const NovaOperator& op)</code>: Performs a compound operation with another value</li>
-        <li><code>Access(const std::string& name)</code>: Returns the value of the member with the given name, or null if it does not exist</li>
-        <li><code>OnDestroy()</code>: Called when the value is destroyed</li>
     </ul>
 </section>
 
 <section id="novaint">
     <h1>NovaInt</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Num()</code>: Returns a pointer to the C++ integer</li>
-        <li><code>CNum()</code>: Returns a const reference to the C++ integer</li>
-    </ul>
     <h2>Operators</h2>
     <p>NovaInt supports the following operators with NovaInt and NovaFloat values:</p>
     <ul>
@@ -64,11 +51,6 @@
 
 <section id="novafloat">
     <h1>NovaFloat</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Num()</code>: Returns a pointer to the C++ float</li>
-        <li><code>CNum()</code>: Returns a const reference to the C++ float</li>
-    </ul>
     <h2>Operators</h2>
     <p>NovaFloat supports the following operators with NovaInt and NovaFloat values:</p>
     <ul>
@@ -91,19 +73,6 @@
 
 <section id="novastring">
     <h1>NovaString</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Str()</code>: Returns a pointer to the C++ string</li>
-        <li><code>CStr()</code>: Returns a const reference to the C++ string</li>
-    </ul>
-    <h2>Operators</h2>
-    <p>NovaString supports the following operators with NovaString values:</p>
-    <ul>
-        <li><code>+</code>: Concatenation</li>
-        <li><code>==</code>: Equality comparison</li>
-        <li><code>!=</code>: Inequality comparison</li>
-        <li><code>+=</code>: Concatenation assignment</li>
-    </ul>
     <h2>Members</h2>
     <ul>
         <li><code>Length()</code>: Returns the length of the string as a NovaInt</li>
@@ -119,15 +88,18 @@
         <li><code>Substr(start : Int, length : Int)</code>: Returns a new string that is a substring of the original string</li>
         <li><code>Split(delimiter : String)</code>: Splits the string into an array of substrings using the given delimiter</li>
     </ul>
+    <h2>Operators</h2>
+    <p>NovaString supports the following operators with NovaString values:</p>
+    <ul>
+        <li><code>+</code>: Concatenation</li>
+        <li><code>==</code>: Equality comparison</li>
+        <li><code>!=</code>: Inequality comparison</li>
+        <li><code>+=</code>: Concatenation assignment</li>
+    </ul>
 </section>
 
 <section id="novabool">
     <h1>NovaBool</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>B()</code>: Returns a pointer to the C++ boolean</li>
-        <li><code>CB()</code>: Returns a const reference to the C++ boolean</li>
-    </ul>
     <h2>Operators</h2>
     <p>NovaBool supports the following operators with NovaBool values:</p>
     <ul>
@@ -138,11 +110,6 @@
 
 <section id="novaarray">
     <h1>NovaArray</h1>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>Arr()</code>: Returns a pointer to the C++ vector of NovaValue pointers</li>
-        <li><code>CArr()</code>: Returns a const reference to the C++ vector of NovaValue pointers</li>
-    </ul>
     <h2>Members</h2>
     <ul>
         <li><code>Size()</code>: Returns the number of elements in the array as a NovaInt</li>
@@ -155,11 +122,7 @@
 
 <section id="novaobject">
     <h2>NovaObject</h2>
-    <p>A NovaObject is a value with no data other than accessables</p>
-    <h2>Methods</h2>
-    <ul>
-        <li><code>PushBack(name : String, value : NovaValue)</code>: Adds a new member with the given name and value to the object</li>
-    </ul>
+    <p>A NovaObject is a value with no data other than accessables, created with type declarations</p>
 </section>
 
 <section id="novasignal">

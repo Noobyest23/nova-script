@@ -96,8 +96,6 @@ extern "C" {
 		node->Delete();
 	}
 
-	const char* Version() { return "v0.4b"; };
-
-	const char* Changelog() { return ""; };
+	const char* Version() { return "v0.4b"; }
 
 }

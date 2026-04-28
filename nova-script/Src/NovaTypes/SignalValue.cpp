@@ -57,8 +57,8 @@ nova_std_decl(GetConnections) {
 std::unordered_map<std::string, std::shared_ptr<NovaValue>> NovaSignal::signal_accessables = {
 	{"Emit", std::make_shared<NovaFunction>(Emit, true)},
 	{"Connect", std::make_shared<NovaFunction>(Connect, true)},
-	{"Disconnect", std::make_shared<NovaFunction>(Connect, true)},
-	{"GetConnections", std::make_shared<NovaFunction>(Connect, true)},
+	{"Disconnect", std::make_shared<NovaFunction>(Disconnect, true)},
+	{"GetConnections", std::make_shared<NovaFunction>(GetConnections, true)},
 	{"_NOVA_THIS", nullptr }
 };
 

@@ -1,0 +1,18 @@
+include "tests/arrays.ns"
+include "io"
+
+var sig = Signal()
+
+
+func welcome_message(msg) {
+	Print(msg)
+}
+
+sig.Connect(welcome_message)
+sig.Emit("Hello NovaScript!")
+
+
+#Print(sig.GetConnections())
+
+sig.GetConnections().Pop()("Pluh")
+

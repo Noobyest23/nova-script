@@ -14,3 +14,8 @@ array.PushBack("according to all known laws of aviation...")
 array.Pop()
 Print(array)
 Print(array.Clear())
+
+var integer = 5
+var msg = integer.ToString()
+Print("integer is an " + integer.Type() + " that equals " + msg)
+Print(integer + 2)

@@ -38,7 +38,7 @@ std::shared_ptr<NovaValue> NovaString::CopyPtr() {
 }
 
 std::shared_ptr<NovaValue> NovaString::PerformOp(std::shared_ptr<NovaValue> rhs, const NovaOperator& op) const {
-	if (Type() == "String") {
+	if (rhs->Type() == "String") {
 		NovaString* r = static_cast<NovaString*>(rhs.get());
 		std::string result;
 		switch(op) {

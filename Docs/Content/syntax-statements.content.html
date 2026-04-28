@@ -80,7 +80,7 @@ while (i < 5) {
     <h2>Type Declarations</h2>
     <p>Used to define new types or classes in Nova Script with an optional constructor</p>
     <pre><code>type Person {
-    Person(name, age) {
+    func Person(name, age) { # Constructor is a function with the same name as the type
         this.name = name
         this.age = age
     }

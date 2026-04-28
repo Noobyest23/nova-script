@@ -106,6 +106,7 @@ es_decl(IncludeNode* node) {
 		if (file->ToString().ends_with(".ns")) {
 			// Include another nova script file
 			Interpretor i(file->ToString());
+			i.Exec();
 			if (node->as) {
 				if (VariableNode* as = dynamic_cast<VariableNode*>(node->as)) {
 					std::shared_ptr<NovaObject> object = std::make_shared<NovaObject>();

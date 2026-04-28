@@ -50,7 +50,6 @@ extern "C" {
 
 	NOVASCRIPT_API const char* Version();
 
-	NOVASCRIPT_API const char* Changelog();
 
 }
 

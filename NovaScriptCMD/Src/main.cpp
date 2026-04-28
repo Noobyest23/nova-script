@@ -60,6 +60,7 @@ void Help() {
 	std::cout << "- test - Tests a nova script file against its .ns.test files\n\n";
 	std::cout << "- test-dir - Tests a directory of nova script files\n\n";
 	std::cout << "- batch - Runs a file <x> times\n\n";
+	//std::cout << "- version - Prints the version number";
 	std::cout << "\n";
 }
 
@@ -178,7 +179,7 @@ int main(int argc, char* argv[]) {
 			// run a test for a script. Compare its output to script.test. Compare its ast to script.ast.test (if its different this does mean that the test failed if the output is the same)
 			if (argc < 3) std::cout << "Usage: test <filepath>\n";
 			else Test(argv[2]);
-		}
+		}	
 		else if (arg1 == "test-dir") {
 			if (argc < 3) {
 				std::cout << "Usage: test-dir <directory>\n";
@@ -206,6 +207,9 @@ int main(int argc, char* argv[]) {
 				std::cout << "Usage: batch <filepath> <runs>";
 			}
 		}
+		//else if (arg1 == "version") {
+		//	std::cout << Version();
+		//}
 		else {
 			std::cout << "No correct arguments provided use 'help' to get started\n";
 		}

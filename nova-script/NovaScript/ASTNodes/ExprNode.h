@@ -42,13 +42,19 @@ struct OpNode : public ExprNode {
 };
 
 struct FuncCallNode : public ExprNode {
-	FuncCallNode(const std::string& func_id, const std::vector<ExprNode*>& args) : func_id(func_id), args(args) {};
+	FuncCallNode(ExprNode* callee, const std::vector<ExprNode*>& args) : callee(callee), args(args) {};
 
-	std::string func_id;
+	ExprNode* callee;
 	std::vector<ExprNode*> args;
 
 	std::string Print() const override {
-		std::string output = func_id + "(";
+		std::string output;
+		if (callee) {
+			output = callee->Print() + "(";
+		}
+		else {
+			output = std::string("ERROR_EXPR_NULL") + "(";
+		}
 		for (ExprNode* arg : args) {
 			if (arg) {
 				output += arg->Print() + (arg == args[args.size() - 1] ? "" : ", ");
@@ -63,6 +69,9 @@ struct FuncCallNode : public ExprNode {
 			if (arg) {
 				arg->Delete();
 			}
+		}
+		if (callee) {
+			callee->Delete();
 		}
 		delete this;
 	}

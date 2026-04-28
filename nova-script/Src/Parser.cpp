@@ -467,23 +467,47 @@ ExprNode* Parser::ParseTerm() {
 ExprNode* Parser::ParseAccesor() {
 	debug_info_get;
 	ExprNode* expression = ParseUnary();
-	if (Accept(NovaTokenType::Dot)) {
-		Advance();
-		ExprNode* right = ParsePrimary();
-		auto* node = new DotAccessNode(expression, right);
-		debug_info_set;
-		return node;
-	}
-	if (Accept(NovaTokenType::OpenBracket)) {
-		Advance();
-		ExprNode* index = ParseExpression();
-		if (!Accept(NovaTokenType::CloseBracket)) {
-			PushError("Expected ]");
+	while (true) {
+		if (Accept(NovaTokenType::Dot)) {
+			Advance();
+			ExprNode* right = ParsePrimary();
+			auto* node = new DotAccessNode(expression, right);
+			debug_info_set;
+			expression = node;
 		}
-		Advance();
-		auto* node = new ArrayAccessNode(expression, index);
-		debug_info_set;
-		return node;
+		else if (Accept(NovaTokenType::OpenBracket)) {
+			Advance();
+			ExprNode* index = ParseExpression();
+			if (!Accept(NovaTokenType::CloseBracket)) {
+				PushError("Expected ]");
+			}
+			Advance();
+			auto* node = new ArrayAccessNode(expression, index);
+			debug_info_set;
+			expression = node;
+		}
+		else if (Accept(NovaTokenType::OpenParen)) {
+			std::vector<ExprNode*> args;
+			Advance();
+			while (!Accept(NovaTokenType::CloseParen)) {
+				ExprNode* arg = ParseExpression();
+				if (Accept(NovaTokenType::Comma)) {
+					Advance();
+				}
+				else if (!Accept(NovaTokenType::CloseParen)) {
+					PushError("Expected either ',' or ')' after arguments in function call");
+					return nullptr;
+				}
+				args.push_back(arg);
+			}
+			Advance();
+			auto* node = new FuncCallNode(expression, args);
+			debug_info_set;
+			expression = node;
+		}
+		else {
+			break;
+		}
 	}
 	return expression;
 }
@@ -559,23 +583,6 @@ ExprNode* Parser::ParsePrimary() {
 		std::string id = Current().content;
 
 		Advance();
-		// Function Call
-		if (Accept(NovaTokenType::OpenParen)) {
-			std::vector<ExprNode*> args;
-			Advance();
-			while (!Accept(NovaTokenType::CloseParen)) {
-				ExprNode* arg = ParseExpression();
-				if (!Accept(NovaTokenType::CloseParen) and !Accept(NovaTokenType::Comma)) {
-					PushError("Expected either ',' or ')' after arguments in function call");
-					return nullptr;
-				}
-				args.push_back(arg);
-			}
-			Advance();
-			auto* node = new FuncCallNode(id, args);
-			debug_info_set;
-			return node;
-		}
 		auto* node = new VariableNode(id, as_ptr);
 		debug_info_set;
 		return node;
@@ -611,9 +618,9 @@ ExprNode* Parser::ParsePrimary() {
 
 void Parser::PushError(const std::string& message) {
 	force_stop = true;
-	Callbacker::PushError(("[Parser] " + message + " at " + std::to_string(Current().line) + ", " + std::to_string(Current().column) + ", NovaTokenType is " + std::to_string(int(Current().type))).c_str(), 2);
+	Callbacker::PushError(("[Parser] " + message + " at " + std::to_string(Current().line) + ", " + std::to_string(Current().column) + ", NovaTokenType is " + TokenTypeToString(Current().type)), 2);
 }
 
 void Parser::PushWarning(const std::string& message) {
-	Callbacker::PushError(("[Parser] " + message + " at " + std::to_string(Current().line) + ", " + std::to_string(Current().column) + ", NovaTokenType is " + std::to_string(int(Current().type))).c_str(), 1);
+	Callbacker::PushError(("[Parser] " + message + " at " + std::to_string(Current().line) + ", " + std::to_string(Current().column) + ", NovaTokenType is " + TokenTypeToString(Current().type)), 1);
 }

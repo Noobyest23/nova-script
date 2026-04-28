@@ -142,6 +142,11 @@ public:
 
 	}
 
+	nova_std_decl(WorkingDir) {
+		std::string working_dir = fs::current_path().string();
+		return std::make_shared<NovaString>(working_dir);
+	}
+
 
 	std::shared_ptr<NovaObject> GetModule() {
 		std::shared_ptr<NovaObject> obj = std::make_shared<NovaObject>();
@@ -153,6 +158,7 @@ public:
 		objbindmethod(obj, WriteFile);
 		objbindmethod(obj, RemoveFile);
 		objbindmethod(obj, RemoveDir);
+		objbindmethod(obj, WorkingDir);
 		return obj;
 	}
 
